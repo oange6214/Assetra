@@ -50,10 +50,11 @@ internal static class ServiceCollectionExtensions
             new Assetra.Application.Fx.FxRateHistoryService(
                 sp.GetRequiredService<IFxRateHistoryRepository>()));
         services.AddSingleton<Assetra.Application.Fx.TransactionFxRateResolver>();
-        // P4.1b — Yahoo fetcher to populate the history store. Manual trigger
-        // for now; P4.1c will add a background poll + settings UI button.
+        // P4.1b — historical FX fetcher to populate the store. Bank of Taiwan
+        // (台灣銀行) 即期買入 monthly CSV; YahooFxRateHistoryFetcher remains in the
+        // repo as a valid alternate source but is no longer the registered default.
         services.AddSingleton<IFxRateHistoryFetcher>(sp =>
-            new Assetra.Infrastructure.Fx.YahooFxRateHistoryFetcher(
+            new Assetra.Infrastructure.Fx.BotFxRateHistoryFetcher(
                 sp.GetRequiredService<HttpClient>()));
         // P4.1c — orchestrator called from AppStartupTasks on every startup.
         services.AddSingleton<Assetra.Application.Fx.FxRateHistoryRefresher>(sp =>
@@ -119,7 +120,6 @@ internal static class ServiceCollectionExtensions
             new CurrencyService(
                 sp.GetRequiredService<IAppSettingsService>(),
                 sp.GetRequiredService<HttpClient>(),
-                sp.GetRequiredService<IFxRateHistoryFetcher>(),
                 sp.GetRequiredService<ILogger<CurrencyService>>()));
 
         services.AddSingleton<FinMindApiStatus>();

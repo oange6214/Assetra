@@ -1,4 +1,5 @@
-using System.Text.Json;
+using System.Globalization;
+using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,11 @@ public sealed class CurrencyService : ICurrencyService
     private static readonly IReadOnlyList<string> _supportedCurrencies =
         ["TWD", "USD", "JPY", "EUR", "HKD"];
 
-    // 硬碼預設匯率（當 AppSettings.ExchangeRates 為 null 且 Frankfurter 尚未回應時使用）
+    // 透過台灣銀行抓的外幣（TWD 為基準，不需自抓）。
+    private static readonly IReadOnlyList<string> _fetchedCurrencies =
+        ["USD", "JPY", "EUR", "HKD"];
+
+    // 硬碼預設匯率（當 AppSettings.ExchangeRates 為 null 且台灣銀行尚未回應時使用）
     private static readonly Dictionary<string, decimal> _hardcodedDefaults = new()
     {
         ["USD"] = 32.0m,
@@ -24,9 +29,11 @@ public sealed class CurrencyService : ICurrencyService
         ["HKD"] = 4.1m,
     };
 
+    // 台灣銀行即時匯率（當日，所有幣別一檔 CSV）。每列一個幣別，即期買入 = 第 3 欄。
+    private const string BotDailyCsvUrl = "https://rate.bot.com.tw/xrt/flcsv/0/day";
+
     private readonly IAppSettingsService _settings;
     private readonly HttpClient _http;
-    private readonly IFxRateHistoryFetcher _historyFetcher;
     private readonly ILogger<CurrencyService> _logger;
     private volatile IReadOnlyDictionary<string, decimal> _exchangeRates;
 
@@ -42,12 +49,10 @@ public sealed class CurrencyService : ICurrencyService
     public event Action? CurrencyChanged;
 
     public CurrencyService(IAppSettingsService settings, HttpClient http,
-        IFxRateHistoryFetcher historyFetcher,
         ILogger<CurrencyService>? logger = null)
     {
         _settings = settings;
         _http = http;
-        _historyFetcher = historyFetcher;
         _logger = logger ?? NullLogger<CurrencyService>.Instance;
         Currency = settings.Current.PreferredCurrency;
         _exchangeRates = BuildRates(settings.Current);
@@ -68,39 +73,22 @@ public sealed class CurrencyService : ICurrencyService
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-            // USD→TWD from Yahoo. Frankfurter (ECB) does NOT quote TWD, so the
-            // critical base-currency rate comes from Yahoo's USDTWD=X pair.
-            var usdToTwd = await FetchUsdTwdFromYahooAsync(cts.Token).ConfigureAwait(false);
+            // 台灣銀行當日匯率：一檔 CSV 含全部幣別，採「即期買入」（spot-buy）。
+            // 台幣為基準，BOT 直接報「1 外幣 = N 台幣」，毋須再做交叉匯率換算。
+            var spotBuy = await FetchBotSpotBuyAsync(cts.Token).ConfigureAwait(false);
 
-            // USD→{JPY,EUR,HKD} cross-rates from Frankfurter (reliable for these).
-            // A Frankfurter failure here is non-fatal — USD is the critical rate.
-            var cross = await FetchCrossRatesFromFrankfurterAsync(cts.Token).ConfigureAwait(false);
-
-            if (usdToTwd is not { } twd)
+            // USD 為關鍵基準匯率：抓取失敗或缺 USD 時不寫入，保留現有/預設值。
+            if (spotBuy is null || !spotBuy.TryGetValue("USD", out var usd) || usd <= 0m)
             {
-                // Yahoo unavailable: do NOT fabricate a TWD rate. Leave the
-                // current/default rates intact (same spirit as the old bail-out).
-                _logger.LogWarning("Yahoo USD→TWD rate unavailable; using cached/default rates");
+                _logger.LogWarning("Bank of Taiwan spot-buy rate unavailable; using cached/default rates");
                 return;
             }
 
-            // Frankfurter returns: 1 USD = N {currency}
-            // We store: 1 {foreign currency} = N TWD
-            // So: TWD rate of foreign = usdToTwd / usdToForeign
+            // 以現有匯率為底，覆蓋成功解析（> 0）的幣別，缺的維持原值。
             var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
-            newRates["USD"] = twd;
-
-            if (cross is not null)
-            {
-                if (cross.TryGetValue("JPY", out var usdToJpy) && usdToJpy > 0m)
-                    newRates["JPY"] = Math.Round(twd / usdToJpy, 4);
-
-                if (cross.TryGetValue("EUR", out var usdToEur) && usdToEur > 0m)
-                    newRates["EUR"] = Math.Round(twd / usdToEur, 4);
-
-                if (cross.TryGetValue("HKD", out var usdToHkd) && usdToHkd > 0m)
-                    newRates["HKD"] = Math.Round(twd / usdToHkd, 4);
-            }
+            foreach (var code in _fetchedCurrencies)
+                if (spotBuy.TryGetValue(code, out var rate) && rate > 0m)
+                    newRates[code] = rate;
 
             _exchangeRates = newRates;
 
@@ -125,25 +113,16 @@ public sealed class CurrencyService : ICurrencyService
     }
 
     /// <summary>
-    /// Latest USD→TWD from Yahoo (last 7 days, take the entry with MAX Date).
-    /// Returns null when Yahoo returns no data. The fetcher swallows its own
-    /// errors and returns an empty list per its contract, but we guard
-    /// defensively all the same.
+    /// 抓取台灣銀行當日匯率 CSV 並解析出各幣別的即期買入價。
+    /// 回傳 null 代表抓取／解析整體失敗（呼叫端保留現有/預設匯率）。
     /// </summary>
-    private async Task<decimal?> FetchUsdTwdFromYahooAsync(CancellationToken ct)
+    private async Task<IReadOnlyDictionary<string, decimal>?> FetchBotSpotBuyAsync(CancellationToken ct)
     {
         try
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var history = await _historyFetcher
-                .FetchAsync("USD", "TWD", today.AddDays(-7), today, ct)
-                .ConfigureAwait(false);
-
-            if (history is null || history.Count == 0)
-                return null;
-
-            var latest = history.MaxBy(e => e.Date);
-            return latest is { Rate: > 0m } ? latest.Rate : null;
+            var bytes = await _http.GetByteArrayAsync(BotDailyCsvUrl, ct).ConfigureAwait(false);
+            var csv = Encoding.UTF8.GetString(bytes);
+            return ParseBotDailyCsv(csv);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -151,54 +130,39 @@ public sealed class CurrencyService : ICurrencyService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Yahoo USD→TWD fetch failed");
+            _logger.LogWarning(ex, "Bank of Taiwan daily CSV fetch failed");
             return null;
         }
     }
 
     /// <summary>
-    /// USD→{JPY,EUR,HKD} cross-rates from Frankfurter. Returns null on any
-    /// failure (non-fatal — caller keeps existing cross-rates).
+    /// 解析台灣銀行「當日」匯率 CSV（<c>/xrt/flcsv/0/day</c>）為 code→即期買入 字典。
+    /// <para>欄位（0-indexed）：[0]=幣別代碼, [1]="本行買入", [2]=現金買入,
+    /// [3]=即期買入, …, [11]="本行賣出", …。即期買入 = col[3]。</para>
+    /// <para>第一列為標題（首欄含 BOM），略過；即期買入非數字／≤ 0 的幣別跳過。
+    /// BOT 每一幣別皆以「1 單位 = N 台幣」報價（USD≈31.5、JPY≈0.21、EUR≈36.5、HKD≈4.0）。</para>
     /// </summary>
-    private async Task<IReadOnlyDictionary<string, decimal>?> FetchCrossRatesFromFrankfurterAsync(CancellationToken ct)
+    internal static Dictionary<string, decimal> ParseBotDailyCsv(string csv)
     {
-        try
-        {
-            var url = "https://api.frankfurter.app/latest?from=USD&to=JPY,EUR,HKD";
-            var json = await _http.GetStringAsync(url, ct).ConfigureAwait(false);
-
-            using var doc = JsonDocument.Parse(json);
-            if (!doc.RootElement.TryGetProperty("rates", out var rates) ||
-                rates.ValueKind != JsonValueKind.Object)
-            {
-                _logger.LogWarning("Frankfurter response did not include a valid 'rates' object");
-                return null;
-            }
-
-            var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
-            foreach (var code in (ReadOnlySpan<string>)["JPY", "EUR", "HKD"])
-                if (TryGetDecimalProperty(rates, code, out var rate))
-                    result[code] = rate;
-
+        var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
+        if (string.IsNullOrEmpty(csv))
             return result;
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Frankfurter cross-rate fetch failed; keeping existing cross-rates");
-            return null;
-        }
-    }
 
-    private static bool TryGetDecimalProperty(JsonElement parent, string propertyName, out decimal value)
-    {
-        value = default;
-        return parent.TryGetProperty(propertyName, out var property) &&
-            property.ValueKind == JsonValueKind.Number &&
-            property.TryGetDecimal(out value);
+        var lines = csv.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        // 第 0 列為標題列（幣別,匯率,現金,即期,…），略過。
+        for (int i = 1; i < lines.Length; i++)
+        {
+            var cols = lines[i].Split(',');
+            if (cols.Length <= 3)
+                continue;
+            var code = cols[0].Trim().ToUpperInvariant();
+            if (code.Length == 0)
+                continue;
+            if (decimal.TryParse(cols[3].Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var spotBuy)
+                && spotBuy > 0m)
+                result[code] = spotBuy;
+        }
+        return result;
     }
 
     // ── Formatting ──────────────────────────────────────────────────────────

@@ -1,4 +1,6 @@
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
@@ -18,12 +20,24 @@ public class CurrencyServiceTests
         ["HKD"] = 4.1m,
     };
 
+    /// <summary>
+    /// A realistic Bank of Taiwan daily CSV (/xrt/flcsv/0/day). First line is the
+    /// header (with a leading BOM as the live endpoint serves). Each currency is
+    /// one line; 即期買入 = col[3]. BOT quotes "1 foreign = N TWD" directly
+    /// (USD≈31.5, JPY≈0.21, EUR≈36.5, HKD≈4.0 — NOT per-100).
+    /// </summary>
+    private const string BotDailyCsv =
+        "﻿幣別,匯率,現金,即期,遠期10天,遠期30天,遠期60天,遠期90天,遠期120天,遠期150天,遠期180天,本行賣出,現金,即期,遠期10天,遠期30天,遠期60天,遠期90天,遠期120天,遠期150天,遠期180天\n" +
+        "USD,本行買入,31.23000,31.55500,31.56700,0,0,0,0,0,0,本行賣出,31.90000,31.65500,0,0,0,0,0,0,0\n" +
+        "JPY,本行買入,0.2050,0.2100,0,0,0,0,0,0,0,本行賣出,0.2180,0.2150,0,0,0,0,0,0,0\n" +
+        "EUR,本行買入,35.80000,36.50000,0,0,0,0,0,0,0,本行賣出,37.50000,36.90000,0,0,0,0,0,0,0\n" +
+        "HKD,本行買入,3.85000,4.03000,0,0,0,0,0,0,0,本行賣出,4.25000,4.12000,0,0,0,0,0,0,0\n";
+
     private static CurrencyService Create(
         string currency = "TWD",
         decimal usdRate = 32.0m,
         Dictionary<string, decimal>? rates = null,
-        HttpClient? http = null,
-        IFxRateHistoryFetcher? fetcher = null)
+        HttpClient? http = null)
     {
         var settings = new Mock<IAppSettingsService>();
         settings.SetupGet(s => s.Current)
@@ -31,42 +45,10 @@ public class CurrencyServiceTests
                 PreferredCurrency: currency,
                 UsdTwdRate: usdRate,
                 ExchangeRates: rates));
-        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>())).Returns(Task.CompletedTask);
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Returns(Task.CompletedTask);
         http ??= new HttpClient();
-        // Default fetcher: empty Yahoo history (no USD→TWD). Tests that exercise
-        // a successful refresh pass an explicit fetcher returning a rate.
-        fetcher ??= FakeFetcher(Array.Empty<FxRateHistoryEntry>());
-        return new CurrencyService(settings.Object, http, fetcher, NullLogger<CurrencyService>.Instance);
-    }
-
-    /// <summary>
-    /// A stand-in <see cref="IFxRateHistoryFetcher"/> that returns a fixed list,
-    /// mirroring the real Yahoo fetcher's "never throw, return what we have"
-    /// contract.
-    /// </summary>
-    private static IFxRateHistoryFetcher FakeFetcher(IReadOnlyList<FxRateHistoryEntry> entries)
-    {
-        var mock = new Mock<IFxRateHistoryFetcher>();
-        mock.SetupGet(f => f.SourceName).Returns("yahoo");
-        mock.Setup(f => f.FetchAsync(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<DateOnly>(), It.IsAny<DateOnly>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(entries);
-        return mock.Object;
-    }
-
-    /// <summary>Single-day USDTWD history whose latest entry has the given rate.</summary>
-    private static IFxRateHistoryFetcher YahooUsdTwd(decimal rate)
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        // Two entries; the MAX-Date one (today) carries the rate the service must pick.
-        var entries = new[]
-        {
-            new FxRateHistoryEntry(today.AddDays(-1), "USD", "TWD", rate - 0.5m, "yahoo", DateTimeOffset.UtcNow),
-            new FxRateHistoryEntry(today, "USD", "TWD", rate, "yahoo", DateTimeOffset.UtcNow),
-        };
-        return FakeFetcher(entries);
+        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance);
     }
 
     // ── SupportedCurrencies ────────────────────────────────────────────────
@@ -205,53 +187,68 @@ public class CurrencyServiceTests
         Assert.True(fired);
     }
 
-    // ── RefreshRatesAsync: Yahoo USD→TWD + Frankfurter cross-rates ─────────
+    // ── RefreshRatesAsync: Bank of Taiwan 即期買入 (spot-buy) ───────────────
 
     [Fact]
-    public async Task RefreshRatesAsync_UsesYahooUsdTwd_AndFrankfurterCrossRates()
+    public async Task RefreshRatesAsync_UsesBotSpotBuy_DirectTwdRates()
     {
-        // Yahoo gives the live USD→TWD; Frankfurter gives USD→{EUR,HKD,JPY}.
-        var http = CreateHttpClient(
-            """{"rates":{"EUR":0.86678,"HKD":7.8365,"JPY":160.54},"base":"USD"}""");
+        // BOT daily CSV → 即期買入 (col[3]) used directly as "1 foreign = N TWD",
+        // NO cross-rate division.
+        var http = CreateHttpClient(BotDailyCsv);
         AppSettings? saved = null;
         var svc = CreateCapturing(
             out var capture,
             rates: new Dictionary<string, decimal>(DefaultRates),
-            http: http,
-            fetcher: YahooUsdTwd(31.65m));
+            http: http);
         capture.Saved += s => saved = s;
         bool fired = false;
         svc.CurrencyChanged += () => fired = true;
 
         await svc.RefreshRatesAsync();
 
-        // USD comes straight from Yahoo's latest (MAX-Date) entry.
-        Assert.Equal(31.65m, svc.ExchangeRates["USD"]);
-        // Cross-rates = usdToTwd / usdToForeign, rounded to 4dp (banker's rounding).
-        Assert.Equal(Math.Round(31.65m / 0.86678m, 4), svc.ExchangeRates["EUR"]); // 36.5145
-        Assert.Equal(Math.Round(31.65m / 160.54m, 4), svc.ExchangeRates["JPY"]);  // 0.1971
-        Assert.Equal(Math.Round(31.65m / 7.8365m, 4), svc.ExchangeRates["HKD"]);  // 4.0388
+        // Each rate is the CSV's 即期買入 column verbatim (no division).
+        Assert.Equal(31.555m, svc.ExchangeRates["USD"]);
+        Assert.Equal(0.2100m, svc.ExchangeRates["JPY"]);
+        Assert.Equal(36.50000m, svc.ExchangeRates["EUR"]);
+        Assert.Equal(4.03000m, svc.ExchangeRates["HKD"]);
+        // JPY magnitude sanity-check: ~0.21, NOT ~21 (BOT is per-1-unit, not per-100).
+        Assert.InRange(svc.ExchangeRates["JPY"], 0.15m, 0.30m);
         Assert.True(fired, "CurrencyChanged should fire on a successful refresh");
 
         // Persisted with the new rates + a non-null refresh timestamp.
         Assert.NotNull(saved);
-        Assert.Equal(31.65m, saved!.UsdTwdRate);
-        Assert.Equal(31.65m, saved.ExchangeRates!["USD"]);
-        Assert.Equal(Math.Round(31.65m / 0.86678m, 4), saved.ExchangeRates!["EUR"]);
+        Assert.Equal(31.555m, saved!.UsdTwdRate);
+        Assert.Equal(31.555m, saved.ExchangeRates!["USD"]);
+        Assert.Equal(0.2100m, saved.ExchangeRates!["JPY"]);
         Assert.False(string.IsNullOrEmpty(saved.LastFxRefreshUtc));
     }
 
     [Fact]
-    public async Task RefreshRatesAsync_YahooEmpty_DoesNotOverwrite()
+    public async Task RefreshRatesAsync_RequestsBotDailyCsvEndpoint()
     {
-        // Yahoo returns nothing → no fabricated TWD write; rates stay as-is.
-        var http = CreateHttpClient(
-            """{"rates":{"EUR":0.86678,"HKD":7.8365,"JPY":160.54},"base":"USD"}""");
-        var svc = Create(
-            "TWD",
+        var handler = new RecordingHandler(BotDailyCsv);
+        var http = new HttpClient(handler);
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+
+        await svc.RefreshRatesAsync();
+
+        Assert.NotNull(handler.LastRequest);
+        Assert.Equal(
+            "https://rate.bot.com.tw/xrt/flcsv/0/day",
+            handler.LastRequest!.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task RefreshRatesAsync_Http500_DoesNotOverwrite()
+    {
+        // BOT 500s → no fabricated write; rates stay as-is, no CurrencyChanged.
+        var http = new HttpClient(new StatusHttpMessageHandler(HttpStatusCode.InternalServerError));
+        AppSettings? saved = null;
+        var svc = CreateCapturing(
+            out var capture,
             rates: new Dictionary<string, decimal>(DefaultRates),
-            http: http,
-            fetcher: FakeFetcher(Array.Empty<FxRateHistoryEntry>()));
+            http: http);
+        capture.Saved += s => saved = s;
         bool fired = false;
         svc.CurrencyChanged += () => fired = true;
 
@@ -261,55 +258,64 @@ public class CurrencyServiceTests
         Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]);
         Assert.Equal(DefaultRates["EUR"], svc.ExchangeRates["EUR"]);
         Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]);
-        Assert.False(fired, "no refresh should be signalled when USD→TWD is unavailable");
+        Assert.False(fired, "no refresh should be signalled when the fetch fails");
+        Assert.Null(saved); // nothing persisted on failure
     }
 
     [Fact]
-    public async Task RefreshRatesAsync_WhenFrankfurterOmitsOptionalRate_KeepsThatRate()
+    public async Task RefreshRatesAsync_GarbageBody_DoesNotOverwrite()
     {
-        // Yahoo gives USD→TWD; Frankfurter omits HKD → HKD keeps its prior value.
-        var http = CreateHttpClient(
-            """{"rates":{"JPY":160.54,"EUR":0.86678},"base":"USD"}""");
-        var svc = Create(
-            "TWD",
-            rates: new Dictionary<string, decimal>(DefaultRates),
-            http: http,
-            fetcher: YahooUsdTwd(31.65m));
+        // 200 OK but not a parseable CSV (no USD line) → rates unchanged.
+        var http = CreateHttpClient("this is not a CSV at all\nneither,is,this");
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+        bool fired = false;
+        svc.CurrencyChanged += () => fired = true;
 
         await svc.RefreshRatesAsync();
 
-        Assert.Equal(31.65m, svc.ExchangeRates["USD"]);
-        Assert.Equal(Math.Round(31.65m / 160.54m, 4), svc.ExchangeRates["JPY"]);
-        Assert.Equal(Math.Round(31.65m / 0.86678m, 4), svc.ExchangeRates["EUR"]);
-        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]);
-    }
-
-    [Fact]
-    public async Task RefreshRatesAsync_WhenFrankfurterFails_StillAppliesYahooUsd()
-    {
-        // Frankfurter 500s → cross-rates unchanged, but USD still updates from Yahoo.
-        var http = new HttpClient(new StatusHttpMessageHandler(System.Net.HttpStatusCode.InternalServerError))
-        {
-            BaseAddress = new Uri("https://api.frankfurter.app/"),
-        };
-        var svc = Create(
-            "TWD",
-            rates: new Dictionary<string, decimal>(DefaultRates),
-            http: http,
-            fetcher: YahooUsdTwd(31.65m));
-
-        await svc.RefreshRatesAsync();
-
-        Assert.Equal(31.65m, svc.ExchangeRates["USD"]);
+        Assert.Equal(DefaultRates["USD"], svc.ExchangeRates["USD"]);
         Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]);
-        Assert.Equal(DefaultRates["EUR"], svc.ExchangeRates["EUR"]);
-        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]);
+        Assert.False(fired, "no refresh should be signalled when USD can't be parsed");
+    }
+
+    [Fact]
+    public async Task RefreshRatesAsync_WhenCurrencyMissingOrZero_KeepsThatRate()
+    {
+        // CSV has USD (valid) but JPY 即期買入 is 0 and omits HKD entirely → both keep prior values.
+        const string partial =
+            "﻿幣別,匯率,現金,即期,本行賣出,現金,即期\n" +
+            "USD,本行買入,31.23000,31.55500,本行賣出,31.90000,31.65500\n" +
+            "JPY,本行買入,0.2050,0,本行賣出,0.2180,0.2150\n" +
+            "EUR,本行買入,35.80000,36.50000,本行賣出,37.50000,36.90000\n";
+        var http = CreateHttpClient(partial);
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+
+        await svc.RefreshRatesAsync();
+
+        Assert.Equal(31.555m, svc.ExchangeRates["USD"]);
+        Assert.Equal(36.50000m, svc.ExchangeRates["EUR"]);
+        Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]); // 0 in CSV → keep prior
+        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]); // absent in CSV → keep prior
+    }
+
+    // ── ParseBotDailyCsv (unit) ────────────────────────────────────────────
+
+    [Fact]
+    public void ParseBotDailyCsv_TakesSpotBuyColumn_AndSkipsHeaderAndBom()
+    {
+        var parsed = CurrencyService.ParseBotDailyCsv(BotDailyCsv);
+
+        Assert.Equal(31.555m, parsed["USD"]);
+        Assert.Equal(0.2100m, parsed["JPY"]);
+        Assert.Equal(36.50000m, parsed["EUR"]);
+        Assert.Equal(4.03000m, parsed["HKD"]);
+        Assert.DoesNotContain("幣別", parsed.Keys); // header row skipped
     }
 
     private static HttpClient CreateHttpClient(string responseBody) =>
         new(new StubHttpMessageHandler(responseBody))
         {
-            BaseAddress = new Uri("https://api.frankfurter.app/")
+            BaseAddress = new Uri("https://rate.bot.com.tw/")
         };
 
     /// <summary>
@@ -322,8 +328,7 @@ public class CurrencyServiceTests
         string currency = "TWD",
         decimal usdRate = 32.0m,
         Dictionary<string, decimal>? rates = null,
-        HttpClient? http = null,
-        IFxRateHistoryFetcher? fetcher = null)
+        HttpClient? http = null)
     {
         var cap = new SaveCapture();
         var settings = new Mock<IAppSettingsService>();
@@ -335,9 +340,8 @@ public class CurrencyServiceTests
         settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
             .Returns((AppSettings s, bool _) => { cap.Raise(s); return Task.CompletedTask; });
         http ??= new HttpClient();
-        fetcher ??= FakeFetcher(Array.Empty<FxRateHistoryEntry>());
         capture = cap;
-        return new CurrencyService(settings.Object, http, fetcher, NullLogger<CurrencyService>.Instance);
+        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance);
     }
 
     private sealed class SaveCapture
@@ -346,7 +350,7 @@ public class CurrencyServiceTests
         public void Raise(AppSettings s) => Saved?.Invoke(s);
     }
 
-    private sealed class StatusHttpMessageHandler(System.Net.HttpStatusCode status) : HttpMessageHandler
+    private sealed class StatusHttpMessageHandler(HttpStatusCode status) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -362,9 +366,26 @@ public class CurrencyServiceTests
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken) =>
-            Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(responseBody),
+                // Serve UTF-8 bytes so the service's byte→UTF8 decode path is exercised.
+                Content = new ByteArrayContent(Encoding.UTF8.GetBytes(responseBody)),
             });
+    }
+
+    private sealed class RecordingHandler(string responseBody) : HttpMessageHandler
+    {
+        public HttpRequestMessage? LastRequest { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            LastRequest = request;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(Encoding.UTF8.GetBytes(responseBody)),
+            });
+        }
     }
 }

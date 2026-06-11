@@ -837,9 +837,9 @@
     <sys:String x:Key="Settings.Currency.Select">Display Currency</sys:String>
     <sys:String x:Key="Settings.Currency.SelectDesc">Choose the unit for all displayed amounts</sys:String>
     <sys:String x:Key="Settings.Currency.Rates">Exchange Rates</sys:String>
-    <sys:String x:Key="Settings.Currency.RatesDesc">Source: Frankfurter (auto-updated)</sys:String>
+    <sys:String x:Key="Settings.Currency.RatesDesc">Source: Bank of Taiwan spot-buy (auto-updated)</sys:String>
     <sys:String x:Key="Settings.Currency.RefreshRates">Refresh</sys:String>
-    <sys:String x:Key="Settings.Currency.RefreshRatesTooltip">Fetch latest rates from Frankfurter</sys:String>
+    <sys:String x:Key="Settings.Currency.RefreshRatesTooltip">Fetch latest spot-buy rates from Bank of Taiwan</sys:String>
 
     <!--  Screener  -->
     <sys:String x:Key="Common.All">All</sys:String>
@@ -1796,11 +1796,11 @@
     <sys:String x:Key="AuditLog.Detail.SelectPrompt">Select an entry from the list to see details.</sys:String>
     <sys:String x:Key="AuditLog.Detail.DiffMode">Previous version detected. Red strikethrough shows the prior value (expand raw JSON for full comparison).</sys:String>
     <sys:String x:Key="AuditLog.Detail.RawJson">Raw JSON (debug)</sys:String>
-    <sys:String x:Key="Settings.Fx.Title">Exchange rates (Frankfurter live source)</sys:String>
+    <sys:String x:Key="Settings.Fx.Title">Exchange rates (Bank of Taiwan spot-buy)</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed (using default rates — click Refresh below)</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">Refresh now</sys:String>
-    <sys:String x:Key="Settings.Fx.Source">Source: https://api.frankfurter.app; the app also tries to refresh once at startup.</sys:String>
+    <sys:String x:Key="Settings.Fx.Source">Source: https://rate.bot.com.tw; the app also tries to refresh once at startup.</sys:String>
     <sys:String x:Key="Import.PdfPreview.Title">PDF page text preview (verify OCR output)</sys:String>
     <sys:String x:Key="Import.PdfPreview.EmptyPage">No text extracted from this page (likely an image-only page with OCR disabled or no recognised content).</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>

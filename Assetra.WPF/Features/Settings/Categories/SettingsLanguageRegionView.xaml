@@ -57,7 +57,7 @@
                         ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
                 </StackPanel>
 
-                <!--  ── 即時匯率（Frankfurter）──  -->
+                <!--  ── 即時匯率（台灣銀行即期買入）──  -->
                 <StackPanel Margin="0,16,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>

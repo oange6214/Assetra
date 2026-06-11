@@ -838,9 +838,9 @@
     <sys:String x:Key="Settings.Currency.Select">顯示貨幣</sys:String>
     <sys:String x:Key="Settings.Currency.SelectDesc">選擇所有金額的顯示單位</sys:String>
     <sys:String x:Key="Settings.Currency.Rates">即時匯率</sys:String>
-    <sys:String x:Key="Settings.Currency.RatesDesc">資料來源：Frankfurter（自動更新）</sys:String>
+    <sys:String x:Key="Settings.Currency.RatesDesc">資料來源：台灣銀行即期買入（自動更新）</sys:String>
     <sys:String x:Key="Settings.Currency.RefreshRates">重新整理</sys:String>
-    <sys:String x:Key="Settings.Currency.RefreshRatesTooltip">從 Frankfurter 取得最新匯率</sys:String>
+    <sys:String x:Key="Settings.Currency.RefreshRatesTooltip">從台灣銀行取得最新即期買入匯率</sys:String>
 
     <!--  Screener  -->
     <sys:String x:Key="Common.All">全部</sys:String>
@@ -1801,11 +1801,11 @@
     <sys:String x:Key="AuditLog.Detail.SelectPrompt">從左側列表選一筆查看詳細內容。</sys:String>
     <sys:String x:Key="AuditLog.Detail.DiffMode">已偵測到較舊的版本，下方紅字為前一版內容（點選 raw JSON 摺疊區可比對全文）。</sys:String>
     <sys:String x:Key="AuditLog.Detail.RawJson">原始 JSON（debug）</sys:String>
-    <sys:String x:Key="Settings.Fx.Title">匯率（Frankfurter 即時來源）</sys:String>
+    <sys:String x:Key="Settings.Fx.Title">匯率（台灣銀行即期買入）</sys:String>
     <sys:String x:Key="Settings.Fx.LastRefreshed">上次更新：</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">尚未更新（使用預設匯率，請點下方「刷新」拉最新值）</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">立即刷新</sys:String>
-    <sys:String x:Key="Settings.Fx.Source">資料來源 https://api.frankfurter.app；應用程式啟動時亦會自動嘗試刷新一次。</sys:String>
+    <sys:String x:Key="Settings.Fx.Source">資料來源 https://rate.bot.com.tw；應用程式啟動時亦會自動嘗試刷新一次。</sys:String>
     <sys:String x:Key="Import.PdfPreview.Title">PDF 頁面文字預覽（檢查 OCR 結果）</sys:String>
     <sys:String x:Key="Import.PdfPreview.EmptyPage">本頁未抽出文字（可能為純圖片頁，且 OCR 未啟用 / 未識別出內容）。</sys:String>
     <sys:String x:Key="Reports.Performance.Title">投資績效</sys:String>
