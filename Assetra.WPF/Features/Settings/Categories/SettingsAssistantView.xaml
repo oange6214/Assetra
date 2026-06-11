@@ -1,0 +1,93 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Settings.Categories.SettingsAssistantView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:infra="clr-namespace:Assetra.WPF.Infrastructure"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Settings"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <StackPanel HorizontalAlignment="Stretch">
+        <!--  ── AI 助手 (Phase 3 LLM) ──  -->
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="{StaticResource Font.Size.Md}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Settings.Section.Llm}" />
+
+        <Border Style="{StaticResource FormCard}"
+            Margin="0,0,0,24"
+            Padding="16,12">
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,12"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Settings.Llm.Hint}"
+                    TextWrapping="Wrap" />
+
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Llm.Provider}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedLlmProviders}"
+                        SelectedValue="{Binding LlmProvider, Mode=TwoWay}"
+                        SelectedValuePath="Code" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Llm.ApiKey}" />
+                    <PasswordBox
+                        MinWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        infra:PasswordBoxBindingHelper.BoundPassword="{Binding LlmApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Llm.ApiKey.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Llm.Model}" />
+                    <TextBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Text="{Binding LlmModel, UpdateSourceTrigger=LostFocus}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Llm.Model.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Llm.Endpoint}" />
+                    <TextBox
+                        MinWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Text="{Binding LlmEndpoint, UpdateSourceTrigger=LostFocus}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Llm.Endpoint.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

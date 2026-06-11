@@ -1035,6 +1035,19 @@
     <sys:String x:Key="Onboarding.Banner.Title">歡迎使用 Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① 新增持倉  →  ② 查看配置分析  →  ③ 設定價格警示</sys:String>
     <sys:String x:Key="Settings.Title">設定</sys:String>
+    <!--  ── 左側分類導覽標籤 ──  -->
+    <sys:String x:Key="Settings.Category.Appearance">外觀</sys:String>
+    <sys:String x:Key="Settings.Category.LanguageRegion">語言與區域</sys:String>
+    <sys:String x:Key="Settings.Category.DataSources">資料來源</sys:String>
+    <sys:String x:Key="Settings.Category.Dashboard">儀表板</sys:String>
+    <sys:String x:Key="Settings.Category.Trading">交易</sys:String>
+    <sys:String x:Key="Settings.Category.ReportsTax">報表與稅務</sys:String>
+    <sys:String x:Key="Settings.Category.Assistant">AI 助手</sys:String>
+    <sys:String x:Key="Settings.Category.Sync">雲端同步</sys:String>
+    <sys:String x:Key="Settings.Category.DataMaintenance">資料與維護</sys:String>
+    <!--  ── 分類面板內標題（資料來源 / 資料與維護為新增；其餘沿用既有 Section key）──  -->
+    <sys:String x:Key="Settings.Section.DataSources">資料來源</sys:String>
+    <sys:String x:Key="Settings.Section.DataMaintenance">資料與維護</sys:String>
     <sys:String x:Key="Settings.Section.Appearance">外觀</sys:String>
     <sys:String x:Key="Settings.DarkTheme">深色主題</sys:String>
     <sys:String x:Key="Settings.ColorScheme.Taiwan">台灣（紅漲綠跌）</sys:String>

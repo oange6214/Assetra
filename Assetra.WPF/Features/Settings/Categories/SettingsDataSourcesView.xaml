@@ -1,0 +1,277 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Settings.Categories.SettingsDataSourcesView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Settings"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel}, IsDesignTimeCreatable=False}"
+    Loaded="UserControl_Loaded"
+    mc:Ignorable="d">
+
+    <StackPanel HorizontalAlignment="Stretch">
+        <!--  ── 資料來源 ──  -->
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="{StaticResource Font.Size.Md}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Settings.Section.DataSources}" />
+
+        <Border Style="{StaticResource FormCard}"
+            Margin="0,0,0,24"
+            Padding="16,12">
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.QuoteSource}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedQuoteProviders}"
+                        SelectedValue="{Binding QuoteProvider}"
+                        SelectedValuePath="Code" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.DataSource}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedHistoryProviders}"
+                        SelectedValue="{Binding HistoryProvider}"
+                        SelectedValuePath="Code" />
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.UsSymbolDirectory.Title}" />
+                    <TextBlock
+                        Margin="0,8,0,6"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding UsSymbolDirectoryStatus}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        HorizontalAlignment="Left"
+                        Command="{Binding RefreshUsSymbolDirectoryCommand}"
+                        Content="{DynamicResource Settings.UsSymbolDirectory.Refresh}"
+                        IsEnabled="{Binding CanRefreshUsSymbolDirectory}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+
+                <!--  P4.1d — FX History (historical FX backfill — distinct from the live FX rate refresh above)  -->
+                <StackPanel Margin="0,16,0,0">
+                    <TextBlock
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        FontWeight="SemiBold"
+                        Text="{DynamicResource Settings.FxHistory.SectionTitle}" />
+                    <TextBlock
+                        Margin="0,4,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.FxHistory.SectionHint}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{Binding LastFxHistoryRefreshDisplay}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding RefreshFxHistoryCommand}"
+                            Content="{DynamicResource Settings.FxHistory.RefreshNow}"
+                            IsEnabled="{Binding CanRefreshFxHistory}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding RefreshFxHistoryDeepCommand}"
+                            Content="{DynamicResource Settings.FxHistory.DeepBackfill}"
+                            IsEnabled="{Binding CanRefreshFxHistory}"
+                            Style="{StaticResource AppSecondaryButton}"
+                            ToolTip="{DynamicResource Settings.FxHistory.DeepBackfillHint}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Margin="0,16,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.FugleApiKey}" />
+                        <Button
+                            Margin="6,-2,0,0"
+                            Command="{Binding OpenFugleHelpCommand}"
+                            Padding="0" Style="{StaticResource AppGhostButton}"
+                            ToolTip="{DynamicResource Settings.FugleHelp.Tooltip}">
+                            <ds:AppIcon Symbol="Info24" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" />
+                        </Button>
+                    </StackPanel>
+                    <StackPanel MaxWidth="420" Margin="0,8,0,0">
+                        <PasswordBox
+                            x:Name="FugleApiKeyBox"
+                            MinWidth="220"
+                            MaxWidth="420"
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Stretch"
+                            PasswordChanged="FugleApiKeyBox_OnPasswordChanged" />
+                    </StackPanel>
+                    <TextBlock
+                        Margin="0,0,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.FugleApiKeyHint}"
+                        TextWrapping="Wrap" />
+                    <!--  已選 Fugle 但未填金鑰 → 回退提示（warning 色，僅此情況顯示）  -->
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppDown}"
+                        Text="{DynamicResource Settings.Fugle.KeyMissingWarning}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding ShowFugleKeyMissingWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding DataSourceSaveStatus}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Margin="0,16,0,0">
+                    <!--
+                        Label + info button — parallel to FugleApiKey row.
+                        Click opens TwelveDataHelpDialog (申請與設定步驟).
+                    -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource AppTextPrimary}"
+                            Text="{DynamicResource Settings.TwelveDataApiKey}" />
+                        <Button
+                            Margin="6,-2,0,0"
+                            Command="{Binding OpenTwelveDataHelpCommand}"
+                            Padding="0" Style="{StaticResource AppGhostButton}"
+                            ToolTip="{DynamicResource Settings.TwelveDataHelp.Tooltip}">
+                            <ds:AppIcon Symbol="Info24" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" />
+                        </Button>
+                    </StackPanel>
+                    <StackPanel MaxWidth="420" Margin="0,8,0,0">
+                        <PasswordBox
+                            x:Name="TwelveDataApiKeyBox"
+                            MinWidth="220"
+                            MaxWidth="420"
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Stretch"
+                            PasswordChanged="TwelveDataApiKeyBox_OnPasswordChanged" />
+                        <WrapPanel>
+                            <Button
+                                Margin="0,0,8,8"
+                                Command="{Binding TestTwelveDataConnectionCommand}"
+                                Content="{DynamicResource Settings.TwelveData.Test}"
+                                IsEnabled="{Binding CanTestTwelveDataConnection}"
+                                Style="{StaticResource AppSecondaryButton}" />
+                            <TextBlock
+                                Margin="0,8,0,8"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}">
+                                <Run Text="{DynamicResource Settings.TwelveData.Quota}" />
+                                <Run Text=" " />
+                                <Run Text="{Binding TwelveDataQuotaDisplay, Mode=OneWay}" />
+                            </TextBlock>
+                        </WrapPanel>
+                    </StackPanel>
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.TwelveDataApiKeyHint}"
+                        TextWrapping="Wrap" />
+                    <!--  未填金鑰時的 Yahoo 後備來源說明（恆顯示，純靜態提示）  -->
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.TwelveData.FallbackHint}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding TwelveDataTestStatus}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Button
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding SaveDataSourceSettingsCommand}"
+                    Content="{DynamicResource Common.Save}"
+                    Style="{StaticResource AppSecondaryButton}" />
+            </StackPanel>
+        </Border>
+
+        <!--  ── OCR（PDF 對帳單匯入）— 影像頁 PDF 的文字辨識來源 ──  -->
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="{StaticResource Font.Size.Md}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Settings.Section.Ocr}" />
+
+        <Border Style="{StaticResource FormCard}"
+            Margin="0,0,0,24"
+            Padding="16,12">
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Ocr.TessdataPath}" />
+                    <StackPanel
+                        MaxWidth="520"
+                        Margin="0,8,0,0"
+                        Orientation="Horizontal">
+                        <TextBox
+                            MinWidth="320"
+                            Margin="0,0,8,0"
+                            Text="{Binding OcrTessdataPath, UpdateSourceTrigger=LostFocus}" />
+                        <Button
+                            Command="{Binding BrowseOcrTessdataCommand}"
+                            Content="{DynamicResource Common.Browse}" Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Margin="8,0,0,0"
+                            Command="{Binding OpenTessdataDownloadCommand}"
+                            Content="{DynamicResource Settings.Ocr.Download}"
+                            Style="{StaticResource AppSecondaryButton}"
+                            ToolTip="{DynamicResource Settings.Ocr.Download.Tooltip}" />
+                    </StackPanel>
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Ocr.TessdataPath.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Ocr.Language}" />
+                    <TextBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Text="{Binding OcrLanguage, UpdateSourceTrigger=LostFocus}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Ocr.Language.Hint}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

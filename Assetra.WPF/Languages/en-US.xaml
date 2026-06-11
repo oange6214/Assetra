@@ -1032,6 +1032,19 @@
     <sys:String x:Key="Onboarding.Banner.Title">Welcome to Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① Add a position  →  ② View allocation analysis  →  ③ Set price alerts</sys:String>
     <sys:String x:Key="Settings.Title">Settings</sys:String>
+    <!--  ── Left-nav category labels ──  -->
+    <sys:String x:Key="Settings.Category.Appearance">Appearance</sys:String>
+    <sys:String x:Key="Settings.Category.LanguageRegion">Language &amp; Region</sys:String>
+    <sys:String x:Key="Settings.Category.DataSources">Data Sources</sys:String>
+    <sys:String x:Key="Settings.Category.Dashboard">Dashboard</sys:String>
+    <sys:String x:Key="Settings.Category.Trading">Trading</sys:String>
+    <sys:String x:Key="Settings.Category.ReportsTax">Reports &amp; Tax</sys:String>
+    <sys:String x:Key="Settings.Category.Assistant">AI Assistant</sys:String>
+    <sys:String x:Key="Settings.Category.Sync">Cloud Sync</sys:String>
+    <sys:String x:Key="Settings.Category.DataMaintenance">Data &amp; Maintenance</sys:String>
+    <!--  ── In-panel section titles (DataSources / DataMaintenance are new; others reuse existing Section keys) ──  -->
+    <sys:String x:Key="Settings.Section.DataSources">Data Sources</sys:String>
+    <sys:String x:Key="Settings.Section.DataMaintenance">Data &amp; Maintenance</sys:String>
     <sys:String x:Key="Settings.Section.Appearance">Appearance</sys:String>
     <sys:String x:Key="Settings.DarkTheme">Dark theme</sys:String>
     <sys:String x:Key="Settings.ColorScheme.Taiwan">Taiwan (red up / green down)</sys:String>

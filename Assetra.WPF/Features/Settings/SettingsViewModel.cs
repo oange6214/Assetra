@@ -95,6 +95,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public SyncSettingsViewModel Sync { get; }
     public ConflictResolutionViewModel Conflicts { get; }
 
+    /// <summary>
+    /// 左側分類導覽目前選取的分類。右側內容區（<c>SettingsView.xaml</c> 的 ContentControl）
+    /// 依此值切換對應的子視圖。預設落在「外觀」。
+    /// </summary>
+    [ObservableProperty] private SettingsCategory _selectedCategory = SettingsCategory.Appearance;
+
     private bool _isLoading;
     private int _saveVersion;
 

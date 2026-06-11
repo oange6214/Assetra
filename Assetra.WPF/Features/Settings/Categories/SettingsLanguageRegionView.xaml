@@ -1,0 +1,117 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Settings.Categories.SettingsLanguageRegionView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Settings"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel}, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <StackPanel HorizontalAlignment="Stretch">
+        <!--  ── 語言與區域  ──  -->
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="{StaticResource Font.Size.Md}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextPrimary}"
+            Text="{DynamicResource Settings.Section.Language}" />
+
+        <Border Style="{StaticResource FormCard}"
+            Margin="0,0,0,24"
+            Padding="16,12">
+            <StackPanel>
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Language}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{x:Static vm:SettingsViewModel.SupportedLanguages}"
+                        SelectedValue="{Binding Language}"
+                        SelectedValuePath="Code" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.PrimaryCurrency}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding SupportedCurrencies}"
+                        SelectedItem="{Binding PrimaryCurrency}" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.BaseCurrency}" />
+                    <ComboBox
+                        MinWidth="220"
+                        MaxWidth="320"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding SupportedCurrencies}"
+                        SelectedItem="{Binding BaseCurrency}"
+                        ToolTip="{DynamicResource Settings.BaseCurrency.Tooltip}" />
+                </StackPanel>
+
+                <!--  ── 即時匯率（Frankfurter）──  -->
+                <StackPanel Margin="0,16,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource Settings.Fx.Title}" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}">
+                                <Run Text="{DynamicResource Settings.Fx.LastRefreshed}" />
+                                <Run Text=" " />
+                                <Run FontFamily="{StaticResource Font.Family.Base}" Text="{Binding LastFxRefreshDisplay, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                        <Button
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Top"
+                            Command="{Binding RefreshFxRatesCommand}"
+                            Content="{DynamicResource Settings.Fx.Refresh}"
+                            IsEnabled="{Binding CanRefreshFxRates}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                    </Grid>
+                    <Border
+                        Margin="0,8,0,0"
+                        Padding="10,8"
+                        Background="{DynamicResource AppSurfaceAlt}"
+                        BorderBrush="{DynamicResource AppBorderLight}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Sm}">
+                        <ItemsControl ItemsSource="{Binding FxRateRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Margin="0,2,0,2"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding RateDisplay}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.Fx.Source}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -110,6 +110,23 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public void SelectedCategory_DefaultsToAppearance_AndIsSettable()
+    {
+        // WHY: SelectedCategory is the single source of truth that drives the Settings page's
+        // left-nav selection AND the right-panel ContentControl DataTrigger switch. It must start
+        // on Appearance (the page's default landing) and accept every category so navigation works.
+        var vm = CreateVm();
+
+        Assert.Equal(SettingsCategory.Appearance, vm.SelectedCategory);
+
+        vm.SelectedCategory = SettingsCategory.Sync;
+        Assert.Equal(SettingsCategory.Sync, vm.SelectedCategory);
+
+        vm.SelectedCategory = SettingsCategory.DataMaintenance;
+        Assert.Equal(SettingsCategory.DataMaintenance, vm.SelectedCategory);
+    }
+
+    [Fact]
     public async Task SaveDataSourceSettingsCommand_PersistsQuoteProviderHistoryProviderAndFugleKey()
     {
         var vm = CreateVm();
