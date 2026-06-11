@@ -71,7 +71,7 @@ public sealed partial class SellTxViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(FxRateDateDisplay))]
     private DateOnly? _fxRateDate;
 
-    /// <summary>匯率來源名稱，例如 Frankfurter；空字串代表尚未查得或使用者手動輸入。</summary>
+    /// <summary>匯率來源名稱，例如台灣銀行；空字串代表尚未查得或使用者手動輸入。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FxSourceDisplay))]
     private string _fxSourceLabel = string.Empty;

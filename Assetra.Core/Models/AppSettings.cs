@@ -12,7 +12,7 @@ public sealed record AppSettings(
     decimal UsdTwdRate = 32.0m,      // 1 USD = N TWD（向後相容；同步至 ExchangeRates["USD"]）
     /// <summary>
     /// 各幣別兌台幣匯率（1 單位外幣 = N 台幣）。
-    /// null 表示尚未從 Frankfurter 取得，此時 CurrencyService 使用硬碼預設值。
+    /// null 表示尚未從台灣銀行取得，此時 CurrencyService 使用硬碼預設值。
     /// </summary>
     Dictionary<string, decimal>? ExchangeRates = null,
     // 語言
@@ -151,7 +151,7 @@ public sealed record AppSettings(
     bool TaxDividendSeparate = false,
 
     /// <summary>
-    /// 最近一次 Frankfurter 匯率刷新成功時間（UTC ISO-8601）。
+    /// 最近一次台灣銀行匯率刷新成功時間（UTC ISO-8601）。
     /// 空字串 = 從未刷新成功，UI 顯示「尚未更新」。
     /// </summary>
     string LastFxRefreshUtc = "",

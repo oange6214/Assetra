@@ -79,7 +79,7 @@ public interface IBuyExecutionContext
     /// <summary>Effective historical FX rate date, when the rate was fetched or chosen.</summary>
     DateOnly? FxRateDate { get => null; }
 
-    /// <summary>FX source/audit label, for example Frankfurter. Null for same-currency/manual-empty trades.</summary>
+    /// <summary>FX source/audit label, for example Bank of Taiwan. Null for same-currency/manual-empty trades.</summary>
     string? FxSource { get => null; }
 
     /// <summary>True when the FX rate came from a user override instead of the resolver.</summary>

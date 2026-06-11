@@ -237,7 +237,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnIsPhysicalFocusEnabledChanged(bool value) { if (!_isLoading) _ = SaveAsync(); }
 
     // ── 多幣別匯率即時換算 ─────────────────────────────────────────
-    // 來源：Frankfurter（CurrencyService.RefreshRatesAsync）。
+    // 來源：台灣銀行（CurrencyService.RefreshRatesAsync）。
     // 顯示「上次更新時間 + 各幣別兌台幣匯率」並提供手動刷新按鈕。
 
     [ObservableProperty] private string _lastFxRefreshDisplay = string.Empty;

@@ -17,7 +17,7 @@ public interface ICurrencyService
 
     /// <summary>
     /// 各幣別兌台幣匯率（1 單位外幣 = N 台幣）。
-    /// 若尚未從 Frankfurter 取得，回傳硬碼預設值。
+    /// 若尚未從台灣銀行取得，回傳硬碼預設值。
     /// </summary>
     IReadOnlyDictionary<string, decimal> ExchangeRates { get; }
 
@@ -37,7 +37,7 @@ public interface ICurrencyService
     Task ApplyAsync(string currency);
 
     /// <summary>
-    /// 從 Frankfurter 取得最新匯率並持久化至 AppSettings.ExchangeRates。
+    /// 從台灣銀行取得最新匯率並持久化至 AppSettings.ExchangeRates。
     /// 失敗時靜默（使用硬碼預設或上次快取的匯率），不拋出例外。
     /// </summary>
     Task RefreshRatesAsync(CancellationToken ct = default);

@@ -147,7 +147,7 @@ public sealed record Trade(
     /// </summary>
     DateOnly? FxRateDate = null,
     /// <summary>
-    /// <see cref="FxRate"/> 的來源，例如 Frankfurter、broker statement 或 manual。
+    /// <see cref="FxRate"/> 的來源，例如台灣銀行、broker statement 或 manual。
     /// </summary>
     string? FxSource = null,
     // ── Portfolio-Groups-Refactor P1 ─────────────────────────────────
