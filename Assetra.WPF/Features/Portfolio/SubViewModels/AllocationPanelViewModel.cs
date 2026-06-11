@@ -47,6 +47,26 @@ public sealed partial class AllocationPanelViewModel : ObservableObject
     /// </summary>
     public void Apply(IReadOnlyList<AllocationSliceResult> slices)
     {
+        // Threading: RebuildTotals (our caller) may run on a background thread
+        // (async quote / reload continuation) and can overlap the UI-thread
+        // quote-tick path. _slices is Clear/Add'd and then enumerated below;
+        // doing that off the Dispatcher races a concurrent Apply — Clear() nulls
+        // a backing slot that the PieSeries projection then reads as a null
+        // slice (NullReferenceException), besides risking the cross-thread
+        // CollectionView exception. Marshal so all Apply calls serialize on the
+        // UI thread — mirrors RebuildPositionPieCharts.
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.CheckAccess())
+        {
+            dispatcher.Invoke(() => ApplyCore(slices));
+            return;
+        }
+
+        ApplyCore(slices);
+    }
+
+    private void ApplyCore(IReadOnlyList<AllocationSliceResult> slices)
+    {
         var newSlices = new List<AssetAllocationSlice>();
 
         foreach (var slice in slices)
