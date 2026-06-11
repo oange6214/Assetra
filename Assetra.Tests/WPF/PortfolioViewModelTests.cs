@@ -1938,10 +1938,10 @@ public class PortfolioViewModelTests
             SettlementCurrency: "TWD",
             FxRate: 31.25m,
             FxRateDate: new DateOnly(2026, 5, 8),
-            FxSource: "Frankfurter"));
+            FxSource: "bot"));
 
         Assert.True(row.HasFxSettlementMetadata);
-        Assert.Equal("USD → TWD · 31.2500 · 2026-05-08 · Frankfurter", row.FxSettlementSummary);
+        Assert.Equal("USD → TWD · 31.2500 · 2026-05-08 · bot", row.FxSettlementSummary);
     }
 
     [Fact]

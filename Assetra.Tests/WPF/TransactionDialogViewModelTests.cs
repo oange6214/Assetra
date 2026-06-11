@@ -677,7 +677,7 @@ public class TransactionDialogViewModelTests
                 "USD",
                 "TWD",
                 32.335m,
-                "Frankfurter",
+                "bot",
                 DateTimeOffset.UtcNow));
 
         var vm = CreateVm(fxResolver: new TransactionFxRateResolver(history.Object));
@@ -690,7 +690,7 @@ public class TransactionDialogViewModelTests
 
         Assert.Equal("32.335", vm.Buy.FxRate);
         Assert.Equal(tradeDate, vm.Buy.FxRateDate);
-        Assert.Equal("Frankfurter", vm.Buy.FxSourceLabel);
+        Assert.Equal("bot", vm.Buy.FxSourceLabel);
         Assert.False(vm.Buy.IsFxManual);
         Assert.Equal(string.Empty, vm.Buy.FxFetchError);
     }

@@ -122,7 +122,7 @@ public class TradeSyncMapperTests
             SettlementCurrency = "TWD",
             FxRate = 32.335m,
             FxRateDate = new DateOnly(2026, 5, 8),
-            FxSource = "Frankfurter",
+            FxSource = "bot",
         };
 
         var env = TradeSyncMapper.ToEnvelope(
@@ -133,7 +133,7 @@ public class TradeSyncMapperTests
 
         Assert.Equal("TWD", back.SettlementCurrency);
         Assert.Equal(new DateOnly(2026, 5, 8), back.FxRateDate);
-        Assert.Equal("Frankfurter", back.FxSource);
+        Assert.Equal("bot", back.FxSource);
     }
 
     [Fact]

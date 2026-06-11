@@ -168,7 +168,7 @@ public class TradeSqliteRepositoryTests : IDisposable
             SettlementCurrency: "TWD",
             FxRate: 32.335m,
             FxRateDate: new DateOnly(2026, 5, 8),
-            FxSource: "Frankfurter");
+            FxSource: "bot");
 
         await repo.AddAsync(trade);
 
@@ -179,6 +179,6 @@ public class TradeSqliteRepositoryTests : IDisposable
         Assert.Equal("TWD", saved.SettlementCurrency);
         Assert.Equal(32.335m, saved.FxRate);
         Assert.Equal(new DateOnly(2026, 5, 8), saved.FxRateDate);
-        Assert.Equal("Frankfurter", saved.FxSource);
+        Assert.Equal("bot", saved.FxSource);
     }
 }

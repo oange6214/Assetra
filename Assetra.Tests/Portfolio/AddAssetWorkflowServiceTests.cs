@@ -236,14 +236,14 @@ public sealed class AddAssetWorkflowServiceTests
             FxRate: 32.335m,
             SettlementCurrency: "TWD",
             FxRateDate: new DateOnly(2026, 5, 8),
-            FxSource: "Frankfurter"));
+            FxSource: "bot"));
 
         Assert.NotNull(recorded);
         Assert.Equal("USD", recorded!.InstrumentCurrency);
         Assert.Equal("TWD", recorded.SettlementCurrency);
         Assert.Equal(32.335m, recorded.FxRate);
         Assert.Equal(new DateOnly(2026, 5, 8), recorded.FxRateDate);
-        Assert.Equal("Frankfurter", recorded.FxSource);
+        Assert.Equal("bot", recorded.FxSource);
     }
 
     [Fact]
