@@ -73,7 +73,7 @@ internal sealed class StockScheduler : IStockService
         var subscription = Observable
             .Timer(TimeSpan.Zero, _interval, _scheduler)
             .SelectMany(_ =>
-                Observable.FromAsync(FetchAllAsync)
+                Observable.FromAsync(() => FetchAllAsync())
                           .Catch((Exception _) => Observable.Empty<IReadOnlyList<StockQuote>>()))
             .Subscribe(v => _subject.OnNext(v));
 
@@ -82,7 +82,32 @@ internal sealed class StockScheduler : IStockService
 
     public void Stop() => _disposables.Clear();
 
-    private async Task<IReadOnlyList<StockQuote>> FetchAllAsync()
+    /// <summary>
+    /// Force an immediate one-shot fetch of every current portfolio / alert symbol and
+    /// push the result onto <see cref="QuoteStream"/>. Bypasses the market-hours and
+    /// cold-row gates so a 報價來源 / API-key settings change refreshes prices right away
+    /// (the user explicitly changed the source and expects to see the effect now).
+    /// Catches and swallows fetch errors to mirror the polling path's resilience.
+    /// </summary>
+    public async Task RefreshNowAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var quotes = await FetchAllAsync(forceAll: true).ConfigureAwait(false);
+            _subject.OnNext(quotes);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            // Swallow — same contract as the polling pipeline's Catch(Empty). A failed
+            // manual refresh must not crash the caller (fire-and-forget from a UI handler).
+        }
+    }
+
+    private async Task<IReadOnlyList<StockQuote>> FetchAllAsync(bool forceAll = false)
     {
         var portfolioEntries = await _portfolio.GetEntriesAsync().ConfigureAwait(false);
         var alertRules = await _alerts.GetRulesAsync().ConfigureAwait(false);
@@ -99,14 +124,18 @@ internal sealed class StockScheduler : IStockService
 
         var now = _timeProvider.GetUtcNow();
 
-        // Two-gate filter:
+        // Two-gate filter (skipped entirely on forceAll — a manual / settings-driven
+        // refresh re-fetches everything regardless of session or seen-state):
         //   1. Market-hours filter: only entries whose exchange is in session right now
         //   2. Cold-row bypass: entries we've never quoted at least once are ALWAYS allowed
         //      through, regardless of session, so the user sees last-close immediately
         //      after adding a foreign position outside US trading hours.
-        entries = entries
-            .Where(e => ShouldFetchQuotes(e.Exchange, now) || !_seenEntries.Contains((e.Symbol, e.Exchange)))
-            .ToList();
+        if (!forceAll)
+        {
+            entries = entries
+                .Where(e => ShouldFetchQuotes(e.Exchange, now) || !_seenEntries.Contains((e.Symbol, e.Exchange)))
+                .ToList();
+        }
 
         if (entries.Count == 0)
             return [];

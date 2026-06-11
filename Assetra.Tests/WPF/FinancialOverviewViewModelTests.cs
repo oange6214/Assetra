@@ -260,6 +260,81 @@ public sealed class FinancialOverviewViewModelTests
         Assert.False(vm.IsCashFocusVisible);
     }
 
+    [Fact]
+    public async Task SettingsChanged_RaisesFocusVisibilityNotifications()
+    {
+        // P2: the 6 Is*FocusVisible properties read AssetClassFocusVisibility live, but
+        // WPF only re-queries them when PropertyChanged fires. Toggling the setting while
+        // sitting on the dashboard must notify the bindings — otherwise the focus cells
+        // don't show/hide without a restart. We assert the notification is raised (the
+        // value gate itself is covered by AssetClassFocusVisibility_FalseInSettings_HidesCell).
+        var settings = new StubSettings(new AppSettings());
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed(),
+            settings: settings);
+
+        var raised = new HashSet<string>();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not null)
+                raised.Add(e.PropertyName);
+        };
+
+        // Simulate the user toggling a focus-cell visibility preference + save.
+        await settings.SaveAsync(new AppSettings(
+            AssetClassFocusVisibility: new Dictionary<string, bool> { { "Cash", false } }));
+
+        Assert.Contains(nameof(vm.IsCashFocusVisible), raised);
+        Assert.Contains(nameof(vm.IsLiabilityFocusVisible), raised);
+        Assert.Contains(nameof(vm.IsRealEstateFocusVisible), raised);
+        Assert.Contains(nameof(vm.IsInsuranceFocusVisible), raised);
+        Assert.Contains(nameof(vm.IsRetirementFocusVisible), raised);
+        Assert.Contains(nameof(vm.IsPhysicalFocusVisible), raised);
+    }
+
+    [Fact]
+    public async Task SettingsChanged_ReloadsAndUpdatesBaseCurrency()
+    {
+        // P3: BaseCurrency (估值基準幣別) is a separate setting from PreferredCurrency
+        // (顯示幣別). Changing it fires IAppSettingsService.Changed (NOT CurrencyChanged),
+        // and FO's amounts are converted to base by the query service — so a base-currency
+        // change must trigger a reload, otherwise the symbol + converted values stay stale
+        // until the next price tick / revisit. The query service resolves the new base from
+        // settings; here the stub returns the post-change base and we assert FO picks it up.
+        var qs = new Mock<IFinancialOverviewQueryService>();
+        qs.Setup(x => x.BuildAsync(It.IsAny<IReadOnlyList<FinancialOverviewInvestmentItem>>(), It.IsAny<CancellationToken>()))
+          .ReturnsAsync(new FinancialOverviewResult(
+              AssetGroups: [],
+              InvestmentGroups: [],
+              LiabilityGroups: [],
+              TotalAssets: 0m,
+              TotalInvestments: 0m,
+              TotalLiabilities: 0m,
+              BaseCurrency: "USD"));
+
+        var settings = new StubSettings(new AppSettings(BaseCurrency: "TWD"));
+        var scheduler = new TestScheduler();
+        var vm = new FinancialOverviewViewModel(
+            qs.Object,
+            new StubFeed(),
+            settings: settings,
+            reloadScheduler: scheduler);
+
+        // Ctor does not load; BaseCurrency stays at its default until a reload runs.
+        Assert.Equal("TWD", vm.BaseCurrency);
+
+        // User changes base currency → Changed fires → reload is pushed through the
+        // Sample window. Advance past the window so the reload runs.
+        await settings.SaveAsync(new AppSettings(BaseCurrency: "USD"));
+        scheduler.AdvanceBy(TimeSpan.FromMilliseconds(600).Ticks);
+
+        Assert.Equal("USD", vm.BaseCurrency);
+        qs.Verify(
+            x => x.BuildAsync(It.IsAny<IReadOnlyList<FinancialOverviewInvestmentItem>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
     private sealed class StubSettings(AppSettings current) : Assetra.Core.Interfaces.IAppSettingsService
     {
         public AppSettings Current { get; private set; } = current;

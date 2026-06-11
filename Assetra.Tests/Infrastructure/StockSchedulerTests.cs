@@ -220,6 +220,65 @@ public class StockSchedulerTests
         Assert.Contains(router.LastKeys, k => k.Symbol == "AAPL" && k.Exchange == "NASDAQ");
     }
 
+    [Fact]
+    public async Task RefreshNowAsync_ForceFetchesAndEmits_EvenWhenCalendarClosed()
+    {
+        // WHY: a 報價來源 / API-key settings change must refresh prices immediately,
+        // bypassing the market-hours gate (the user explicitly changed the source and
+        // expects to see the effect now, even outside US trading hours). Without the
+        // force path the closed-calendar gate would suppress a non-Taiwan symbol and
+        // the user would think a restart is needed.
+        var scheduler = new TestScheduler();
+        var aaplQuote = new EquityQuote(
+            new EquityInstrumentKey("AAPL", "NASDAQ"),
+            210m, 200m, 10m, 5m, "USD", DateTimeOffset.UnixEpoch,
+            "Test", isDelayed: true, "Apple");
+        var router = new FakeRouter(MarketDataResult<EquityQuote>.Success(aaplQuote));
+        var alerts = Alerts(new AlertRule(
+            Guid.NewGuid(), "AAPL", "NASDAQ", AlertCondition.Above, 200m));
+
+        var svc = new StockScheduler(
+            router,
+            EmptyPortfolio().Object,
+            alerts.Object,
+            scheduler,
+            TimeSpan.FromSeconds(10),
+            calendar: new ClosedTradingCalendar());
+
+        IReadOnlyList<StockQuote>? received = null;
+        svc.QuoteStream.Subscribe(q => received = q);
+
+        // No Start()/poll: force a one-shot refresh directly. The closed calendar
+        // would normally suppress AAPL on a *seen* row, but forceAll bypasses it.
+        await svc.RefreshNowAsync();
+
+        Assert.NotNull(received);
+        Assert.Contains(received!, q => q.Symbol == "AAPL" && q.Exchange == "NASDAQ");
+        Assert.Equal(1, router.CallCount);
+        Assert.Contains(router.LastKeys, k => k.Symbol == "AAPL" && k.Exchange == "NASDAQ");
+    }
+
+    [Fact]
+    public async Task RefreshNowAsync_SwallowsRouterFailure_DoesNotThrow()
+    {
+        // WHY: RefreshNowAsync is called fire-and-forget from a UI settings handler.
+        // A router/network failure must not surface as an unhandled exception — it
+        // mirrors the polling pipeline's Catch(Empty) resilience contract.
+        var scheduler = new TestScheduler();
+        var portfolio = new Mock<IPortfolioRepository>();
+        portfolio.Setup(r => r.GetEntriesAsync()).ThrowsAsync(new InvalidOperationException("boom"));
+
+        var svc = new StockScheduler(
+            new FakeRouter(),
+            portfolio.Object,
+            Alerts().Object,
+            scheduler,
+            TimeSpan.FromSeconds(10));
+
+        // Should complete without throwing despite the repository blowing up.
+        await svc.RefreshNowAsync();
+    }
+
     private sealed class FakeRouter(params MarketDataResult<EquityQuote>[] results) : IEquityRouter
     {
         public int CallCount { get; private set; }

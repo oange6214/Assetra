@@ -155,6 +155,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
     public System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> CustomBenchmarks { get; }
 
+    // P5：上次套用的自訂對標清單快照，用來在 IAppSettingsService.Changed 觸發時判斷
+    // CustomBenchmarkSymbols 是否真的變了（避免每次無關設定儲存都重跑對標）。
+    private IReadOnlyList<string> _lastBenchmarkSymbols;
+
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
         ILocalizationService? localization = null,
@@ -185,6 +189,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         HasSharpe = _sharpe is not null;
         HasHhi = _concentration is not null;
         CustomBenchmarks = new System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>(_customBenchmarks);
+
+        // P5：記住建構當下的自訂對標清單；之後 Changed 觸發時與此比對偵測變動。
+        _lastBenchmarkSymbols = (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).ToList();
+        // app-lifetime singleton（由 PortfolioViewModel 持有），無 Dispose 生命週期；
+        // 訂閱隨 app 存活，與 PortfolioViewModel 對 Changed 的訂閱相同模式。
+        if (_settings is not null)
+            _settings.Changed += OnSettingsChanged;
     }
 
     // Public API
@@ -284,9 +295,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private async Task RefreshChartAsync()
     {
-        var filtered = (CustomStartDate, CustomEndDate) is ({ } s, { } e)
-            ? FilterByRange(_allSnapshots, s, e)
-            : FilterByDays(_allSnapshots, SelectedDays);
+        var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
         BuildChart(points);
 
@@ -301,6 +310,51 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             // 任何 KPI / benchmark 計算錯誤不應拖累主流程
             HasKpis = false;
         }
+    }
+
+    private IReadOnlyList<PortfolioDailySnapshot> ComputeFilteredSnapshots() =>
+        (CustomStartDate, CustomEndDate) is ({ } s, { } e)
+            ? FilterByRange(_allSnapshots, s, e)
+            : FilterByDays(_allSnapshots, SelectedDays);
+
+    // ── P5: 自訂對標清單即時生效 ───────────────────────────────────────────
+    //
+    // 使用者在設定頁改 CustomBenchmarkSymbols 時，若正停在 Trends 頁，對標比較區
+    // 原本要等切換期間 / 重載才會用新清單重算（UpdateBenchmarksAsync 只在 chart
+    // refresh 流程被呼叫）。訂閱 IAppSettingsService.Changed，偵測到清單實際變動就
+    // 只重跑對標（不重建整張圖 / KPI），讓改完設定即時看到新對標列。
+    private void OnSettingsChanged()
+    {
+        var current = _settings?.Current.CustomBenchmarkSymbols ?? new List<string>();
+        if (CustomBenchmarkSymbolsEqual(current, _lastBenchmarkSymbols))
+            return;
+        _lastBenchmarkSymbols = current.ToList();
+        AsyncHelpers.SafeFireAndForget(RefreshBenchmarksAsync, "PortfolioHistory.RefreshBenchmarksOnSettingsChanged");
+    }
+
+    private async Task RefreshBenchmarksAsync()
+    {
+        try
+        {
+            await UpdateBenchmarksAsync(ComputeFilteredSnapshots()).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // 對標重算失敗不應影響其餘 UI；維持原本顯示。
+        }
+    }
+
+    private static bool CustomBenchmarkSymbolsEqual(
+        IReadOnlyList<string> a, IReadOnlyList<string> b)
+    {
+        if (a.Count != b.Count)
+            return false;
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (!string.Equals(a[i], b[i], StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+        return true;
     }
 
     // ── Stage 1: 區間 KPI 計算 ─────────────────────────────────────────

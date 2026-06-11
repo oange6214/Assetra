@@ -177,6 +177,97 @@ public sealed class PortfolioHistoryViewModelTests
     }
 
     [Fact]
+    public async Task CustomBenchmarksChange_RefreshesBenchmarkRows_WithoutReload()
+    {
+        // P5: changing CustomBenchmarkSymbols in settings while sitting on Trends must
+        // refresh the custom-benchmark comparison rows. Previously UpdateBenchmarksAsync
+        // only ran during a chart refresh (load / period / theme), so an edited list went
+        // stale until a revisit. The VM now subscribes to IAppSettingsService.Changed and
+        // re-runs only the benchmark computation when the symbol list actually changed.
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2025, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_100m, 0m, 1),
+        };
+        var benchmark = new RecordingBenchmark();
+        var settings = new FakeSettings(new AppSettings(BaseCurrency: "TWD"));
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            settings: settings,
+            benchmark: benchmark);
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+
+        // No custom symbols yet → no custom rows.
+        Assert.Empty(vm.CustomBenchmarks);
+
+        // User adds a custom benchmark symbol and saves → Changed fires.
+        await settings.SaveAsync(new AppSettings(
+            BaseCurrency: "TWD",
+            CustomBenchmarkSymbols: new List<string> { "QQQ" }));
+
+        // Refresh is fire-and-forget; wait for the custom row to land.
+        await WaitForAsync(() => vm.CustomBenchmarks.Any(r => r.Symbol == "QQQ"));
+
+        Assert.Single(vm.CustomBenchmarks);
+        Assert.Equal("QQQ", vm.CustomBenchmarks[0].Symbol);
+        lock (benchmark.RequestedSymbols)
+            Assert.Contains("QQQ", benchmark.RequestedSymbols);
+    }
+
+    [Fact]
+    public async Task UnrelatedSettingsChange_DoesNotRecomputeBenchmarks()
+    {
+        // P5 guard: the Changed handler must only re-run benchmarks when the symbol list
+        // actually changed — otherwise every unrelated save (KPI selection, currency, etc.)
+        // would trigger redundant external TWR fetches.
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2025, 1, 1), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(new DateOnly(2026, 1, 1), 0m, 1_100m, 0m, 1),
+        };
+        var benchmark = new RecordingBenchmark();
+        var settings = new FakeSettings(new AppSettings(
+            BaseCurrency: "TWD",
+            CustomBenchmarkSymbols: new List<string> { "QQQ" }));
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            settings: settings,
+            benchmark: benchmark);
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+        int afterLoad;
+        lock (benchmark.RequestedSymbols)
+            afterLoad = benchmark.RequestedSymbols.Count(s => s == "QQQ");
+
+        // Save with the SAME custom symbols but a different unrelated field.
+        await settings.SaveAsync(new AppSettings(
+            BaseCurrency: "USD",
+            CustomBenchmarkSymbols: new List<string> { "QQQ" }));
+
+        // Give any erroneous fire-and-forget a chance to run, then assert no extra fetch.
+        await Task.Delay(150);
+        int afterSave;
+        lock (benchmark.RequestedSymbols)
+            afterSave = benchmark.RequestedSymbols.Count(s => s == "QQQ");
+        Assert.Equal(afterLoad, afterSave);
+    }
+
+    private static async Task WaitForAsync(Func<bool> condition, int timeoutMs = 2000)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (condition())
+                return;
+            await Task.Delay(15);
+        }
+        Assert.True(condition(), "Condition was not met within the timeout.");
+    }
+
+    [Fact]
     public async Task LoadAsync_BelowTwoSnapshots_HasKpisFalse()
     {
         var snapshots = new[]
@@ -342,9 +433,15 @@ public sealed class PortfolioHistoryViewModelTests
             Task.FromResult(snapshots);
     }
 
-    private sealed class FakeSettings(string baseCurrency) : IAppSettingsService
+    private sealed class FakeSettings : IAppSettingsService
     {
-        public AppSettings Current { get; private set; } = new(BaseCurrency: baseCurrency);
+        public FakeSettings(string baseCurrency)
+            => Current = new AppSettings(BaseCurrency: baseCurrency);
+
+        public FakeSettings(AppSettings initial)
+            => Current = initial;
+
+        public AppSettings Current { get; private set; }
         public event Action? Changed;
 
         public Task SaveAsync(AppSettings settings)
@@ -352,6 +449,26 @@ public sealed class PortfolioHistoryViewModelTests
             Current = settings;
             Changed?.Invoke();
             return Task.CompletedTask;
+        }
+    }
+
+    /// <summary>
+    /// Records the symbols requested and returns a per-symbol TWR so tests can assert the
+    /// custom-benchmark rows reflect the current CustomBenchmarkSymbols list.
+    /// </summary>
+    private sealed class RecordingBenchmark : IBenchmarkComparisonService
+    {
+        public List<string> RequestedSymbols { get; } = new();
+
+        public Task<decimal?> ComputeBenchmarkTwrAsync(
+            string symbol,
+            Assetra.Core.Models.Analysis.PerformancePeriod period,
+            CancellationToken ct = default)
+        {
+            lock (RequestedSymbols)
+                RequestedSymbols.Add(symbol);
+            // Deterministic non-null value so the custom row formats to a real percentage.
+            return Task.FromResult<decimal?>(0.10m);
         }
     }
 

@@ -59,6 +59,8 @@ internal static class PortfolioVmFixtures
         var mock = new Mock<IStockService>();
         mock.Setup(s => s.QuoteStream)
             .Returns(Observable.Never<IReadOnlyList<StockQuote>>());
+        mock.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         return mock;
     }
 

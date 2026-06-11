@@ -184,6 +184,7 @@ public sealed class AlertsViewModelTests
         public IObservable<IReadOnlyList<StockQuote>> QuoteStream => quoteStream;
         public void Start() { }
         public void Stop() { }
+        public Task RefreshNowAsync(CancellationToken ct = default) => Task.CompletedTask;
         public void Dispose() => quoteStream.Dispose();
     }
 

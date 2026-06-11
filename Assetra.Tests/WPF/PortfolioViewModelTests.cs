@@ -73,6 +73,8 @@ public class PortfolioViewModelTests
         var mock = new Mock<IStockService>();
         mock.Setup(s => s.QuoteStream)
             .Returns(Observable.Never<IReadOnlyList<StockQuote>>());
+        mock.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         return mock;
     }
 
@@ -667,6 +669,43 @@ public class PortfolioViewModelTests
         Assert.Equal(0m, twseRow.CurrentPrice);
         Assert.Equal(55m, tpexRow.CurrentPrice);
         Assert.Equal("TPEX Target", tpexRow.Name);
+    }
+
+    [Fact]
+    public async Task SettingsChanged_TriggersImmediateQuoteRefresh()
+    {
+        // WHY: changing 報價來源 / API 金鑰 must refresh prices right away. The quote
+        // provider chain re-reads settings live, but the running stream only re-fetches
+        // on the next ~10s poll — so the Changed handler must kick a one-shot refresh,
+        // otherwise the user sees no change and assumes a restart is required.
+        var portfolioRepo = new Mock<IPortfolioRepository>();
+        portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(Array.Empty<PortfolioEntry>());
+
+        var refreshSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var stockService = SilentStockService();
+        stockService.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => { refreshSignal.TrySetResult(); return Task.CompletedTask; });
+
+        var settings = new Mock<IAppSettingsService>();
+        settings.Setup(s => s.Current).Returns(new AppSettings());
+
+        var (snapshotSvc, snapshotRepo) = SnapshotStubs();
+        var (logRepo, backfill) = BackfillStubs(snapshotRepo);
+        var vm = new PortfolioViewModel(
+            new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
+            new PortfolioServices(
+                stockService.Object,
+                new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
+            new PortfolioUiServices(ImmediateScheduler.Instance, Settings: settings.Object));
+
+        // Fire the settings Changed event (as AppSettingsService.SaveAsync would).
+        settings.Raise(s => s.Changed += null);
+
+        // The refresh is fire-and-forget; wait briefly for the continuation.
+        var completed = await Task.WhenAny(refreshSignal.Task, Task.Delay(2000));
+        Assert.Same(refreshSignal.Task, completed);
+        stockService.Verify(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

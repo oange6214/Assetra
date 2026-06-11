@@ -30,6 +30,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     Contracts.IPortfolioPositionFeed, Contracts.IDashboardNavigation
 {
     private readonly IStockSearchService _search;
+    private readonly IStockService _stockService;
     private readonly IAppSettingsService? _settingsService;
     private readonly ISnackbarService? _snackbar;
     private readonly IThemeService? _themeService;
@@ -584,12 +585,21 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         if (services.Currency is not null)
             services.Currency.CurrencyChanged += OnCurrencyChanged;
 
+        _stockService = services.Stock;
+
         if (_settingsService is not null)
         {
             _onSettingsChanged = () =>
             {
                 OnPropertyChanged(nameof(ShowQuoteProviderNotice));
                 RebuildTotals();
+                // 報價來源 / API 金鑰等變更時，報價鏈會即時重讀設定，但執行中的串流
+                // 要等下一輪（~10s）輪詢才會用新來源重抓。主動觸發一次立即刷新，
+                // 讓使用者改完設定就看到價格更新，而不是「以為要重啟」。fire-and-forget
+                // 不阻塞 SaveAsync 的 UI 命令；RefreshNowAsync 內部已吞錯。
+                AsyncHelpers.SafeFireAndForget(
+                    () => _stockService.RefreshNowAsync(),
+                    "Portfolio.RefreshQuotesOnSettingsChanged");
             };
             _settingsService.Changed += _onSettingsChanged;
         }

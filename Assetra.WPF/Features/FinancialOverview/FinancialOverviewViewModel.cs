@@ -728,7 +728,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         LiabGroups = new ReadOnlyObservableCollection<AssetGroupVm>(_liabGroups);
 
         if (_settings is not null)
-            _settings.Changed += RebuildKpiCards;
+            _settings.Changed += OnSettingsChanged;
 
         RebuildKpiCards();
     }
@@ -969,6 +969,40 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
             vm.AddItem(new AssetItemVm { Id = item.Id, Name = item.Name, Currency = item.Currency, CurrentValue = item.CurrentValue });
         vm.Subtotal = group.Subtotal;
         return vm;
+    }
+
+    // ── Settings live-apply ──────────────────────────────────────────────
+    //
+    // 設定儲存（任何欄位）都會 raise IAppSettingsService.Changed。此 VM 是 app-lifetime
+    // singleton，可能停在總覽頁時被改設定，故這幾項要即時反映，不必重啟：
+    //   1. KPI 卡選擇（OverviewKpis）— 重建卡片。
+    //   2. 資產類焦點格顯示偏好（AssetClassFocusVisibility）— 6 格 Is*FocusVisible 直接
+    //      讀 _settings.Current，但屬性本身不會自己 re-raise，需手動通知 binding。
+    //   3. 估值基準幣別（BaseCurrency）— FO 全頁金額由 query service 換算到 base，改幣別
+    //      後不只顯示符號要換、各 converted 值要重算，故推一次重載（走既有節流管線）。
+    private void OnSettingsChanged()
+    {
+        RebuildKpiCards();
+        RaiseAssetClassFocusVisibilityChanged();
+        // 重載讓 FinancialOverviewQueryService 重新 ResolveBaseCurrency() 並重算換算值，
+        // BaseCurrency 屬性也會在 LoadInternalAsync 內被設成最新值。
+        _reloadTrigger.OnNext(System.Reactive.Unit.Default);
+    }
+
+    /// <summary>
+    /// Re-raise the 6 asset-class focus-cell visibility properties. They read
+    /// <see cref="AppSettings.AssetClassFocusVisibility"/> live via IsAssetClassVisible,
+    /// but WPF only re-queries them when PropertyChanged fires — so a settings toggle
+    /// while sitting on the dashboard needs an explicit notification to show/hide cells.
+    /// </summary>
+    private void RaiseAssetClassFocusVisibilityChanged()
+    {
+        OnPropertyChanged(nameof(IsCashFocusVisible));
+        OnPropertyChanged(nameof(IsLiabilityFocusVisible));
+        OnPropertyChanged(nameof(IsRealEstateFocusVisible));
+        OnPropertyChanged(nameof(IsInsuranceFocusVisible));
+        OnPropertyChanged(nameof(IsRetirementFocusVisible));
+        OnPropertyChanged(nameof(IsPhysicalFocusVisible));
     }
 
     // ── KPI bar — user-selectable cards ──────────────────────────────────
