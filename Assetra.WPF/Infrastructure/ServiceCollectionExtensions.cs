@@ -119,6 +119,7 @@ internal static class ServiceCollectionExtensions
             new CurrencyService(
                 sp.GetRequiredService<IAppSettingsService>(),
                 sp.GetRequiredService<HttpClient>(),
+                sp.GetRequiredService<IFxRateHistoryFetcher>(),
                 sp.GetRequiredService<ILogger<CurrencyService>>()));
 
         services.AddSingleton<FinMindApiStatus>();

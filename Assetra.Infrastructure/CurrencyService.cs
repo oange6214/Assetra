@@ -26,6 +26,7 @@ public sealed class CurrencyService : ICurrencyService
 
     private readonly IAppSettingsService _settings;
     private readonly HttpClient _http;
+    private readonly IFxRateHistoryFetcher _historyFetcher;
     private readonly ILogger<CurrencyService> _logger;
     private volatile IReadOnlyDictionary<string, decimal> _exchangeRates;
 
@@ -41,10 +42,12 @@ public sealed class CurrencyService : ICurrencyService
     public event Action? CurrencyChanged;
 
     public CurrencyService(IAppSettingsService settings, HttpClient http,
+        IFxRateHistoryFetcher historyFetcher,
         ILogger<CurrencyService>? logger = null)
     {
         _settings = settings;
         _http = http;
+        _historyFetcher = historyFetcher;
         _logger = logger ?? NullLogger<CurrencyService>.Instance;
         Currency = settings.Current.PreferredCurrency;
         _exchangeRates = BuildRates(settings.Current);
@@ -65,39 +68,39 @@ public sealed class CurrencyService : ICurrencyService
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-            // Frankfurter: base USD → TWD, JPY, EUR, HKD
-            var url = "https://api.frankfurter.app/latest?from=USD&to=TWD,JPY,EUR,HKD";
-            var json = await _http.GetStringAsync(url, cts.Token).ConfigureAwait(false);
+            // USD→TWD from Yahoo. Frankfurter (ECB) does NOT quote TWD, so the
+            // critical base-currency rate comes from Yahoo's USDTWD=X pair.
+            var usdToTwd = await FetchUsdTwdFromYahooAsync(cts.Token).ConfigureAwait(false);
 
-            using var doc = JsonDocument.Parse(json);
-            if (!doc.RootElement.TryGetProperty("rates", out var rates) ||
-                rates.ValueKind != JsonValueKind.Object)
+            // USD→{JPY,EUR,HKD} cross-rates from Frankfurter (reliable for these).
+            // A Frankfurter failure here is non-fatal — USD is the critical rate.
+            var cross = await FetchCrossRatesFromFrankfurterAsync(cts.Token).ConfigureAwait(false);
+
+            if (usdToTwd is not { } twd)
             {
-                _logger.LogWarning("Frankfurter response did not include a valid 'rates' object");
+                // Yahoo unavailable: do NOT fabricate a TWD rate. Leave the
+                // current/default rates intact (same spirit as the old bail-out).
+                _logger.LogWarning("Yahoo USD→TWD rate unavailable; using cached/default rates");
                 return;
             }
-
-            var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
 
             // Frankfurter returns: 1 USD = N {currency}
             // We store: 1 {foreign currency} = N TWD
             // So: TWD rate of foreign = usdToTwd / usdToForeign
-            if (!TryGetDecimalProperty(rates, "TWD", out var usdToTwd))
+            var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
+            newRates["USD"] = twd;
+
+            if (cross is not null)
             {
-                _logger.LogWarning("Frankfurter response did not include a valid TWD rate");
-                return;
+                if (cross.TryGetValue("JPY", out var usdToJpy) && usdToJpy > 0m)
+                    newRates["JPY"] = Math.Round(twd / usdToJpy, 4);
+
+                if (cross.TryGetValue("EUR", out var usdToEur) && usdToEur > 0m)
+                    newRates["EUR"] = Math.Round(twd / usdToEur, 4);
+
+                if (cross.TryGetValue("HKD", out var usdToHkd) && usdToHkd > 0m)
+                    newRates["HKD"] = Math.Round(twd / usdToHkd, 4);
             }
-
-            newRates["USD"] = usdToTwd;
-
-            if (TryGetDecimalProperty(rates, "JPY", out var usdToJpy) && usdToJpy > 0m)
-                newRates["JPY"] = Math.Round(usdToTwd / usdToJpy, 4);
-
-            if (TryGetDecimalProperty(rates, "EUR", out var usdToEur) && usdToEur > 0m)
-                newRates["EUR"] = Math.Round(usdToTwd / usdToEur, 4);
-
-            if (TryGetDecimalProperty(rates, "HKD", out var usdToHkd) && usdToHkd > 0m)
-                newRates["HKD"] = Math.Round(usdToTwd / usdToHkd, 4);
 
             _exchangeRates = newRates;
 
@@ -117,7 +120,76 @@ public sealed class CurrencyService : ICurrencyService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Frankfurter exchange rate fetch failed; using cached/default rates");
+            _logger.LogWarning(ex, "Exchange rate refresh failed; using cached/default rates");
+        }
+    }
+
+    /// <summary>
+    /// Latest USD→TWD from Yahoo (last 7 days, take the entry with MAX Date).
+    /// Returns null when Yahoo returns no data. The fetcher swallows its own
+    /// errors and returns an empty list per its contract, but we guard
+    /// defensively all the same.
+    /// </summary>
+    private async Task<decimal?> FetchUsdTwdFromYahooAsync(CancellationToken ct)
+    {
+        try
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var history = await _historyFetcher
+                .FetchAsync("USD", "TWD", today.AddDays(-7), today, ct)
+                .ConfigureAwait(false);
+
+            if (history is null || history.Count == 0)
+                return null;
+
+            var latest = history.MaxBy(e => e.Date);
+            return latest is { Rate: > 0m } ? latest.Rate : null;
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Yahoo USD→TWD fetch failed");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// USD→{JPY,EUR,HKD} cross-rates from Frankfurter. Returns null on any
+    /// failure (non-fatal — caller keeps existing cross-rates).
+    /// </summary>
+    private async Task<IReadOnlyDictionary<string, decimal>?> FetchCrossRatesFromFrankfurterAsync(CancellationToken ct)
+    {
+        try
+        {
+            var url = "https://api.frankfurter.app/latest?from=USD&to=JPY,EUR,HKD";
+            var json = await _http.GetStringAsync(url, ct).ConfigureAwait(false);
+
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("rates", out var rates) ||
+                rates.ValueKind != JsonValueKind.Object)
+            {
+                _logger.LogWarning("Frankfurter response did not include a valid 'rates' object");
+                return null;
+            }
+
+            var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
+            foreach (var code in (ReadOnlySpan<string>)["JPY", "EUR", "HKD"])
+                if (TryGetDecimalProperty(rates, code, out var rate))
+                    result[code] = rate;
+
+            return result;
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Frankfurter cross-rate fetch failed; keeping existing cross-rates");
+            return null;
         }
     }
 
