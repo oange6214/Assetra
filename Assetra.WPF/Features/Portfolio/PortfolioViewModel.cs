@@ -36,6 +36,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     private readonly IThemeService? _themeService;
     private Action<ApplicationTheme>? _onThemeChanged;
     private Action? _onSettingsChanged;
+    // 上次見到的「報價相關」設定值。settings.Changed 可能由非報價變更（含內部記帳）
+    // 觸發；唯有這三者實際變動時才主動重抓報價，避免無謂地燒掉 TwelveData 配額並
+    // 切斷回饋迴圈。於訂閱接線處從 Current 初始化。
+    private string? _lastQuoteProvider;
+    private string? _lastFugleApiKey;
+    private string? _lastTwelveDataApiKey;
     private readonly ICurrencyService? _currencyService;
     private readonly ICryptoService? _cryptoService;
     // P4.1 — XIRR calculator for asset detail panel KPI matrix. Null when not registered.
@@ -589,17 +595,38 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         if (_settingsService is not null)
         {
+            var initial = _settingsService.Current;
+            _lastQuoteProvider = initial.QuoteProvider;
+            _lastFugleApiKey = initial.FugleApiKey;
+            _lastTwelveDataApiKey = initial.TwelveDataApiKey;
+
             _onSettingsChanged = () =>
             {
                 OnPropertyChanged(nameof(ShowQuoteProviderNotice));
                 RebuildTotals();
+
                 // 報價來源 / API 金鑰等變更時，報價鏈會即時重讀設定，但執行中的串流
                 // 要等下一輪（~10s）輪詢才會用新來源重抓。主動觸發一次立即刷新，
                 // 讓使用者改完設定就看到價格更新，而不是「以為要重啟」。fire-and-forget
                 // 不阻塞 SaveAsync 的 UI 命令；RefreshNowAsync 內部已吞錯。
-                AsyncHelpers.SafeFireAndForget(
-                    () => _stockService.RefreshNowAsync(),
-                    "Portfolio.RefreshQuotesOnSettingsChanged");
+                //
+                // 但只在「報價相關」設定真的變動時才重抓：Changed 也會被無關設定觸發，
+                // 無腦重抓會白白消耗 TwelveData 配額；亦是對未來任何 Changed 來源的防禦。
+                var current = _settingsService.Current;
+                var quoteRelevantChanged =
+                    !string.Equals(current.QuoteProvider, _lastQuoteProvider, StringComparison.Ordinal) ||
+                    !string.Equals(current.FugleApiKey, _lastFugleApiKey, StringComparison.Ordinal) ||
+                    !string.Equals(current.TwelveDataApiKey, _lastTwelveDataApiKey, StringComparison.Ordinal);
+
+                if (quoteRelevantChanged)
+                {
+                    _lastQuoteProvider = current.QuoteProvider;
+                    _lastFugleApiKey = current.FugleApiKey;
+                    _lastTwelveDataApiKey = current.TwelveDataApiKey;
+                    AsyncHelpers.SafeFireAndForget(
+                        () => _stockService.RefreshNowAsync(),
+                        "Portfolio.RefreshQuotesOnSettingsChanged");
+                }
             };
             _settingsService.Changed += _onSettingsChanged;
         }

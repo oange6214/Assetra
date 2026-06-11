@@ -188,7 +188,7 @@ public class MoneyWeightedReturnCalculatorTests
     {
         public StubSettings(string baseCcy) { Current = new AppSettings { BaseCurrency = baseCcy }; }
         public AppSettings Current { get; private set; }
-        public Task SaveAsync(AppSettings settings) { Current = settings; return Task.CompletedTask; }
+        public Task SaveAsync(AppSettings settings, bool raiseChanged = true) { Current = settings; return Task.CompletedTask; }
         public event Action? Changed { add { } remove { } }
     }
 

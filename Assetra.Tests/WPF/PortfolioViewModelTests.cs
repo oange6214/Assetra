@@ -671,27 +671,25 @@ public class PortfolioViewModelTests
         Assert.Equal("TPEX Target", tpexRow.Name);
     }
 
-    [Fact]
-    public async Task SettingsChanged_TriggersImmediateQuoteRefresh()
+    // Builds a Portfolio VM wired to a settings service whose Current is mutable, so a
+    // test can change settings AFTER construction and then raise Changed — mirroring what
+    // AppSettingsService.SaveAsync does. Returns the VM, the recording stock service, and
+    // a setter to swap Current before raising Changed.
+    private (Mock<IStockService> stock, Mock<IAppSettingsService> settings, Action<AppSettings> setCurrent)
+        WireSettingsChangedVm(AppSettings initial)
     {
-        // WHY: changing 報價來源 / API 金鑰 must refresh prices right away. The quote
-        // provider chain re-reads settings live, but the running stream only re-fetches
-        // on the next ~10s poll — so the Changed handler must kick a one-shot refresh,
-        // otherwise the user sees no change and assumes a restart is required.
         var portfolioRepo = new Mock<IPortfolioRepository>();
         portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(Array.Empty<PortfolioEntry>());
 
-        var refreshSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var stockService = SilentStockService();
-        stockService.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => { refreshSignal.TrySetResult(); return Task.CompletedTask; });
 
+        var current = initial;
         var settings = new Mock<IAppSettingsService>();
-        settings.Setup(s => s.Current).Returns(new AppSettings());
+        settings.Setup(s => s.Current).Returns(() => current);
 
         var (snapshotSvc, snapshotRepo) = SnapshotStubs();
         var (logRepo, backfill) = BackfillStubs(snapshotRepo);
-        var vm = new PortfolioViewModel(
+        _ = new PortfolioViewModel(
             new PortfolioRepositories(portfolioRepo.Object, snapshotRepo.Object, logRepo.Object, Trade: new FakeTradeRepo()),
             new PortfolioServices(
                 stockService.Object,
@@ -699,13 +697,50 @@ public class PortfolioViewModelTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill)),
             new PortfolioUiServices(ImmediateScheduler.Instance, Settings: settings.Object));
 
-        // Fire the settings Changed event (as AppSettingsService.SaveAsync would).
+        return (stockService, settings, next => current = next);
+    }
+
+    [Fact]
+    public async Task SettingsChanged_TriggersImmediateQuoteRefresh()
+    {
+        // WHY: changing 報價來源 / API 金鑰 must refresh prices right away. The quote
+        // provider chain re-reads settings live, but the running stream only re-fetches
+        // on the next ~10s poll — so the Changed handler must kick a one-shot refresh,
+        // otherwise the user sees no change and assumes a restart is required.
+        var refreshSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var (stockService, settings, setCurrent) =
+            WireSettingsChangedVm(new AppSettings(QuoteProvider: "official"));
+        stockService.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => { refreshSignal.TrySetResult(); return Task.CompletedTask; });
+
+        // Quote-relevant change: switch provider, then fire Changed as SaveAsync would.
+        setCurrent(new AppSettings(QuoteProvider: "twelvedata"));
         settings.Raise(s => s.Changed += null);
 
         // The refresh is fire-and-forget; wait briefly for the continuation.
         var completed = await Task.WhenAny(refreshSignal.Task, Task.Delay(2000));
         Assert.Same(refreshSignal.Task, completed);
         stockService.Verify(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SettingsChanged_NoQuoteRelevantChange_DoesNotRefresh()
+    {
+        // WHY: settings.Changed can fire for non-quote changes (and historically for
+        // internal bookkeeping persistence such as TwelveData quota usage). Re-fetching
+        // on every Changed burns API quota and — when the persist itself raised Changed —
+        // formed an infinite feedback loop. The handler must refresh ONLY when the quote
+        // provider / API keys actually changed.
+        var (stockService, settings, setCurrent) =
+            WireSettingsChangedVm(new AppSettings(QuoteProvider: "twelvedata", MonthlyExpense: 1000m));
+
+        // Change only an unrelated field; provider + keys are unchanged.
+        setCurrent(new AppSettings(QuoteProvider: "twelvedata", MonthlyExpense: 2000m));
+        settings.Raise(s => s.Changed += null);
+
+        // Give any (erroneous) fire-and-forget refresh a chance to run before asserting.
+        await Task.Delay(200);
+        stockService.Verify(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

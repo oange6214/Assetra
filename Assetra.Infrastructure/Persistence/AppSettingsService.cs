@@ -26,7 +26,7 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
         Current = LoadSettings();
     }
 
-    public async Task SaveAsync(AppSettings settings)
+    public async Task SaveAsync(AppSettings settings, bool raiseChanged = true)
     {
         await _lock.WaitAsync().ConfigureAwait(false);
         try
@@ -42,6 +42,10 @@ public sealed class AppSettingsService : IAppSettingsService, IDisposable
             throw;
         }
         finally { _lock.Release(); }
+
+        // 內部記帳的持久化（raiseChanged:false）不該驅動全域訂閱者重算／重抓。
+        if (!raiseChanged)
+            return;
 
         // 在鎖之外觸發，避免訂閱者的同步邏輯拖住其他 Save 呼叫；訂閱者異常不向呼叫端外洩
         try

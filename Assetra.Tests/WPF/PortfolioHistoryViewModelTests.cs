@@ -444,10 +444,11 @@ public sealed class PortfolioHistoryViewModelTests
         public AppSettings Current { get; private set; }
         public event Action? Changed;
 
-        public Task SaveAsync(AppSettings settings)
+        public Task SaveAsync(AppSettings settings, bool raiseChanged = true)
         {
             Current = settings;
-            Changed?.Invoke();
+            if (raiseChanged)
+                Changed?.Invoke();
             return Task.CompletedTask;
         }
     }

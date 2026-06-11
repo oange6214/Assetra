@@ -196,10 +196,11 @@ public class BalanceSheetServiceTests
 
         public event Action? Changed;
 
-        public Task SaveAsync(AppSettings settings)
+        public Task SaveAsync(AppSettings settings, bool raiseChanged = true)
         {
             Current = settings;
-            Changed?.Invoke();
+            if (raiseChanged)
+                Changed?.Invoke();
             return Task.CompletedTask;
         }
     }

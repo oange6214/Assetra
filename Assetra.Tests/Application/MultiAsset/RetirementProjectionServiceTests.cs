@@ -146,6 +146,6 @@ public class RetirementProjectionServiceTests
             add { }
             remove { }
         }
-        public Task SaveAsync(AppSettings settings) => Task.CompletedTask;
+        public Task SaveAsync(AppSettings settings, bool raiseChanged = true) => Task.CompletedTask;
     }
 }

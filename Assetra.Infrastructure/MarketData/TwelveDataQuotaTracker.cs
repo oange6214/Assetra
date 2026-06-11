@@ -35,11 +35,13 @@ internal sealed class TwelveDataQuotaTracker(IAppSettingsService settings) : ITw
                 ? Math.Max(0, current.TwelveDataQuotaUsed)
                 : 0;
 
+            // 純記帳：靜默存檔（raiseChanged:false），避免觸發全域 Changed 而引發
+            // 報價刷新 → 再記帳 → 再觸發的回饋迴圈。
             await settings.SaveAsync(current with
             {
                 TwelveDataQuotaDate = today,
                 TwelveDataQuotaUsed = used + credits,
-            }).ConfigureAwait(false);
+            }, raiseChanged: false).ConfigureAwait(false);
         }
         finally
         {

@@ -73,8 +73,8 @@ public class SyncCoordinatorTests : IDisposable
         var mock = new Mock<IAppSettingsService>();
         mock.Setup(s => s.Current).Returns(current);
         AppSettings? saved = null;
-        mock.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
-            .Callback<AppSettings>(s => saved = s)
+        mock.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, _) => saved = s)
             .Returns(Task.CompletedTask);
 
         var coord = CreateCoordinator(mock.Object);

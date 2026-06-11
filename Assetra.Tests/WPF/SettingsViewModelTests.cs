@@ -170,8 +170,8 @@ public class SettingsViewModelTests
     public async Task SaveDataSourceSettingsCommand_TwelveDataRequiresSuccessfulTestBeforeSave()
     {
         var saved = new List<AppSettings>();
-        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
-            .Callback<AppSettings>(saved.Add)
+        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, _) => saved.Add(s))
             .Returns(Task.CompletedTask);
         var tester = new FakeTwelveDataTester(success: true);
         var vm = CreateVm(twelveDataTester: tester);
@@ -197,8 +197,8 @@ public class SettingsViewModelTests
     public async Task BaseCurrencyChanged_PersistsSetting()
     {
         var saved = new TaskCompletionSource<AppSettings>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>()))
-            .Callback<AppSettings>(s => saved.TrySetResult(s))
+        _mockSettings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, _) => saved.TrySetResult(s))
             .Returns(Task.CompletedTask);
         var vm = CreateVm();
 
