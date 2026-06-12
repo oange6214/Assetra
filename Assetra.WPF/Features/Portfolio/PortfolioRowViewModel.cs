@@ -36,18 +36,6 @@ public partial class PortfolioRowViewModel : ObservableObject
 
     [ObservableProperty] private string _portfolioGroupDisplay = "未分組";
 
-    public string MarketDisplay => string.IsNullOrWhiteSpace(Exchange) ? Currency : Exchange;
-
-    public string AssetTypeDisplay => AssetType switch
-    {
-        AssetType.Etf => "ETF",
-        AssetType.Fund => "基金",
-        AssetType.Bond => "債券",
-        AssetType.Crypto => "加密",
-        AssetType.PreciousMetal => "貴金屬",
-        _ => IsEtf ? "ETF" : "個股",
-    };
-
     public bool IsStock => AssetType == AssetType.Stock;
 
     /// <summary>
