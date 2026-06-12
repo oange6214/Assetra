@@ -117,12 +117,12 @@
     <sys:String x:Key="Common.Save">Save</sys:String>
     <sys:String x:Key="Common.Edit">Edit</sys:String>
     <sys:String x:Key="Common.Search.Placeholder">Search...</sys:String>
-    <sys:String x:Key="PortfolioGroups.Nav">Groups</sys:String>
-    <sys:String x:Key="PortfolioGroups.Heading">Portfolio Groups</sys:String>
-    <sys:String x:Key="PortfolioGroups.Subheading">Organise trades and accounts into buckets (e.g. "Retirement", "House Fund") so goals and FIRE calculations map onto concrete groups.</sys:String>
-    <sys:String x:Key="PortfolioGroups.Add">New group</sys:String>
-    <sys:String x:Key="PortfolioGroups.Add.Title">New group</sys:String>
-    <sys:String x:Key="PortfolioGroups.Edit.Title">Edit group</sys:String>
+    <sys:String x:Key="PortfolioGroups.Nav">Portfolios</sys:String>
+    <sys:String x:Key="PortfolioGroups.Heading">Portfolio Management</sys:String>
+    <sys:String x:Key="PortfolioGroups.Subheading">Organise trades and accounts into portfolios (e.g. "Retirement", "House Fund") so goals and FIRE calculations map onto concrete buckets.</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add">New Portfolio</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add.Title">New Portfolio</sys:String>
+    <sys:String x:Key="PortfolioGroups.Edit.Title">Edit Portfolio</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.Name">Name</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.Description">Description (optional)</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.Color">Color (Hex)</sys:String>
@@ -357,29 +357,29 @@
     <sys:String x:Key="Portfolio.Liability.MonthlyPayment">Monthly</sys:String>
     <sys:String x:Key="Portfolio.Liability.NextDue">Next due</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">All</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.All">All Groups</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.Add">New Group</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.Manage">Manage Groups</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.All">All Portfolios</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Add">New Portfolio</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Manage">Manage Portfolios</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.All">All</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Group">By Group</sys:String>
+    <sys:String x:Key="Portfolio.ViewMode.Group">By Portfolio</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Market">By Market</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Type">By Type</sys:String>
-    <sys:String x:Key="Portfolio.Group.Ungrouped">Ungrouped</sys:String>
-    <sys:String x:Key="Portfolio.Group.Unknown">Unknown group</sys:String>
+    <sys:String x:Key="Portfolio.Group.Ungrouped">Unassigned</sys:String>
+    <sys:String x:Key="Portfolio.Group.Unknown">Unknown portfolio</sys:String>
     <sys:String x:Key="Portfolio.Group.NeedsResolution">Needs review</sys:String>
-    <sys:String x:Key="Portfolio.Group.Detail">Group details</sys:String>
-    <sys:String x:Key="Portfolio.Group.DetailSubtitle">Review this group's holdings and aggregated values.</sys:String>
+    <sys:String x:Key="Portfolio.Group.Detail">Portfolio details</sys:String>
+    <sys:String x:Key="Portfolio.Group.DetailSubtitle">Review this portfolio's holdings and aggregated values.</sys:String>
     <sys:String x:Key="Portfolio.Group.Holdings">Holdings</sys:String>
     <sys:String x:Key="Portfolio.Group.Transactions">Transactions</sys:String>
-    <sys:String x:Key="Portfolio.Group.NoTransactions">No transactions in this group yet.</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.MarketValue">Group market value trend</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.Performance">Group performance trend</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.CurrentMembershipNote">Estimated from current group members and recent prices.</sys:String>
+    <sys:String x:Key="Portfolio.Group.NoTransactions">No transactions in this portfolio yet.</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.MarketValue">Portfolio market value trend</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.Performance">Portfolio performance trend</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.CurrentMembershipNote">Estimated from current portfolio members and recent prices.</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Cost">Cost</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Pnl">Estimated P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.TodayChange">Today</sys:String>
-    <sys:String x:Key="Portfolio.Group.MoveToGroup">Move to Group</sys:String>
+    <sys:String x:Key="Portfolio.Group.MoveToGroup">Move to Portfolio</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Stock">Stocks</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETFs</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Fund">Funds</sys:String>
@@ -660,7 +660,7 @@
     <sys:String x:Key="Portfolio.Tx.NoCashLink">No Linkage</sys:String>
     <sys:String x:Key="Portfolio.Tx.IncomeNoCashLinkHint">Income is deposited into the account selected above; uncheck to record the income without affecting any cash balance.</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">Stock</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Group">Portfolio Group</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Group">Portfolio</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">Dividend / Share</sys:String>
     <sys:String x:Key="Portfolio.Tx.HeldShares">Shares Held</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotal">Total</sys:String>
@@ -794,14 +794,14 @@
     <sys:String x:Key="Portfolio.EditAsset.CashTitle">Edit Funds Account</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CashSubtitle">Update account details.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.PositionTitle">Edit Asset</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">Update investment asset name, currency, and group.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">Update investment asset name, currency, and portfolio.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">Type</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">Sub-category</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">Changing the sub-category automatically updates which group this account appears under in the financial overview (e.g. Bank savings → Banking; Brokerage settlement → Settlement).</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Symbol">Symbol</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.GroupHint">Changes apply to all visible lots for this asset.</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.GroupConflictTitle">This asset spans multiple groups</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.GroupConflictDescription">Saving will assign all currently visible lots to the selected group.</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.GroupConflictTitle">This asset spans multiple portfolios</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.GroupConflictDescription">Saving will assign all currently visible lots to the selected portfolio.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Currency">Currency</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CurrencyHint">Ensure the currency matches what your broker uses for this account.</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Update">Update</sys:String>
@@ -946,7 +946,7 @@
     <sys:String x:Key="Allocation.Overview.Title">Allocation Overview</sys:String>
     <sys:String x:Key="Allocation.Insights.Title">Allocation Insights</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">By Symbol</sys:String>
-    <sys:String x:Key="Allocation.GroupBy.Group">By Group</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Group">By Portfolio</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Currency">By Currency</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">Holdings</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">Cash</sys:String>
@@ -1179,7 +1179,7 @@
     <sys:String x:Key="Sync.Domain.PhysicalAsset">Physical Assets</sys:String>
     <sys:String x:Key="Sync.Domain.Alert">Alerts</sys:String>
     <sys:String x:Key="Sync.Domain.FinancialGoal">Goals</sys:String>
-    <sys:String x:Key="Sync.Domain.PortfolioGroup">Investment Groups</sys:String>
+    <sys:String x:Key="Sync.Domain.PortfolioGroup">Portfolios</sys:String>
 
     <!-- P4.1d — FX history refresh -->
     <sys:String x:Key="Settings.FxHistory.SectionTitle">FX History</sys:String>
@@ -1556,8 +1556,8 @@
     <sys:String x:Key="Goals.Form.Hint">Set a target amount, current amount, and deadline to track progress.</sys:String>
     <sys:String x:Key="Goals.Add.LinkedAssetClass">Auto-track from asset class</sys:String>
     <sys:String x:Key="Goals.Add.LinkedAssetClass.Hint">Pick an asset class to auto-track progress against the dashboard's current value. Choose "Manual" to keep using the Current amount field above.</sys:String>
-    <sys:String x:Key="Goals.Add.PortfolioGroup">Linked portfolio group</sys:String>
-    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">A linked group takes precedence over the asset class above: progress = the group's current net value ÷ target. Useful for user-defined buckets like "Retirement" or "House Fund".</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup">Linked portfolio</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">A linked portfolio takes precedence over the asset class above: progress = the portfolio's current net value ÷ target. Useful for user-defined buckets like "Retirement" or "House Fund".</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.Manual">Manual (use Current amount)</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.NetWorth">Net worth (assets − liabilities)</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.TotalAssets">Total assets</sys:String>
@@ -1579,7 +1579,7 @@
     <sys:String x:Key="Goals.Deadline.Overdue">Overdue</sys:String>
     <sys:String x:Key="Goals.Tracking.Manual">Manual</sys:String>
     <sys:String x:Key="Goals.Tracking.Auto">Auto-tracked</sys:String>
-    <sys:String x:Key="Goals.Tracking.PortfolioGroup">Portfolio group</sys:String>
+    <sys:String x:Key="Goals.Tracking.PortfolioGroup">Portfolio</sys:String>
     <sys:String x:Key="Goals.Tracking.Fire">FIRE sync</sys:String>
     <sys:String x:Key="Goals.Detail.Title">Goal detail</sys:String>
     <sys:String x:Key="Goals.Detail.Open">View detail</sys:String>
@@ -1998,8 +1998,8 @@
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">Current Net Worth</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth.Refresh">Re-fetch current net worth</sys:String>
-    <sys:String x:Key="Fire.Input.Group">Linked portfolio group</sys:String>
-    <sys:String x:Key="Fire.Input.Group.Hint">Picking a group auto-fills the current net worth from that bucket's running total (you can override). The saved FIRE goal remembers this link.</sys:String>
+    <sys:String x:Key="Fire.Input.Group">Linked portfolio</sys:String>
+    <sys:String x:Key="Fire.Input.Group.Hint">Picking a portfolio auto-fills the current net worth from that bucket's running total (you can override). The saved FIRE goal remembers this link.</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">Annual Expenses</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">Annual Savings</sys:String>
     <sys:String x:Key="Fire.Input.Return">Expected Annual Return</sys:String>

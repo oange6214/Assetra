@@ -112,13 +112,13 @@
     <sys:String x:Key="Common.Edit">編輯</sys:String>
     <sys:String x:Key="Common.Search.Placeholder">搜尋...</sys:String>
     <!--  Portfolio Groups (Portfolio-Groups-Refactor P2)  -->
-    <sys:String x:Key="PortfolioGroups.Nav">群組</sys:String>
-    <sys:String x:Key="PortfolioGroups.Heading">投資群組管理</sys:String>
-    <sys:String x:Key="PortfolioGroups.Subheading">把交易與帳戶分到不同群組（如「退休帳戶」「買房儲蓄」），讓目標與 FIRE 計算對應到具體 bucket。</sys:String>
-    <sys:String x:Key="PortfolioGroups.Add">新增群組</sys:String>
-    <sys:String x:Key="PortfolioGroups.Add.Title">新增群組</sys:String>
-    <sys:String x:Key="PortfolioGroups.Edit.Title">編輯群組</sys:String>
-    <sys:String x:Key="PortfolioGroups.Form.Name">群組名稱</sys:String>
+    <sys:String x:Key="PortfolioGroups.Nav">投資組合</sys:String>
+    <sys:String x:Key="PortfolioGroups.Heading">投資組合管理</sys:String>
+    <sys:String x:Key="PortfolioGroups.Subheading">把交易與帳戶分到不同投資組合（如「退休帳戶」「買房儲蓄」），讓目標與 FIRE 計算對應到具體 bucket。</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add">新增投資組合</sys:String>
+    <sys:String x:Key="PortfolioGroups.Add.Title">新增投資組合</sys:String>
+    <sys:String x:Key="PortfolioGroups.Edit.Title">編輯投資組合</sys:String>
+    <sys:String x:Key="PortfolioGroups.Form.Name">投資組合名稱</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.Description">說明（選填）</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.Color">顯色 (Hex)</sys:String>
     <sys:String x:Key="PortfolioGroups.Form.ColorHint">輸入 Hex 色碼如 #3B82F6（藍）。留空使用主題預設色。</sys:String>
@@ -355,29 +355,29 @@
     <sys:String x:Key="Portfolio.Liability.MonthlyPayment">月付</sys:String>
     <sys:String x:Key="Portfolio.Liability.NextDue">下次到期</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">全部</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.All">全部群組</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.Add">新增群組</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.Manage">管理群組</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.All">全部投資組合</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Add">新增投資組合</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Group.Manage">管理投資組合</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.All">全部</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Group">依群組</sys:String>
+    <sys:String x:Key="Portfolio.ViewMode.Group">依投資組合</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Market">依市場</sys:String>
     <sys:String x:Key="Portfolio.ViewMode.Type">依類型</sys:String>
-    <sys:String x:Key="Portfolio.Group.Ungrouped">未分組</sys:String>
-    <sys:String x:Key="Portfolio.Group.Unknown">未知群組</sys:String>
-    <sys:String x:Key="Portfolio.Group.NeedsResolution">群組待整理</sys:String>
-    <sys:String x:Key="Portfolio.Group.Detail">群組詳情</sys:String>
-    <sys:String x:Key="Portfolio.Group.DetailSubtitle">查看此群組的持股與目前聚合數據。</sys:String>
+    <sys:String x:Key="Portfolio.Group.Ungrouped">未指定組合</sys:String>
+    <sys:String x:Key="Portfolio.Group.Unknown">未知投資組合</sys:String>
+    <sys:String x:Key="Portfolio.Group.NeedsResolution">投資組合待整理</sys:String>
+    <sys:String x:Key="Portfolio.Group.Detail">投資組合詳情</sys:String>
+    <sys:String x:Key="Portfolio.Group.DetailSubtitle">查看此投資組合的持股與目前聚合數據。</sys:String>
     <sys:String x:Key="Portfolio.Group.Holdings">持股</sys:String>
     <sys:String x:Key="Portfolio.Group.Transactions">交易紀錄</sys:String>
-    <sys:String x:Key="Portfolio.Group.NoTransactions">此群組目前沒有交易紀錄。</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.MarketValue">群組市值趨勢</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.Performance">群組績效趨勢</sys:String>
-    <sys:String x:Key="Portfolio.Group.Trend.CurrentMembershipNote">依目前群組成員與近月價格估算。</sys:String>
+    <sys:String x:Key="Portfolio.Group.NoTransactions">此投資組合目前沒有交易紀錄。</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.MarketValue">投資組合市值趨勢</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.Performance">投資組合績效趨勢</sys:String>
+    <sys:String x:Key="Portfolio.Group.Trend.CurrentMembershipNote">依目前投資組合成員與近月價格估算。</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Cost">付出成本</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.Pnl">淨損益試算</sys:String>
     <sys:String x:Key="Portfolio.Group.Kpi.TodayChange">今日漲跌</sys:String>
-    <sys:String x:Key="Portfolio.Group.MoveToGroup">移至群組</sys:String>
+    <sys:String x:Key="Portfolio.Group.MoveToGroup">移至投資組合</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Stock">個股</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Etf">ETF</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Fund">基金</sys:String>
@@ -658,7 +658,7 @@
     <sys:String x:Key="Portfolio.Tx.NoCashLink">不連動</sys:String>
     <sys:String x:Key="Portfolio.Tx.IncomeNoCashLinkHint">收入會存入上方所選帳戶；取消勾選＝只記錄收入、不影響現金餘額。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Stock">股票</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Group">所屬群組</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Group">所屬投資組合</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivPerShare">每股股利（元）</sys:String>
     <sys:String x:Key="Portfolio.Tx.HeldShares">持有股數</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivTotal">合計</sys:String>
@@ -793,14 +793,14 @@
     <sys:String x:Key="Portfolio.EditAsset.CashTitle">編輯資金帳戶</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CashSubtitle">更新帳戶詳細資訊。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.PositionTitle">編輯資產</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">更新投資資產名稱、幣別與群組。</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.PositionSubtitle">更新投資資產名稱、幣別與投資組合。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.TypeLabel">類型</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeLabel">細分類</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.SubtypeHint">調整細分類後，此帳戶在財務總覽的分組會自動更新（例：銀行活存 → 銀行類；證券交割戶 → 證券交割款）。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.GroupHint">變更後會套用到此標的目前可見的所有持倉批次。</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.GroupConflictTitle">此標的包含多個群組</sys:String>
-    <sys:String x:Key="Portfolio.EditAsset.GroupConflictDescription">儲存後會把目前可見的持倉批次統一到所選群組。</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.GroupConflictTitle">此標的包含多個投資組合</sys:String>
+    <sys:String x:Key="Portfolio.EditAsset.GroupConflictDescription">儲存後會把目前可見的持倉批次統一到所選投資組合。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Currency">計價幣別</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.CurrencyHint">請確保選擇的幣別與您在交易所進行買賣交易所使用的幣別一致。</sys:String>
     <sys:String x:Key="Portfolio.EditAsset.Update">更新</sys:String>
@@ -948,7 +948,7 @@
     <sys:String x:Key="Allocation.Overview.Title">配置概覽</sys:String>
     <sys:String x:Key="Allocation.Insights.Title">配置洞察</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Symbol">依 Symbol</sys:String>
-    <sys:String x:Key="Allocation.GroupBy.Group">依群組</sys:String>
+    <sys:String x:Key="Allocation.GroupBy.Group">依投資組合</sys:String>
     <sys:String x:Key="Allocation.GroupBy.Currency">依幣別</sys:String>
     <sys:String x:Key="Allocation.Summary.Investment">持股市值</sys:String>
     <sys:String x:Key="Allocation.Summary.Cash">現金</sys:String>
@@ -1183,7 +1183,7 @@
     <sys:String x:Key="Sync.Domain.PhysicalAsset">實物資產</sys:String>
     <sys:String x:Key="Sync.Domain.Alert">警示</sys:String>
     <sys:String x:Key="Sync.Domain.FinancialGoal">財務目標</sys:String>
-    <sys:String x:Key="Sync.Domain.PortfolioGroup">投資群組</sys:String>
+    <sys:String x:Key="Sync.Domain.PortfolioGroup">投資組合</sys:String>
 
     <!--  P4.1d — FX history refresh (historical FX backfill, distinct from live FX)  -->
     <sys:String x:Key="Settings.FxHistory.SectionTitle">匯率歷史</sys:String>
@@ -1561,8 +1561,8 @@
     <!--  2026-05-17 短期妥協：auto-track linked asset class options  -->
     <sys:String x:Key="Goals.Add.LinkedAssetClass">自動追蹤資產類別</sys:String>
     <sys:String x:Key="Goals.Add.LinkedAssetClass.Hint">選擇要對應的資產類別後，進度會自動取自 dashboard 上的當前值；選「手動」則沿用上方「目前金額」欄位。</sys:String>
-    <sys:String x:Key="Goals.Add.PortfolioGroup">連結到投資組合群組</sys:String>
-    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">設定群組後優先於「自動追蹤資產類別」：進度 = 該群組目前累計淨值 ÷ 目標金額。適合用「退休帳戶」「買房儲蓄」這種使用者自訂 bucket。</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup">連結到投資組合</sys:String>
+    <sys:String x:Key="Goals.Add.PortfolioGroup.Hint">設定投資組合後優先於「自動追蹤資產類別」：進度 = 該投資組合目前累計淨值 ÷ 目標金額。適合用「退休帳戶」「買房儲蓄」這種使用者自訂 bucket。</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.Manual">手動（沿用目前金額）</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.NetWorth">淨資產（資產 − 負債）</sys:String>
     <sys:String x:Key="Goals.LinkedAssetClass.TotalAssets">總資產</sys:String>
@@ -1584,7 +1584,7 @@
     <sys:String x:Key="Goals.Deadline.Overdue">已逾期</sys:String>
     <sys:String x:Key="Goals.Tracking.Manual">手動</sys:String>
     <sys:String x:Key="Goals.Tracking.Auto">自動追蹤</sys:String>
-    <sys:String x:Key="Goals.Tracking.PortfolioGroup">投資群組</sys:String>
+    <sys:String x:Key="Goals.Tracking.PortfolioGroup">投資組合</sys:String>
     <sys:String x:Key="Goals.Tracking.Fire">FIRE 同步</sys:String>
     <sys:String x:Key="Goals.Detail.Title">目標詳情</sys:String>
     <sys:String x:Key="Goals.Detail.Open">檢視詳情</sys:String>
@@ -2003,8 +2003,8 @@
     <sys:String x:Key="Fire.Title">FIRE</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth">目前淨資產</sys:String>
     <sys:String x:Key="Fire.Input.NetWorth.Refresh">重新抓取目前淨資產</sys:String>
-    <sys:String x:Key="Fire.Input.Group">選擇投資組合群組</sys:String>
-    <sys:String x:Key="Fire.Input.Group.Hint">選擇群組後會自動把該 bucket 的累計淨值填入「目前淨資產」，可直接覆寫。儲存為 Goal 時會記住此群組連結。</sys:String>
+    <sys:String x:Key="Fire.Input.Group">選擇投資組合</sys:String>
+    <sys:String x:Key="Fire.Input.Group.Hint">選擇投資組合後會自動把該 bucket 的累計淨值填入「目前淨資產」，可直接覆寫。儲存為 Goal 時會記住此投資組合連結。</sys:String>
     <sys:String x:Key="Fire.Input.AnnualExpenses">年支出</sys:String>
     <sys:String x:Key="Fire.Input.AnnualSavings">年儲蓄</sys:String>
     <sys:String x:Key="Fire.Input.Return">預期年化報酬率</sys:String>
