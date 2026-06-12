@@ -78,6 +78,15 @@ public sealed class PortfolioGroupDetailViewModel
     private static decimal DisplayAmount(decimal nativeAmount, decimal baseAmount) =>
         baseAmount != 0m ? baseAmount : nativeAmount;
 
+    /// <summary>Task 1.4 — exposed for PortfolioViewModel.SelectedPortfolioHeader.</summary>
+    internal static IReadOnlyList<double> BuildMarketValueTrendPublic(IReadOnlyList<PortfolioRowViewModel> holdings)
+        => BuildMarketValueTrend(holdings);
+
+    /// <summary>Task 1.4 — exposed for PortfolioViewModel.SelectedPortfolioHeader.</summary>
+    internal static (ISeries[] Series, ICartesianAxis[] XAxes, ICartesianAxis[] YAxes)
+        BuildMarketValueTrendChartPublic(IReadOnlyList<double> values, bool isPositive)
+        => BuildMarketValueTrendChart(values, isPositive);
+
     private static IReadOnlyList<double> BuildMarketValueTrend(IReadOnlyList<PortfolioRowViewModel> holdings)
     {
         var sources = new List<(double[] Points, double Quantity, double BaseFactor)>();

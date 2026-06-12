@@ -10,6 +10,7 @@
     xmlns:lvcsk="clr-namespace:LiveChartsCore.SkiaSharpView;assembly=LiveChartsCore.SkiaSharpView"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Assetra.Core.Models;assembly=Assetra.Core"
+    xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
@@ -195,6 +196,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <!--  Task 1.4: PortfolioDetailHeader (value / pnl / trend / ＋投資) — Task 1.6 finalises placement  -->
+            <RowDefinition Height="Auto" />
             <!--  Investment summary cards  -->
             <RowDefinition Height="Auto" />
             <!--  KPI expand panel (持股佔比 donut / 每日損益 柱狀圖)  -->
@@ -210,14 +213,17 @@
             <!--  Filter summary footer — only visible when 篩選作用中  -->
         </Grid.RowDefinitions>
 
+        <!--  ═══ Row 0: Per-portfolio detail header (Task 1.4 — layout finalised in Task 1.6) ═══  -->
+        <portfolio:PortfolioDetailHeader Grid.Row="0" />
+
         <!--
-            ═══ Row 0: Investment Summary ═══
+            ═══ Row 1: Investment Summary ═══
             v3 redesign：跟 LiabilityTabPanel / AccountsTabPanel 對齊—
             外層 background 改 AppBackground (灰，跟下方 datagrid 同色)，
             內 cards 用 AppCardBackground (白)，padding 統一 Padding.Card token。
         -->
         <Border
-            Grid.Row="0"
+            Grid.Row="1"
             Padding="{StaticResource Padding.SectionStrip}"
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
@@ -514,7 +520,7 @@
             一次只能展開一個，由 ExpandedKpiPanel 單一 state 控制。
         -->
         <Border
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="12,10,12,0"
             Padding="14,12"
             Background="{DynamicResource AppSurface}"
@@ -907,9 +913,9 @@
             </Grid>
         </Border>
 
-        <!--  ═══ Row 2: Quote setup notice ═══  -->
+        <!--  ═══ Row 3: Quote setup notice ═══  -->
         <Border
-            Grid.Row="2"
+            Grid.Row="3"
             Margin="12,10,12,0"
             Padding="12,10"
             Background="{DynamicResource AppSurface}"
@@ -945,7 +951,7 @@
             上方是投資持倉的觀看方式（平面 / 群組 / 市場 / 類型），下方保留資產類型作為
             次要篩選。群組不再用可無限延展的 chip row，避免使用者建立多個策略群組後擠爆工具列。
         -->
-        <StackPanel Grid.Row="3" Margin="12,14,12,6">
+        <StackPanel Grid.Row="4" Margin="12,14,12,6">
             <!--
                 P5.13 (C2) — DockPanel：左側 view mode tabs / 右側群組管理 action buttons。
                 舊版把「+新增群組」「管理群組」放在 IsGroupViewMode-gated Grid 內，使用者
@@ -1058,9 +1064,9 @@
             -->
         </StackPanel>
 
-        <!--  ═══ Row 4: Text search ═══  -->
+        <!--  ═══ Row 5: Text search ═══  -->
         <controls:SearchBox
-            Grid.Row="4"
+            Grid.Row="5"
             Placeholder="{DynamicResource Portfolio.Filter.SearchPositions}"
             Text="{Binding FilterText}">
             <controls:SearchBox.RightContent>
@@ -1107,8 +1113,8 @@
             </controls:SearchBox.RightContent>
         </controls:SearchBox>
 
-        <!--  ═══ Row 5: Positions DataGrid ═══  -->
-        <Grid Grid.Row="5">
+        <!--  ═══ Row 6: Positions DataGrid ═══  -->
+        <Grid Grid.Row="6">
             <!--  Empty state  -->
             <Border
                 Padding="32"
@@ -1973,7 +1979,7 @@
             跟切資產類型後的子集合計一樣有用，不該只在 chip 不是全部時才顯示。
         -->
         <Border
-            Grid.Row="6"
+            Grid.Row="7"
             Padding="12,6"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"

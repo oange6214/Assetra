@@ -1,0 +1,206 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.PortfolioDetailHeader"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
+    mc:Ignorable="d">
+
+    <!--
+        Task 1.4 — Google-Finance-style per-portfolio detail header.
+
+        Layout (top → bottom):
+          Row 0  Portfolio name + ＋投資 button
+          Row 1  Market value (large) + day P&L (signed, coloured)
+          Row 2  Trend area — switches by tab type:
+                   全部 tab  → History chart (History.ValueSeries) with period selector
+                   Portfolio → fixed-window sparkline trend + membership note (no period selector)
+    -->
+
+    <Border
+        Padding="16,12,16,14"
+        Background="{DynamicResource AppSurface}"
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="0,0,0,1">
+
+        <StackPanel>
+
+            <!-- ── Row 0: Portfolio name + ＋投資 ── -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource Font.Size.Sm}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{Binding SelectedPortfolioName}" />
+
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
+                    Content="{DynamicResource Portfolio.DetailHeader.AddInvestment}"
+                    Style="{StaticResource AppPrimaryButton}" />
+            </Grid>
+
+            <!-- ── Row 1: Market value + day P&L ── -->
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Market value (large) + sub-labels -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.DetailHeader.MarketValue}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        FontFamily="{StaticResource Font.Family.Display}"
+                        FontSize="{StaticResource Font.Size.2xl}"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding SelectedPortfolioMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                        Typography.NumeralAlignment="Tabular" />
+
+                    <!-- P&L sub-line -->
+                    <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.DetailHeader.Pnl}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            FontFamily="{StaticResource Font.Family.Numeric}"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Text="{Binding SelectedPortfolioPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                            Typography.NumeralAlignment="Tabular">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelectedPortfolioPnlPositive}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Right: Today change (signed, coloured) -->
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        HorizontalAlignment="Right"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.DetailHeader.TodayChange}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Right"
+                        FontFamily="{StaticResource Font.Family.Numeric}"
+                        FontSize="{StaticResource Font.Size.Lg}"
+                        FontWeight="SemiBold"
+                        Text="{Binding SelectedPortfolioDayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
+                        Typography.NumeralAlignment="Tabular">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelectedPortfolioDayPnlPositive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <!-- ── Row 2a: 全部 tab — History chart with period selector ── -->
+            <StackPanel Visibility="{Binding IsSelectedPortfolioHistoryVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                <!-- Period selector chips (mirrors TrendsView.xaml pattern) -->
+                <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+                    <RadioButton
+                        Command="{Binding History.ChangePeriodCommand}"
+                        CommandParameter="30"
+                        Content="{DynamicResource Trends.Period.30}"
+                        GroupName="DetailHeaderPeriod"
+                        IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=30}"
+                        Style="{StaticResource NavTabBtn}" />
+                    <RadioButton
+                        Command="{Binding History.ChangePeriodCommand}"
+                        CommandParameter="180"
+                        Content="{DynamicResource Trends.Period.180}"
+                        GroupName="DetailHeaderPeriod"
+                        IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=180}"
+                        Style="{StaticResource NavTabBtn}" />
+                    <RadioButton
+                        Command="{Binding History.ChangePeriodCommand}"
+                        CommandParameter="YTD"
+                        Content="{DynamicResource Trends.Period.YTD}"
+                        GroupName="DetailHeaderPeriod"
+                        IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=YTD}"
+                        Style="{StaticResource NavTabBtn}" />
+                    <RadioButton
+                        Command="{Binding History.ChangePeriodCommand}"
+                        CommandParameter="365"
+                        Content="{DynamicResource Trends.Period.365}"
+                        GroupName="DetailHeaderPeriod"
+                        IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=365}"
+                        Style="{StaticResource NavTabBtn}" />
+                    <RadioButton
+                        Command="{Binding History.ChangePeriodCommand}"
+                        CommandParameter="All"
+                        Content="{DynamicResource Trends.Period.All}"
+                        GroupName="DetailHeaderPeriod"
+                        IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=All}"
+                        Style="{StaticResource NavTabBtn}" />
+                </StackPanel>
+
+                <lvc:CartesianChart
+                    Height="80"
+                    Background="Transparent"
+                    Series="{Binding History.ValueSeries}"
+                    TooltipPosition="Top"
+                    TooltipTextSize="11"
+                    Visibility="{Binding History.HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    XAxes="{Binding History.XAxes}"
+                    YAxes="{Binding History.YAxes}" />
+            </StackPanel>
+
+            <!-- ── Row 2b: Portfolio tab — fixed-window sparkline trend + note ── -->
+            <StackPanel Visibility="{Binding IsSelectedPortfolioTrendVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppTextMuted}"
+                    Text="{DynamicResource Portfolio.Group.Trend.CurrentMembershipNote}"
+                    TextWrapping="Wrap" />
+                <lvc:CartesianChart
+                    Height="80"
+                    Background="Transparent"
+                    Series="{Binding SelectedPortfolioTrendSeries}"
+                    TooltipPosition="Top"
+                    TooltipTextSize="11"
+                    XAxes="{Binding SelectedPortfolioTrendXAxes}"
+                    YAxes="{Binding SelectedPortfolioTrendYAxes}" />
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</UserControl>

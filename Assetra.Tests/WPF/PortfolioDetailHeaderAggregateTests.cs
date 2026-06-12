@@ -1,0 +1,186 @@
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using Assetra.Application.Portfolio.Dtos;
+using Assetra.Application.Portfolio.Services;
+using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
+using Assetra.Infrastructure;
+using Assetra.Infrastructure.Persistence;
+using Assetra.WPF.Features.Portfolio;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
+using Assetra.WPF.Features.PortfolioGroups;
+using Assetra.WPF.Infrastructure;
+using Assetra.Tests.WPF.Fixtures;
+using Moq;
+using Xunit;
+
+namespace Assetra.Tests.WPF;
+
+/// <summary>
+/// WHY: Task 1.4 — verifies that SelectedPortfolio* aggregates correctly reflect the
+/// rows that belong to the selected tab's portfolio group, and that switching to 全部
+/// reverts to the whole-portfolio totals already computed by RebuildTotals.
+/// </summary>
+public class PortfolioDetailHeaderAggregateTests
+{
+    private static PortfolioEntry MakeEntry(
+        string symbol,
+        Guid groupId,
+        decimal price,
+        int qty,
+        string currency = "TWD")
+        => new(Guid.NewGuid(), symbol, "TWSE", Currency: currency, PortfolioGroupId: groupId);
+
+    private static Dictionary<Guid, PositionSnapshot> SnapshotsFor(
+        IReadOnlyList<(PortfolioEntry Entry, decimal Price, int Qty)> items) =>
+        items.ToDictionary(
+            x => x.Entry.Id,
+            x => new PositionSnapshot(
+                x.Entry.Id,
+                x.Qty,
+                x.Price * x.Qty,   // TotalCost
+                x.Price,            // AverageCost
+                0m,
+                DateOnly.FromDateTime(DateTime.Today)));
+
+    private static Mock<IStockService> SilentStockService()
+    {
+        var mock = new Mock<IStockService>();
+        mock.Setup(s => s.QuoteStream)
+            .Returns(Observable.Never<IReadOnlyList<StockQuote>>());
+        mock.Setup(s => s.RefreshNowAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        return mock;
+    }
+
+    private static PortfolioViewModel CreateVm(
+        IReadOnlyList<PortfolioEntry> entries,
+        IPositionQueryService positionQuery,
+        PortfolioGroupCatalog catalog)
+    {
+        var repo = new Mock<IPortfolioRepository>();
+        repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(entries.ToList());
+
+        var snapshotRepo = new Mock<IPortfolioSnapshotRepository>();
+        snapshotRepo.Setup(r => r.GetSnapshotsAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
+            .ReturnsAsync(Array.Empty<PortfolioDailySnapshot>());
+        snapshotRepo.Setup(r => r.UpsertAsync(It.IsAny<PortfolioDailySnapshot>()))
+            .Returns(Task.CompletedTask);
+
+        var logRepo = new Mock<IPortfolioPositionLogRepository>();
+        logRepo.Setup(r => r.HasAnyAsync()).ReturnsAsync(true);
+        logRepo.Setup(r => r.LogAsync(It.IsAny<PortfolioPositionLog>())).Returns(Task.CompletedTask);
+        logRepo.Setup(r => r.LogBatchAsync(It.IsAny<IEnumerable<PortfolioPositionLog>>())).Returns(Task.CompletedTask);
+        logRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(Array.Empty<PortfolioPositionLog>());
+
+        var historyProvider = new Mock<IStockHistoryProvider>();
+        var snapshotSvc = new PortfolioSnapshotService(snapshotRepo.Object);
+        var backfill = new PortfolioBackfillService(logRepo.Object, snapshotRepo.Object, historyProvider.Object);
+        var fakeTradeRepo = new FakeTradeRepo();
+
+        return new PortfolioViewModel(
+            new PortfolioRepositories(repo.Object, snapshotRepo.Object, logRepo.Object, Trade: fakeTradeRepo),
+            new PortfolioServices(SilentStockService().Object, new Mock<IStockSearchService>().Object,
+                HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
+                PositionQuery: positionQuery,
+                GroupCatalog: catalog),
+            new PortfolioUiServices(ImmediateScheduler.Instance));
+    }
+
+    private sealed class FakeGroupRepo(IReadOnlyList<PortfolioGroup> groups) : IPortfolioGroupRepository
+    {
+        public Task<IReadOnlyList<PortfolioGroup>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(groups);
+        public Task<PortfolioGroup?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult(groups.FirstOrDefault(g => g.Id == id));
+        public Task AddAsync(PortfolioGroup group, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(PortfolioGroup group, CancellationToken ct = default) => Task.CompletedTask;
+        public Task RemoveAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    [Fact]
+    public async Task SelectingPortfolioTab_SetsAggregatesFromFilteredRows()
+    {
+        // WHY: ensures that SelectedPortfolioMarketValue/Pnl only reflect the rows whose
+        // PortfolioGroupId matches the selected tab, not the whole portfolio.
+        var alphaId = Guid.NewGuid();
+        var betaId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(alphaId, "Alpha"),
+            new PortfolioGroup(betaId, "Beta"),
+        ]));
+
+        var entryAlpha = MakeEntry("2330", alphaId, 500m, 10);
+        var entryBeta = MakeEntry("0050", betaId, 100m, 20);
+        var snapshots = SnapshotsFor([(entryAlpha, 500m, 10), (entryBeta, 100m, 20)]);
+
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync()).ReturnsAsync(snapshots);
+        positionQuery.Setup(s => s.GetPositionAsync(It.IsAny<Guid>()))
+            .Returns<Guid>(id => Task.FromResult(snapshots.TryGetValue(id, out var s) ? s : null));
+        positionQuery.Setup(s => s.ComputeRealizedPnlAsync(
+                It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<decimal>(),
+                It.IsAny<decimal>(), It.IsAny<decimal>()))
+            .ReturnsAsync(0m);
+
+        var vm = CreateVm([entryAlpha, entryBeta], positionQuery.Object, catalog);
+        await vm.LoadAsync();
+
+        Assert.Equal(2, vm.Positions.Count);
+
+        // Select the Alpha tab.
+        var alphaTab = vm.PortfolioTabs.Tabs.FirstOrDefault(t => t.GroupId == alphaId);
+        Assert.NotNull(alphaTab);
+        vm.PortfolioTabs.SelectedTab = alphaTab;
+
+        // WHY: Alpha has 10 shares × 500 = 5000 cost; Beta (2000) rows must not contribute.
+        // MarketValue is 0 in tests since no live price feed; Cost uses BuyPrice × Qty.
+        Assert.Equal("Alpha", vm.SelectedPortfolioName);
+        Assert.Equal(5000m, vm.SelectedPortfolioCost);
+        Assert.Equal(0m, vm.SelectedPortfolioMarketValue);
+    }
+
+    [Fact]
+    public async Task SelectingAllTab_ReusesWholePorfoliTotals()
+    {
+        // WHY: 全部 tab must not sum rows independently (which would double-count base vs native
+        // conversions for multi-currency); it must reuse TotalMarketValue already set by RebuildTotals.
+        var groupId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(groupId, "Test"),
+        ]));
+
+        var entry = MakeEntry("2330", groupId, 500m, 10);
+        var snapshots = SnapshotsFor([(entry, 500m, 10)]);
+
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync()).ReturnsAsync(snapshots);
+        positionQuery.Setup(s => s.GetPositionAsync(It.IsAny<Guid>()))
+            .Returns<Guid>(id => Task.FromResult(snapshots.TryGetValue(id, out var s) ? s : null));
+        positionQuery.Setup(s => s.ComputeRealizedPnlAsync(
+                It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<decimal>(),
+                It.IsAny<decimal>(), It.IsAny<decimal>()))
+            .ReturnsAsync(0m);
+
+        var vm = CreateVm([entry], positionQuery.Object, catalog);
+        await vm.LoadAsync();
+
+        // Switch to a portfolio tab first, then switch back to 全部.
+        var portfolioTab = vm.PortfolioTabs.Tabs.FirstOrDefault(t => t.GroupId == groupId);
+        Assert.NotNull(portfolioTab);
+        vm.PortfolioTabs.SelectedTab = portfolioTab;
+        var nameBeforeAll = vm.SelectedPortfolioName;
+        Assert.Equal("Test", nameBeforeAll);
+
+        // Switch back to 全部 (first tab, IsAll = true, GroupId = null).
+        var allTab = vm.PortfolioTabs.Tabs.First(t => t.IsAll);
+        vm.PortfolioTabs.SelectedTab = allTab;
+
+        // WHY: 全部 tab shows the whole-portfolio total from RebuildTotals, not a filtered sum.
+        Assert.Null(vm.PortfolioTabs.SelectedGroupId);
+        Assert.Equal(vm.TotalMarketValue, vm.SelectedPortfolioMarketValue);
+        Assert.True(vm.IsSelectedPortfolioHistoryVisible);
+        Assert.False(vm.IsSelectedPortfolioTrendVisible);
+    }
+}

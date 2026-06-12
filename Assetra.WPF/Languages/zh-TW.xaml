@@ -320,6 +320,10 @@
     <sys:String x:Key="Portfolio.Header.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.Header.Cash">現金</sys:String>
     <sys:String x:Key="Portfolio.Header.Liabilities">負債</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">＋ 投資</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.MarketValue">市值</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.TodayChange">今日漲跌</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.Pnl">損益</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Empty">尚無資產數據</sys:String>
     <sys:String x:Key="Portfolio.Pagination.JumpTo">頁碼:</sys:String>
     <sys:String x:Key="Portfolio.Filter.AllAssets">所有資產</sys:String>

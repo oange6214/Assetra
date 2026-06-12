@@ -416,12 +416,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         // Task 1.3 — selection → filter: propagate tab changes to the existing PortfolioGroupFilter.
         // OnPortfolioGroupFilterChanged already calls PositionsView.Refresh() + summaries + stats.
-        // TODO (Task 1.4): also recompute per-portfolio header aggregates from this handler.
+        // Task 1.4 — also recompute per-portfolio header aggregates (market value / pnl / trend).
         // TODO (Task 1.5): also refresh stock-vs-ETF focus card from this handler.
         PortfolioTabs.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(PortfolioTabsViewModel.SelectedGroupId))
+            {
                 PortfolioGroupFilter = PortfolioTabs.SelectedGroupId;
+                RecomputeSelectedPortfolioHeader();
+            }
         };
 
         // P4.1 — Asset detail KPI 矩陣 XIRR 計算。null = XIRR row 顯示「—」。
@@ -1112,6 +1115,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         // Footer 統計：positions / cash / liability 都依 collection view 即時加總，
         // 但 collection 內容變了不自動 raise PropertyChanged，這裡統一推一次。
         RefreshPositionViewGroupSummaries();
+
+        // Task 1.4 — recompute selected-portfolio detail header (value / pnl / trend).
+        RecomputeSelectedPortfolioHeader();
         RefreshSelectedPortfolioGroupDetail();
         RaisePositionsFilterStatsChanged();
         RaiseCashFilterStatsChanged();
