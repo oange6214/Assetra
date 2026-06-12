@@ -36,12 +36,6 @@ public partial class PortfolioRowViewModel : ObservableObject
 
     [ObservableProperty] private string _portfolioGroupDisplay = "未分組";
 
-    [ObservableProperty] private int _positionViewGroupItemCount;
-    [ObservableProperty] private decimal _positionViewGroupMarketValue;
-    [ObservableProperty] private decimal _positionViewGroupCost;
-    [ObservableProperty] private decimal _positionViewGroupPnl;
-    [ObservableProperty] private bool _isPositionViewGroupPnlPositive;
-
     public string MarketDisplay => string.IsNullOrWhiteSpace(Exchange) ? Currency : Exchange;
 
     public string AssetTypeDisplay => AssetType switch

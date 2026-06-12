@@ -361,13 +361,8 @@
     <sys:String x:Key="Portfolio.Liability.MonthlyPayment">Monthly</sys:String>
     <sys:String x:Key="Portfolio.Liability.NextDue">Next due</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">All</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.All">All Portfolios</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.Add">New Portfolio</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.Manage">Manage Portfolios</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.All">All</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Group">By Portfolio</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Market">By Market</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Type">By Type</sys:String>
     <sys:String x:Key="Portfolio.Group.Ungrouped">Unassigned</sys:String>
     <sys:String x:Key="Portfolio.Group.Unknown">Unknown portfolio</sys:String>
     <sys:String x:Key="Portfolio.Group.NeedsResolution">Needs review</sys:String>

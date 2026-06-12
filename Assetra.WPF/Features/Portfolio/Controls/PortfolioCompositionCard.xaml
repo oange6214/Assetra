@@ -83,6 +83,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="8" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
@@ -92,9 +94,9 @@
                         Grid.Column="0"
                         Width="8"
                         Height="8"
+                        VerticalAlignment="Center"
                         Background="{DynamicResource AppAccent}"
-                        CornerRadius="{StaticResource Radius.Full}"
-                        VerticalAlignment="Center" />
+                        CornerRadius="{StaticResource Radius.Full}" />
 
                     <!--  Percent  -->
                     <TextBlock
@@ -105,18 +107,16 @@
                         Text="{Binding StockPercent, StringFormat={}{0:F1}%}"
                         Typography.NumeralAlignment="Tabular" />
 
-                    <!--  Label  -->
+                    <!--  Label (own column — no overlap risk)  -->
                     <TextBlock
-                        Grid.Column="2"
-                        HorizontalAlignment="Left"
-                        Margin="40,0,0,0"
+                        Grid.Column="4"
                         FontSize="{StaticResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Filter.AssetType.Stock}" />
 
                     <!--  Value  -->
                     <TextBlock
-                        Grid.Column="4"
+                        Grid.Column="6"
                         FontSize="{StaticResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding StockValue, Converter={StaticResource CurrencyConverter}}"
@@ -129,6 +129,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="8" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
@@ -138,9 +140,9 @@
                         Grid.Column="0"
                         Width="8"
                         Height="8"
+                        VerticalAlignment="Center"
                         Background="{DynamicResource AppTextMuted}"
-                        CornerRadius="{StaticResource Radius.Full}"
-                        VerticalAlignment="Center" />
+                        CornerRadius="{StaticResource Radius.Full}" />
 
                     <!--  Percent  -->
                     <TextBlock
@@ -151,18 +153,16 @@
                         Text="{Binding EtfPercent, StringFormat={}{0:F1}%}"
                         Typography.NumeralAlignment="Tabular" />
 
-                    <!--  Label  -->
+                    <!--  Label (own column — no overlap risk)  -->
                     <TextBlock
-                        Grid.Column="2"
-                        HorizontalAlignment="Left"
-                        Margin="40,0,0,0"
+                        Grid.Column="4"
                         FontSize="{StaticResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{DynamicResource Portfolio.Filter.AssetType.Etf}" />
 
                     <!--  Value  -->
                     <TextBlock
-                        Grid.Column="4"
+                        Grid.Column="6"
                         FontSize="{StaticResource Font.Size.Sm}"
                         Foreground="{DynamicResource AppTextPrimary}"
                         Text="{Binding EtfValue, Converter={StaticResource CurrencyConverter}}"

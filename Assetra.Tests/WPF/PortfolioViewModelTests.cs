@@ -253,61 +253,11 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task SetPositionViewMode_GroupsPositionsViewBySelectedDimension()
+    public async Task LoadAsync_DefaultsToAllTabWhenCustomGroupsExist()
     {
-        var twse = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE");
-        var nasdaq = new PortfolioEntry(Guid.NewGuid(), "AAPL", "NASDAQ", Currency: "USD");
-        var snapshots = SnapshotsFor([(twse, 35m, 1000), (nasdaq, 190m, 10)]);
-        var (vm, _) = CreateVm([twse, nasdaq], PositionQueryMock(snapshots).Object);
-        await vm.LoadAsync();
-
-        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Market);
-
-        var group = Assert.Single(vm.PositionsView.GroupDescriptions);
-        var propertyGroup = Assert.IsType<PropertyGroupDescription>(group);
-        Assert.Equal(nameof(PortfolioRowViewModel.MarketDisplay), propertyGroup.PropertyName);
-    }
-
-    [Fact]
-    public async Task SetPositionViewMode_Group_UpdatesVisibleGroupSummaries()
-    {
-        var longTermId = Guid.NewGuid();
-        var incomeId = Guid.NewGuid();
-        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
-            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
-            new PortfolioGroup(longTermId, "長期投資"),
-            new PortfolioGroup(incomeId, "現金流"),
-        ]));
-        var longFund = new PortfolioEntry(Guid.NewGuid(), "LONGF", "", AssetType.Fund, PortfolioGroupId: longTermId);
-        var longBond = new PortfolioEntry(Guid.NewGuid(), "LONGB", "", AssetType.Bond, PortfolioGroupId: longTermId);
-        var incomeFund = new PortfolioEntry(Guid.NewGuid(), "INCF", "", AssetType.Fund, PortfolioGroupId: incomeId);
-        var snapshots = SnapshotsFor([
-            (longFund, 100m, 10),
-            (longBond, 200m, 5),
-            (incomeFund, 50m, 4),
-        ]);
-        var (vm, _) = CreateVm(
-            [longFund, longBond, incomeFund],
-            PositionQueryMock(snapshots).Object,
-            catalog);
-        await vm.LoadAsync();
-
-        vm.SetAssetTypeFilterCommand.Execute("Fund");
-        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Group);
-
-        var longFundRow = vm.Positions.Single(p => p.Symbol == "LONGF");
-        var incomeFundRow = vm.Positions.Single(p => p.Symbol == "INCF");
-        Assert.Equal(1, longFundRow.PositionViewGroupItemCount);
-        Assert.Equal(1_000m, longFundRow.PositionViewGroupMarketValue);
-        Assert.Equal(1_000m, longFundRow.PositionViewGroupCost);
-        Assert.Equal(0m, longFundRow.PositionViewGroupPnl);
-        Assert.Equal(1, incomeFundRow.PositionViewGroupItemCount);
-        Assert.Equal(200m, incomeFundRow.PositionViewGroupMarketValue);
-    }
-
-    [Fact]
-    public async Task LoadAsync_DefaultsToGroupViewWhenCustomGroupsExist()
-    {
+        // WHY: after Task 1.6, ViewMode is gone. When user has custom groups the tab strip
+        // should populate with those groups but SelectedTab should still start on 全部
+        // (no auto-switch to a group tab on load — user drives navigation via tabs explicitly).
         var groupId = Guid.NewGuid();
         var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
             new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
@@ -319,25 +269,12 @@ public class PortfolioViewModelTests
 
         await vm.LoadAsync();
 
-        Assert.Equal(InvestmentPositionViewMode.Group, vm.PositionViewMode);
-        var group = Assert.Single(vm.PositionsView.GroupDescriptions);
-        var propertyGroup = Assert.IsType<PropertyGroupDescription>(group);
-        Assert.Equal(nameof(PortfolioRowViewModel.PortfolioGroupDisplay), propertyGroup.PropertyName);
-    }
-
-    [Fact]
-    public async Task LoadAsync_KeepsFlatViewWhenOnlySystemGroupExists()
-    {
-        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
-            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
-        ]));
-        var entry = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE");
-        var snapshots = SnapshotsFor([(entry, 35m, 1000)]);
-        var (vm, _) = CreateVm([entry], PositionQueryMock(snapshots).Object, catalog);
-
-        await vm.LoadAsync();
-
-        Assert.Equal(InvestmentPositionViewMode.All, vm.PositionViewMode);
+        // Tab strip should include: 全部, 未指定組合, 長期投資
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.IsAll);
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == groupId);
+        // SelectedTab defaults to 全部 (no auto-navigate on load)
+        Assert.True(vm.PortfolioTabs.SelectedTab?.IsAll ?? false);
+        // PositionsView has no group grouping — flat view (ViewMode machinery removed)
         Assert.Empty(vm.PositionsView.GroupDescriptions);
     }
 
@@ -363,8 +300,11 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task LoadAsync_BuildsDynamicPortfolioGroupFilterChips()
+    public async Task LoadAsync_BuildsTabStripFromGroupCatalog()
     {
+        // WHY: SyncPortfolioTabs() must run during LoadAsync so that PortfolioTabs.Tabs
+        // reflects the current catalog — including user-created portfolios. Tab strip
+        // replaces the old PortfolioGroupFilterChips machinery (Task 1.6).
         var longTermId = Guid.NewGuid();
         var incomeId = Guid.NewGuid();
         var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
@@ -378,10 +318,14 @@ public class PortfolioViewModelTests
 
         await vm.LoadAsync();
 
-        Assert.Equal(
-            ["全部群組", "未分組", "長期投資", "現金流"],
-            vm.PortfolioGroupFilterChips.Select(chip => chip.Name));
-        Assert.True(vm.PortfolioGroupFilterChips.Single(chip => chip.Id is null).IsSelected);
+        // Tab strip: 全部 + 未指定組合 + 長期投資 + 現金流
+        Assert.Equal(4, vm.PortfolioTabs.Tabs.Count);
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.IsAll);
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == PortfolioGroup.DefaultId);
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == longTermId);
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == incomeId);
+        // SelectedTab defaults to 全部
+        Assert.True(vm.PortfolioTabs.SelectedTab?.IsAll ?? false);
     }
 
     [Fact]
@@ -406,12 +350,9 @@ public class PortfolioViewModelTests
             catalog);
 
         await vm.LoadAsync();
-        vm.SetPositionViewModeCommand.Execute(InvestmentPositionViewMode.Group);
         vm.SetPortfolioGroupFilterCommand.Execute(incomeId);
 
         Assert.Equal(["INCF"], vm.PositionsView.Cast<PortfolioRowViewModel>().Select(row => row.Symbol));
-        Assert.True(vm.PortfolioGroupFilterChips.Single(chip => chip.Id == incomeId).IsSelected);
-        Assert.False(vm.PortfolioGroupFilterChips.Single(chip => chip.Id == longTermId).IsSelected);
     }
 
     // ── Task 1.3 — PortfolioTabs → PortfolioGroupFilter wiring ─────────────────

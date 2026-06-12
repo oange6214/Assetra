@@ -359,13 +359,8 @@
     <sys:String x:Key="Portfolio.Liability.MonthlyPayment">月付</sys:String>
     <sys:String x:Key="Portfolio.Liability.NextDue">下次到期</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.All">全部</sys:String>
-    <sys:String x:Key="Portfolio.Filter.Group.All">全部投資組合</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.Add">新增投資組合</sys:String>
     <sys:String x:Key="Portfolio.Filter.Group.Manage">管理投資組合</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.All">全部</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Group">依投資組合</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Market">依市場</sys:String>
-    <sys:String x:Key="Portfolio.ViewMode.Type">依類型</sys:String>
     <sys:String x:Key="Portfolio.Group.Ungrouped">未指定組合</sys:String>
     <sys:String x:Key="Portfolio.Group.Unknown">未知投資組合</sys:String>
     <sys:String x:Key="Portfolio.Group.NeedsResolution">投資組合待整理</sys:String>

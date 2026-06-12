@@ -18,101 +18,6 @@
     <UserControl.Resources>
         <conv:PercentToWidthConverter x:Key="PercentToWidthConverter" />
 
-        <DataTemplate x:Key="PositionGroupHeaderTemplate">
-            <Border
-                Margin="0,8,0,6"
-                Padding="12,8"
-                Background="{DynamicResource AppSurface}"
-                BorderBrush="{DynamicResource AppBorderLight}"
-                BorderThickness="1"
-                CornerRadius="8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Sm}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppText}"
-                        Text="{Binding Name}" />
-
-                    <StackPanel
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal">
-                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Filter.Summary.Count}" />
-                            <TextBlock
-                                Margin="4,0,0,0"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{Binding Items[0].PositionViewGroupItemCount, StringFormat={}{0:N0}}" />
-                        </StackPanel>
-
-                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Filter.Summary.MarketValue}" />
-                            <TextBlock
-                                Margin="4,0,0,0"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{Binding Items[0].PositionViewGroupMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                        </StackPanel>
-
-                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Filter.Summary.Cost}" />
-                            <TextBlock
-                                Margin="4,0,0,0"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{Binding Items[0].PositionViewGroupCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}" />
-                        </StackPanel>
-
-                        <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Filter.Summary.Pnl}" />
-                            <TextBlock
-                                Margin="4,0,0,0"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                FontWeight="SemiBold"
-                                Text="{Binding Items[0].PositionViewGroupPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Items[0].IsPositionViewGroupPnlPositive}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Items[0].PositionViewGroupPnl}" Value="0">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </Border>
-        </DataTemplate>
-
-
         <!--
             KPI 展開面板的關閉鈕 — 24×24 圓形、無框、hover 變淡背景。
             和 AppIconButton 的 32px 方框感分開，視覺更輕巧、配合面板頭部
@@ -196,34 +101,45 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <!--  Task 1.4: PortfolioDetailHeader (value / pnl / trend / ＋投資) — Task 1.6 finalises placement  -->
+            <!--  Row 0: PortfolioTabStrip (Task 1.6 — horizontal pill row of portfolios)  -->
             <RowDefinition Height="Auto" />
-            <!--  Investment summary cards  -->
+            <!--  Row 1: PortfolioDetailHeader (value / pnl / trend / ＋投資) — Task 1.4  -->
             <RowDefinition Height="Auto" />
-            <!--  KPI expand panel (持股佔比 donut / 每日損益 柱狀圖)  -->
+            <!--  Row 2: PortfolioCompositionCard (股票 vs ETF focus card) — Task 1.5/1.6  -->
             <RowDefinition Height="Auto" />
-            <!--  Quote provider notice  -->
+            <!--  Row 3: Investment summary cards  -->
             <RowDefinition Height="Auto" />
-            <!--  Asset-type filter chips  -->
+            <!--  Row 4: KPI expand panel (持股佔比 donut / 每日損益 柱狀圖)  -->
             <RowDefinition Height="Auto" />
-            <!--  Text search  -->
+            <!--  Row 5: Quote provider notice  -->
+            <RowDefinition Height="Auto" />
+            <!--  Row 6: Text search + options  -->
             <RowDefinition Height="*" />
-            <!--  DataGrid (all asset types in one list; sort by Type column to group)  -->
+            <!--  Row 7: DataGrid (all asset types in one list; sort by Type column to group)  -->
             <RowDefinition Height="Auto" />
-            <!--  Filter summary footer — only visible when 篩選作用中  -->
+            <!--  Row 8: Filter summary footer  -->
         </Grid.RowDefinitions>
 
-        <!--  ═══ Row 0: Per-portfolio detail header (Task 1.4 — layout finalised in Task 1.6) ═══  -->
-        <portfolio:PortfolioDetailHeader Grid.Row="0" />
+        <!--  ═══ Row 0: Portfolio tab strip (Task 1.6) ═══  -->
+        <portfolio:PortfolioTabStrip Grid.Row="0" />
+
+        <!--  ═══ Row 1: Per-portfolio detail header (Task 1.4) ═══  -->
+        <portfolio:PortfolioDetailHeader Grid.Row="1" />
+
+        <!--  ═══ Row 2: Stock vs ETF composition focus card (Task 1.5 — placed here in Task 1.6) ═══  -->
+        <portfolio:PortfolioCompositionCard
+            Grid.Row="2"
+            Margin="12,10,12,0"
+            DataContext="{Binding Composition}" />
 
         <!--
-            ═══ Row 1: Investment Summary ═══
+            ═══ Row 3: Investment Summary ═══
             v3 redesign：跟 LiabilityTabPanel / AccountsTabPanel 對齊—
             外層 background 改 AppBackground (灰，跟下方 datagrid 同色)，
             內 cards 用 AppCardBackground (白)，padding 統一 Padding.Card token。
         -->
         <Border
-            Grid.Row="1"
+            Grid.Row="3"
             Padding="{StaticResource Padding.SectionStrip}"
             Background="{DynamicResource AppBackground}"
             BorderBrush="{DynamicResource AppBorder}"
@@ -512,7 +428,7 @@
         </Border>
 
         <!--
-            ═══ Row 1: KPI expand panel ═══
+            ═══ Row 4: KPI expand panel ═══
             點 KPI 卡右上小圖示後展開的圖表面板。三種狀態：
             - IsKpiMarketValueExpanded → 持股佔比 donut（沿用 AllocationMiniChart）
             - IsKpiDayChangeExpanded   → 過去 30 天每日 PnL 柱狀圖
@@ -520,7 +436,7 @@
             一次只能展開一個，由 ExpandedKpiPanel 單一 state 控制。
         -->
         <Border
-            Grid.Row="2"
+            Grid.Row="4"
             Margin="12,10,12,0"
             Padding="14,12"
             Background="{DynamicResource AppSurface}"
@@ -913,9 +829,9 @@
             </Grid>
         </Border>
 
-        <!--  ═══ Row 3: Quote setup notice ═══  -->
+        <!--  ═══ Row 5: Quote setup notice ═══  -->
         <Border
-            Grid.Row="3"
+            Grid.Row="5"
             Margin="12,10,12,0"
             Padding="12,10"
             Background="{DynamicResource AppSurface}"
@@ -946,127 +862,9 @@
             </DockPanel>
         </Border>
 
-        <!--
-            ═══ Row 3: View mode + filters ═══
-            上方是投資持倉的觀看方式（平面 / 群組 / 市場 / 類型），下方保留資產類型作為
-            次要篩選。群組不再用可無限延展的 chip row，避免使用者建立多個策略群組後擠爆工具列。
-        -->
-        <StackPanel Grid.Row="4" Margin="12,14,12,6">
-            <!--
-                P5.13 (C2) — DockPanel：左側 view mode tabs / 右側群組管理 action buttons。
-                舊版把「+新增群組」「管理群組」放在 IsGroupViewMode-gated Grid 內，使用者
-                只能在依群組 mode 才能新建群組 — 不合理。Pull out 兩顆按鈕到 Row 1 右側，
-                所有 view mode 下都可建立 / 管理群組。
-            -->
-            <DockPanel Margin="0,0,0,8">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button
-                        Height="32"
-                        Margin="0,0,8,0"
-                        Padding="12,0"
-                        Command="{Binding AddPortfolioGroupCommand}"
-                        Style="{StaticResource AppPrimaryButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon
-                                Margin="0,0,6,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                Symbol="Add24" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                Text="{DynamicResource Portfolio.Filter.Group.Add}" />
-                        </StackPanel>
-                    </Button>
-                    <Button
-                        Height="32"
-                        Padding="12,0"
-                        Command="{Binding OpenPortfolioGroupsCommand}"
-                        Content="{DynamicResource Portfolio.Filter.Group.Manage}"
-                        Style="{StaticResource AppSecondaryButton}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton
-                        Command="{Binding SetPositionViewModeCommand}"
-                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.All}"
-                        Content="{DynamicResource Portfolio.ViewMode.All}">
-                        <RadioButton.Style>
-                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.All}">
-                                        <Setter Property="IsChecked" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RadioButton.Style>
-                    </RadioButton>
-                    <RadioButton
-                        Command="{Binding SetPositionViewModeCommand}"
-                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Group}"
-                        Content="{DynamicResource Portfolio.ViewMode.Group}">
-                        <RadioButton.Style>
-                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Group}">
-                                        <Setter Property="IsChecked" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RadioButton.Style>
-                    </RadioButton>
-                    <RadioButton
-                        Command="{Binding SetPositionViewModeCommand}"
-                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Market}"
-                        Content="{DynamicResource Portfolio.ViewMode.Market}">
-                        <RadioButton.Style>
-                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Market}">
-                                        <Setter Property="IsChecked" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RadioButton.Style>
-                    </RadioButton>
-                    <RadioButton
-                        Command="{Binding SetPositionViewModeCommand}"
-                        CommandParameter="{x:Static vm:InvestmentPositionViewMode.Type}"
-                        Content="{DynamicResource Portfolio.ViewMode.Type}">
-                        <RadioButton.Style>
-                            <Style BasedOn="{StaticResource AppSubTab}" TargetType="RadioButton">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PositionViewMode}" Value="{x:Static vm:InvestmentPositionViewMode.Type}">
-                                        <Setter Property="IsChecked" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </RadioButton.Style>
-                    </RadioButton>
-                </StackPanel>
-            </DockPanel>
-
-            <!--
-                P5.13 (C1) — Row 2 整列拿掉。
-                舊版 row 2 在「全部 / 依市場 / 依類型」mode 顯示資產類型 chips，
-                「依群組」mode 改顯示群組 chips。對使用者來說兩列都像「歸類」，
-                概念上看不出 row 1 是「視圖」、row 2 是「篩選」。
-                
-                改法：刪掉 row 2 chips 整列。
-                - 想看 ETF / 個股 / 基金：切到「依類型」view mode 自動分組
-                - 想看某個策略群組：切到「依群組」view mode 自動分組
-                - 想找特定資產：用 Row 4 搜尋框（符號 / 名稱 contains 比對）
-                
-                VM 端 SetAssetTypeFilterCommand / SetPortfolioGroupFilterCommand /
-                PortfolioGroupFilterChips collection 保留（unit test 覆蓋）— 只是
-                沒 UI 入口。FilterPosition 的 AssetTypeFilter / PortfolioGroupFilter
-                判斷仍存在但永遠 null = no-op，行為等於只走 view mode + FilterText。
-            -->
-        </StackPanel>
-
-        <!--  ═══ Row 5: Text search ═══  -->
+        <!--  ═══ Row 6: Text search ═══  -->
         <controls:SearchBox
-            Grid.Row="5"
+            Grid.Row="6"
             Placeholder="{DynamicResource Portfolio.Filter.SearchPositions}"
             Text="{Binding FilterText}">
             <controls:SearchBox.RightContent>
@@ -1113,8 +911,8 @@
             </controls:SearchBox.RightContent>
         </controls:SearchBox>
 
-        <!--  ═══ Row 6: Positions DataGrid ═══  -->
-        <Grid Grid.Row="6">
+        <!--  ═══ Row 7: Positions DataGrid ═══  -->
+        <Grid Grid.Row="7">
             <!--  Empty state  -->
             <Border
                 Padding="32"
@@ -1159,13 +957,7 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 SelectedItem="{Binding SelectedPositionRow, Mode=TwoWay}">
-                <ListBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <StaticResource ResourceKey="PositionGroupHeaderTemplate" />
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListBox.GroupStyle>
+                <!--  GroupStyle removed: PositionGroupHeaderTemplate deleted (Task 1.6 — ViewMode machinery gone)  -->
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -1969,7 +1761,7 @@
         </Grid>
 
         <!--
-            ═══ Row 6: Filter Summary Footer ═══
+            ═══ Row 8: Filter Summary Footer ═══
             篩選作用中才顯示（IsPositionsFiltered=true）。仿 TradesTabPanel 的「流入 /
             流出 / 淨額」footer pattern，讓使用者切資產類型 chip 後立即看到該類別
             的彙總（筆數 / 市值 / 成本 / 損益），不必心算。
@@ -1979,7 +1771,7 @@
             跟切資產類型後的子集合計一樣有用，不該只在 chip 不是全部時才顯示。
         -->
         <Border
-            Grid.Row="7"
+            Grid.Row="8"
             Padding="12,6"
             Background="{DynamicResource AppSurface}"
             BorderBrush="{DynamicResource AppBorder}"

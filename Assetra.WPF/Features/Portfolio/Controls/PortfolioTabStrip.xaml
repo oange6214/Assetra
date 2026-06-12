@@ -1,0 +1,127 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.PortfolioTabStrip"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio"
+    d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+
+        <!--
+            Pill style for each tab item in the strip.
+            Active = AppAccent filled + white text (same as AppPillTab in Tabs.xaml).
+            Inactive = transparent + secondary text; hover = AppHover bg.
+            Color-dot (8×8 ellipse) appears only when ColorHex is set (non-null).
+        -->
+        <Style x:Key="PortfolioTabPill" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="14,5" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border
+                            x:Name="Bd"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Lg}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <!--
+                                    Color dot — only visible when ColorHex != null.
+                                    NullToVisibilityConverter is a global resource (App.xaml).
+                                -->
+                                <Ellipse
+                                    x:Name="ColorDot"
+                                    Width="8"
+                                    Height="8"
+                                    Margin="0,0,6,0"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding ColorHex, Converter={StaticResource NullToVisibilityConverter}}">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{Binding ColorHex, TargetNullValue=Transparent}" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <ContentPresenter
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    TextElement.FontFamily="{TemplateBinding FontFamily}"
+                                    TextElement.FontSize="{TemplateBinding FontSize}"
+                                    TextElement.FontWeight="{TemplateBinding FontWeight}"
+                                    TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppAccent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="IsSelected" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                            </MultiTrigger>
+                            <!--  (Color dot visibility is set directly via NullToVisibilityConverter on the Ellipse)  -->
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <!--
+        Horizontal pill row bound to PortfolioTabs.Tabs.
+        Wrapped in a horizontal ScrollViewer (scrollbar hidden, mouse-wheel enabled) to
+        handle overflow gracefully when many portfolios exist.
+        See comment in PositionsTabPanel.xaml: this re-introduces the chip row but WITH
+        overflow handling instead of an unbounded StackPanel.
+    -->
+    <Border
+        Padding="12,8,12,0"
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="0,0,0,0">
+
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Hidden"
+            VerticalScrollBarVisibility="Disabled"
+            PreviewMouseWheel="OnPreviewMouseWheel">
+
+            <ListBox
+                Background="Transparent"
+                BorderThickness="0"
+                ItemContainerStyle="{StaticResource PortfolioTabPill}"
+                ItemsSource="{Binding PortfolioTabs.Tabs}"
+                SelectedItem="{Binding PortfolioTabs.SelectedTab, Mode=TwoWay}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type subvm:PortfolioTabViewModel}">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </ScrollViewer>
+    </Border>
+
+</UserControl>

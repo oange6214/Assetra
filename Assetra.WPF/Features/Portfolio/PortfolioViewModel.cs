@@ -92,8 +92,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     /// </summary>
     public Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? GroupCatalog { get; private set; }
 
-    private bool _hasAppliedInitialPositionViewMode;
-
     /// <summary>XAML 用：是否暴露 group chip row。catalog 存在且至少 1 個 group 時 true。</summary>
     /// <summary>
     /// P3.9 — 排除 system 預設那一個 group。判定改成「user 主動建立過群組」才視為
@@ -400,15 +398,15 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 .ObserveOn(ui.Scheduler)
                 .Subscribe(_ =>
                 {
-                    RefreshPortfolioGroupFilterChips();
+                    SyncPortfolioTabs();
                     OnPropertyChanged(nameof(HasPortfolioGroups));
                 })
                 .DisposeWith(_disposables);
         }
         // Task 1.3 — construct the Google-style tab strip from the current catalog groups.
         // _localization is assigned later in this ctor, but L() is null-safe (returns fallback when null),
-        // so the labels are correct immediately. Catalog groups are empty until LoadAsync(); Sync() in
-        // RefreshPortfolioGroupFilterChips() re-populates the tabs once the catalog is loaded.
+        // so the labels are correct immediately. Catalog groups are empty until LoadAsync(); SyncPortfolioTabs()
+        // re-populates the tabs once the catalog is loaded.
         PortfolioTabs = new PortfolioTabsViewModel(
             GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>(),
             allLabel: L("Common.All", "全部"),
@@ -924,16 +922,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             ?? L("Portfolio.Group.Ungrouped", "未分組");
     }
 
-    private void ApplyInitialPositionViewMode()
-    {
-        if (_hasAppliedInitialPositionViewMode)
-            return;
-
-        _hasAppliedInitialPositionViewMode = true;
-        if (HasPortfolioGroups)
-            PositionViewMode = InvestmentPositionViewMode.Group;
-    }
-
     private void RaiseSetupNoticeChanged()
         => SetupNotice.Refresh(HasNoCashAccounts, HasNoTrades);
 
@@ -947,14 +935,12 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             try
             {
                 await GroupCatalog.EnsureLoadedAsync().ConfigureAwait(true);
-                RefreshPortfolioGroupFilterChips();
+                SyncPortfolioTabs();
                 OnPropertyChanged(nameof(HasPortfolioGroups));
                 groupCatalogLoaded = true;
             }
             catch { /* ignored */ }
         }
-        if (groupCatalogLoaded)
-            ApplyInitialPositionViewMode();
 
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
@@ -1111,10 +1097,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
         // Sparkline — 每次 totals 重算順便 queue（去重；走 cache 多數 instant）
         QueueSparklineLoadIfNeeded();
-
-        // Footer 統計：positions / cash / liability 都依 collection view 即時加總，
-        // 但 collection 內容變了不自動 raise PropertyChanged，這裡統一推一次。
-        RefreshPositionViewGroupSummaries();
 
         // Task 1.4 — recompute selected-portfolio detail header (value / pnl / trend).
         RecomputeSelectedPortfolioHeader();
