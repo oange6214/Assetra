@@ -1,54 +1,60 @@
 # Portfolio Google-Style Redesign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+>
+> **Rev 2** — corrected after a 24-agent adversarial review against the real codebase (4 major + 11 minor findings applied; key corrections: `Trade.PortfolioGroupId` not `GroupId`, positions carry their group directly, the group filter already exists as `PortfolioGroupFilter`, per-group trend has no period selector, ETF = `Stock + IsEtf` flag, theme brushes live in BOTH `Themes/Light.xaml` + `Dark.xaml`).
 
-**Goal:** Rebuild the 投資資產 → 持股 experience to mirror Google Finance's portfolio detail page: top "投資組合" tabs, a per-portfolio header (value / change / trend chart / period) with a 股票-vs-ETF focus card, an expandable per-holding 購買細項 (lot) breakdown, and a portfolio-scoped 活動 feed — while renaming "群組" → "投資組合" in the UI.
+**Goal:** Rebuild the 投資資產 → 持股 experience to mirror Google Finance's portfolio detail page: top "投資組合" tabs, a per-portfolio header (value / change / trend chart / period / ＋投資) with a 股票-vs-ETF focus card, an expandable per-holding 購買細項 (lot) breakdown, and a portfolio-scoped 活動 feed — while renaming "群組" → "投資組合" in the UI.
 
-**Architecture:** UI-layer restructure on the existing data model. `PortfolioGroup` (via singleton `PortfolioGroupCatalog`) becomes the user-facing "投資組合"; `Trade.GroupId` already links trades→portfolio, and positions resolve to a portfolio through their trades (the existing 依群組 grouping). We add a portfolio **tab strip** that replaces the old `全部/依群組/依市場/依類型` ViewMode toggle, a per-portfolio **detail header** that reuses the existing per-group KPIs + trend chart, one genuinely-new **composition card** (股票 vs ETF), an expandable **lot row**, and a filtered **activity** view. No domain/DB/identifier renames — "Group" stays in code; only user-facing strings change.
+**Architecture:** UI-layer restructure on the existing data model. `PortfolioGroup` (via singleton `PortfolioGroupCatalog`) becomes the user-facing "投資組合". **Positions carry their portfolio directly**: source of truth is `PortfolioEntry.PortfolioGroupId`, surfaced as `PortfolioRowViewModel.PortfolioGroupId` (see the doc comment at `PortfolioRowViewModel.cs:24-26` — `Trade.PortfolioGroupId` is historical transaction context and must NOT be used for position grouping; it is used only by P3's activity filtering). The tab strip drives the **existing** `PortfolioGroupFilter` (no new collection view), replacing the old `全部/依群組/依市場/依類型` ViewMode toggle. New work: the tab strip UI, the detail header, one genuinely-new **composition card** (股票 vs ETF), an expandable **lot row** (P2), and a filtered **activity** view (P3). No domain/DB/identifier renames — "Group" stays in code; only user-facing strings change.
 
-**Tech Stack:** .NET 10 WPF, CommunityToolkit.Mvvm (`[ObservableProperty]`/`[RelayCommand]`), LiveChartsCore (existing trend/pie charts), xUnit + Moq, `DesignSystem/` tokens. `TreatWarningsAsErrors` ON. Build `dotnet build Assetra.slnx`; test `dotnet test Assetra.Tests/Assetra.Tests.csproj`.
+**Tech Stack:** .NET 10 WPF, CommunityToolkit.Mvvm, LiveChartsCore, xUnit + Moq, `DesignSystem/` tokens. `TreatWarningsAsErrors` ON. Build `dotnet build Assetra.slnx`; test `dotnet test Assetra.Tests/Assetra.Tests.csproj`.
 
 ---
 
 ## Decomposition & sequencing
 
-This is a medium-large UI feature. It is split into **4 phases, each independently shippable**. **Phase 1 is fully detailed below.** Phases 2–4 are scoped as task outlines; per the writing-plans decomposition rule each will get its own fully-detailed plan once Phase 1 lands and its concrete structure exists to build on (detailing P2–P4's exact XAML now, before P1's containers exist, would bake in unverified assumptions).
+4 phases, each independently shippable. **Phase 1 fully detailed**; P2–P4 are scoped outlines that get their own detailed plans once P1 lands.
 
-- **P1 — Foundation:** rename + portfolio tab strip + detail header (value/change/trend/period) + 股票-vs-ETF focus card. Removes the old ViewMode toggle.
-- **P2 — 購買細項:** expandable per-holding lot breakdown (the buy trades composing a position).
+- **P1 — Foundation:** rename + portfolio tab strip + detail header + 股票-vs-ETF focus card + ＋投資 button. Removes the old ViewMode toggle.
+- **P2 — 購買細項:** expandable per-holding lot breakdown.
 - **P3 — 活動:** portfolio-scoped transaction feed.
-- **P4 (optional) — 比較對象:** per-portfolio benchmark comparison.
+- **P4 (optional) — 比較對象 + per-portfolio period history:** benchmarks AND a period-selectable per-portfolio trend (snapshots carry no group dimension today — both are real new work, see Task 1.4 note).
 
-**Out of scope (confirmed):** cash/liability grouping (separate FIRE/Goals bucketing), 最新消息/news (belongs to Stockra, not Assetra), 觀察清單/watchlists (#2, deferred), any rename of code identifiers / DB columns / `PortfolioGroup`/`GroupId`.
+**Out of scope (confirmed):** cash/liability grouping (separate FIRE/Goals bucketing), 最新消息/news (Stockra), 觀察清單 (#2, deferred), renames of code identifiers / DB columns.
 
 ---
 
-## Data model (read these before starting — do not re-derive)
+## Data model & existing machinery (verified — read these, do not re-derive)
 
-- `Assetra.Core/Models/PortfolioGroup.cs` — `Id`, `Name`, `ColorHex`, static `DefaultId`. The user's "投資組合" == a `PortfolioGroup`.
-- `Assetra.WPF/Features/PortfolioGroups/PortfolioGroupCatalog.cs` — singleton, `ReadOnlyObservableCollection<PortfolioGroup> Groups`, `Default`, `FindById(Guid?)`, `EnsureLoadedAsync`. Already injected into `PortfolioViewModel` as `GroupCatalog` (nullable).
-- `Assetra.Core/Models/Trade.cs` — `GroupId` (Guid?) links each trade to a portfolio.
-- `Assetra.WPF/Features/Portfolio/PortfolioViewModel.cs` — owns `Positions` (`PortfolioRowViewModel`), `Trades` (`TradeRowViewModel`). The existing 依群組 ViewMode already computes per-group KPIs exposed on rows as `PositionViewGroupItemCount / PositionViewGroupMarketValue / PositionViewGroupCost / PositionViewGroupPnl` (see `PositionsTabPanel.xaml` `PositionGroupHeaderTemplate`). **Reuse this group-resolution + KPI logic** for the tab filter and header — find it by searching `PortfolioViewModel.cs` for the ViewMode/`PositionViewGroup` build (and `_hasAppliedInitialPositionViewMode`).
-- `Assetra.WPF/Features/Portfolio/PortfolioHistoryViewModel.cs` — existing trend chart + period selector (`5天/1個月/.../全部`) and per-group trend (`Portfolio.Group.Trend.*`). Reuse for the detail-header chart.
-- `Assetra.Core/Models/AssetType.cs` — `Stock, Fund, PreciousMetal, Bond, Crypto, Etf`. The focus card's "股票 vs ETF" split keys on this (`Etf` → ETF bucket; everything else with holdings → 股票 bucket, OR refine per design note in Task 1.5).
+- `Assetra.Core/Models/PortfolioGroup.cs` — `Id`, `Name`, `ColorHex`, `IsSystem`, static `DefaultId` (`:39-46`). A system default group is migration-seeded; it can be renamed but not deleted. Existing UI deliberately special-cases it: `HasPortfolioGroups` counts only `!IsSystem` groups (`PortfolioViewModel.cs:98-105`), and the chip builder labels the DefaultId chip with `Portfolio.Group.Ungrouped` instead of its raw name (`PortfolioViewModel.Filtering.cs:111-118`).
+- `Assetra.WPF/Features/PortfolioGroups/PortfolioGroupCatalog.cs` — singleton, `Groups`, `Default`, `FindById`, `EnsureLoadedAsync`. Injected into `PortfolioViewModel` as `GroupCatalog` (**nullable** — guard).
+- **Position→portfolio link:** `PortfolioRowViewModel.PortfolioGroupId` (from `PortfolioEntry.PortfolioGroupId`). Effective group = `row.PortfolioGroupId ?? PortfolioGroup.DefaultId` (the existing pattern at `Filtering.cs:305`). `Trade.PortfolioGroupId` (`Trade.cs:160`) is per-trade historical context — P3 only.
+- **The filter machinery ALREADY EXISTS** in `Assetra.WPF/Features/Portfolio/PortfolioViewModel.Filtering.cs`:
+  - `PositionsView` (`:159-173`) = `CollectionViewSource.GetDefaultView(Positions)` with `Filter = FilterPosition` (combines text search + asset-type chips + group filter). The holdings XAML **already binds `PositionsView`** in two presenters (`PositionsTabPanel.xaml:1152` ListBox, `:1447` DataGrid).
+  - `PortfolioGroupFilter` (`Guid?`, null = all, `:61`) + `SetPortfolioGroupFilterCommand` (`:74-75`); the group predicate incl. null→DefaultId coalesce is `FilterPosition:303-308`; `OnPortfolioGroupFilterChanged` (`:63-69`) already does `PositionsView.Refresh()` + summary/stat refreshes. Unit-tested at `PortfolioViewModelTests.cs:388-415`.
+  - ⚠️ `OnPositionViewModeChanged` (`:79-93`) auto-clears `PortfolioGroupFilter` when leaving Group mode (`:83-84`) — relevant to Tasks 1.3/1.6.
+- **Trend charts — two different things:**
+  - `PortfolioHistoryViewModel.cs` — whole-portfolio trend + period selector (snapshot-based). It has **zero** group awareness, and `PortfolioDailySnapshot` has no group dimension, so per-group period history **cannot** be derived from stored data (→ P4).
+  - `PortfolioGroupDetailViewModel.cs` — the per-group trend (`PerformanceTrendSeries`, built once in ctor from holdings' `SparklinePoints`): a **fixed recent-window estimate with NO period selector** (note string zh-TW:375 「依目前群組成員與近月價格估算」). Its ctor (`:25-30`) is also the canonical per-group aggregate pattern: sum `MarketValue/Cost/Pnl` and **`TodayChange = Σ row.DayChange`**.
+- **ETF storage rule** (`Filtering.cs:281-299` documents it): the buy flow writes `AssetType.Stock` for both stocks AND ETFs; ETF-ness is the separate **`IsEtf` flag** (`PortfolioRowViewModel.cs:67`). Effective ETF predicate: `row.AssetType == AssetType.Etf || row.IsEtf`. Keying on `AssetType.Etf` alone silently misclassifies nearly all real TW ETFs as 股票.
+- **Design tokens:** `AppBorder`/`AppBorderLight` are defined in **BOTH** `DesignSystem/Themes/Light.xaml:21-22` AND `Themes/Dark.xaml:22-23` (theme switch swaps exactly these dictionaries — a brush defined in only one renders an invisible border in the other, with **no build error**). Radius tokens: `Radius.Xl`=12, `Radius.2Xl`=18; the card system is standardized on `Radius.2Xl` (`Styles/Cards.xaml`).
 
 ---
 
 ## File Structure
 
 **Create:**
-- `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioTabsViewModel.cs` — owns the tab strip: `Tabs` (All + one per `PortfolioGroup`), `SelectedTab`, selection command. Exposes `SelectedGroupId` (null = 全部).
-- `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioCompositionViewModel.cs` — computes the 投資組合焦點 split (今日漲幅 / 總漲幅 + 股票% / ETF% with values) for the selected tab's holdings.
-- `Assetra.WPF/Features/Portfolio/Controls/PortfolioTabStrip.xaml` (+ `.xaml.cs`) — the `[全部]+組合` pill row.
-- `Assetra.WPF/Features/Portfolio/Controls/PortfolioDetailHeader.xaml` (+ `.xaml.cs`) — name + value + change + trend chart + period selector, bound to the selected tab.
-- `Assetra.WPF/Features/Portfolio/Controls/PortfolioCompositionCard.xaml` (+ `.xaml.cs`) — the bordered focus card.
+- `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioTabsViewModel.cs` — tab strip state: `Tabs` (全部 + 未指定組合 + user portfolios), `SelectedTab`, `SelectedGroupId` (null = 全部).
+- `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioCompositionViewModel.cs` — the 股票-vs-ETF split.
+- `Assetra.WPF/Features/Portfolio/Controls/PortfolioTabStrip.xaml` (+ `.cs`), `PortfolioDetailHeader.xaml` (+ `.cs`), `PortfolioCompositionCard.xaml` (+ `.cs`).
 - `Assetra.Tests/WPF/PortfolioTabsViewModelTests.cs`, `Assetra.Tests/WPF/PortfolioCompositionViewModelTests.cs`.
 
 **Modify:**
-- `Assetra.WPF/Features/Portfolio/PortfolioViewModel.cs` — construct + own `PortfolioTabsViewModel` and `PortfolioCompositionViewModel`; when `SelectedTab` changes, refilter the positions view + recompute composition; recompute on each `RebuildTotals`.
-- `Assetra.WPF/Features/Portfolio/Controls/PositionsTabPanel.xaml` — replace the old ViewMode toggle with `PortfolioTabStrip` + `PortfolioDetailHeader` + `PortfolioCompositionCard` above the holdings list; holdings list filtered to `SelectedGroupId`.
-- `Assetra.WPF/Languages/zh-TW.xaml` + `en-US.xaml` — rename strings (Task 1.1).
-- `Assetra.WPF/Features/PortfolioGroups/PortfolioGroupsView.xaml` (+ lang keys) — page-title/labels 群組→投資組合; make "＋ 新增投資組合" prominent.
+- `Assetra.WPF/Features/Portfolio/PortfolioViewModel.cs` + `PortfolioViewModel.Filtering.cs` — own the new VMs; tab selection → `PortfolioGroupFilter`; delete ViewMode machinery (1.6).
+- `Assetra.WPF/Features/Portfolio/Controls/PositionsTabPanel.xaml` — tab strip + header + composition card replace the ViewMode row; holdings list keeps binding `PositionsView` (unchanged).
+- `Assetra.WPF/Languages/zh-TW.xaml` + `en-US.xaml`; `Assetra.WPF/Features/PortfolioGroups/PortfolioGroupsView.xaml`.
+- `Assetra.WPF/DesignSystem/Themes/Light.xaml` + `Themes/Dark.xaml` (+ optionally `Tokens/Colors.xaml` for the raw color) — `AppCardBorder`.
 
 ---
 
@@ -56,29 +62,23 @@ This is a medium-large UI feature. It is split into **4 phases, each independent
 
 ### Task 1.1: Rename 群組 → 投資組合 (UI strings only)
 
-**Files:**
-- Modify: `Assetra.WPF/Languages/zh-TW.xaml`, `Assetra.WPF/Languages/en-US.xaml`
+**Files:** Modify `Assetra.WPF/Languages/zh-TW.xaml`, `en-US.xaml`
 
-- [ ] **Step 1: Find every user-facing "群組" string.** Grep `群組` in `zh-TW.xaml` and the matching keys in `en-US.xaml` ("group"/"Group" in values, NOT keys). Known keys (do not rename the `x:Key`, only the `<sys:String>` value): `Portfolio.ViewMode.Group` (will be deleted in 1.6, skip), `Portfolio.Filter.Group.All`, `Portfolio.Group.*` (Detail/Holdings/MoveToGroup/Kpi.*/Trend.*/Ungrouped/Unknown/NeedsResolution), `Allocation.GroupBy.Group`, and the PortfolioGroups page strings. Build the exact list before editing.
-
-- [ ] **Step 2: Edit the zh-TW values** — replace 群組 → 投資組合 in those values (e.g. `投資群組管理`→`投資組合管理`, `群組詳情`→`投資組合詳情`, `移至群組`→`移至投資組合`, `未分組`→`未指定組合`). Keep keys unchanged. Leave `Portfolio.Group.Ungrouped` semantics ("default/未指定") clear.
-
-- [ ] **Step 3: Edit the en-US values** — "Group"→"Portfolio" in the same keys' values ("Group Details"→"Portfolio Details", etc.).
-
-- [ ] **Step 4: Build to confirm no key was renamed and XAML still parses.** Run: `dotnet build Assetra.slnx` — Expected: 0/0 (no `StaticResource`/`DynamicResource` key broke).
-
+- [ ] **Step 1: Find EVERY user-facing 群組 string.** Grep `群組` in `zh-TW.xaml` (≈28 occurrences, all the PortfolioGroup sense — no collisions) and the matching keys in `en-US.xaml`. Seed list (NOT exhaustive — the grep is authoritative): `Portfolio.Filter.Group.All/.Add/.Manage`, `Portfolio.Group.*`, `Portfolio.Tx.Group`, `Portfolio.EditAsset.PositionSubtitle/GroupConflict*`, `Allocation.GroupBy.Group`, `PortfolioGroups.*` + `PortfolioGroups.Nav` (nav rail), `Sync.Domain.PortfolioGroup`, `Goals.Add.PortfolioGroup(+.Hint)`, `Goals.Tracking.PortfolioGroup`, `Fire.Input.Group(+.Hint)`. Keys stay; only values change.
+- [ ] **Step 2: Edit zh-TW values — sense-based rewrite, NOT blind replace.** ⚠️ Two values already contain 投資組合: `Goals.Add.PortfolioGroup` (zh:~1564 「連結到投資組合群組」→「連結到投資組合」) and `Fire.Input.Group` (zh:~2006 「選擇投資組合群組」→「選擇投資組合」) — a mechanical 群組→投資組合 replace would produce 「投資組合投資組合」. Examples: `投資群組管理`→`投資組合管理`, `群組詳情`→`投資組合詳情`, `移至群組`→`移至投資組合`, `未分組`→`未指定組合`.
+- [ ] **Step 3: Edit en-US values** the same way ("Group Details"→"Portfolio Details" etc.).
+- [ ] **Step 4: Build.** `dotnet build Assetra.slnx` — Expected 0/0 (keys intact).
 - [ ] **Step 5: Commit.** `git commit -m "refactor(portfolio): 介面文案 群組→投資組合（識別碼不動）"`
 
-### Task 1.2: `PortfolioTabsViewModel` — tab list + selection
+### Task 1.2: `PortfolioTabsViewModel` — tab list + selection (with system-group semantics)
 
-**Files:**
-- Create: `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioTabsViewModel.cs`
-- Test: `Assetra.Tests/WPF/PortfolioTabsViewModelTests.cs`
+**Files:** Create `SubViewModels/PortfolioTabsViewModel.cs`; Test `Assetra.Tests/WPF/PortfolioTabsViewModelTests.cs`
 
-- [ ] **Step 1: Write the failing test.**
+Design (matches the codebase convention at `Filtering.cs:103-131` + `HasPortfolioGroups`): tabs = `[全部]` + (a `未指定組合` tab for `DefaultId`, **only when at least one user (!IsSystem) group exists**) + one tab per `!IsSystem` group. With zero user groups the strip is just `[全部]` (callers may collapse it, mirroring `HasPortfolioGroups`). The DefaultId tab uses the localized `Portfolio.Group.Ungrouped` label, never the raw system group name.
+
+- [ ] **Step 1: Write the failing tests.**
 
 ```csharp
-using System.Linq;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Xunit;
@@ -87,34 +87,57 @@ namespace Assetra.Tests.WPF;
 
 public class PortfolioTabsViewModelTests
 {
-    private static PortfolioGroup G(string name) => new(Guid.NewGuid(), name, "#3B82F6");
+    private static PortfolioGroup User(string name) => new(Guid.NewGuid(), name, "#3B82F6");
+    private static PortfolioGroup SystemDefault() =>
+        new(PortfolioGroup.DefaultId, "預設群組", null, IsSystem: true);
+    // ^ Match the real PortfolioGroup ctor/record shape — read PortfolioGroup.cs:39-46 first
+    //   and adjust construction (it may be init-properties rather than positional).
 
     [Fact]
-    public void Tabs_FirstIsAll_ThenOnePerGroup_AllSelectedByDefault()
+    public void Tabs_AllFirst_ThenUngrouped_ThenUserGroups_AllSelected()
     {
-        var a = G("退休"); var b = G("買房");
-        var vm = new PortfolioTabsViewModel(new[] { a, b });
+        var vm = new PortfolioTabsViewModel(
+            [SystemDefault(), User("退休"), User("買房")],
+            allLabel: "全部", ungroupedLabel: "未指定組合");
 
-        Assert.Equal(3, vm.Tabs.Count);
+        Assert.Equal(4, vm.Tabs.Count);                       // 全部, 未指定組合, 退休, 買房
         Assert.True(vm.Tabs[0].IsAll);
-        Assert.Equal(a.Id, vm.Tabs[1].GroupId);
+        Assert.Equal(PortfolioGroup.DefaultId, vm.Tabs[1].GroupId);
+        Assert.Equal("未指定組合", vm.Tabs[1].Name);            // localized label, not raw name
         Assert.Same(vm.Tabs[0], vm.SelectedTab);
-        Assert.Null(vm.SelectedGroupId);             // 全部 → null filter
+        Assert.Null(vm.SelectedGroupId);
+    }
+
+    [Fact]
+    public void NoUserGroups_OnlyAllTab()
+    {
+        var vm = new PortfolioTabsViewModel([SystemDefault()], "全部", "未指定組合");
+        Assert.Single(vm.Tabs);
+        Assert.True(vm.Tabs[0].IsAll);
     }
 
     [Fact]
     public void SelectingGroupTab_ExposesItsGroupId()
     {
-        var a = G("退休");
-        var vm = new PortfolioTabsViewModel(new[] { a });
-        vm.SelectedTab = vm.Tabs[1];
+        var a = User("退休");
+        var vm = new PortfolioTabsViewModel([SystemDefault(), a], "全部", "未指定組合");
+        vm.SelectedTab = vm.Tabs[^1];
         Assert.Equal(a.Id, vm.SelectedGroupId);
+    }
+
+    [Fact]
+    public void Sync_PreservesSelectionByGroupId()
+    {
+        var a = User("退休");
+        var vm = new PortfolioTabsViewModel([SystemDefault(), a], "全部", "未指定組合");
+        vm.SelectedTab = vm.Tabs[^1];
+        vm.Sync([SystemDefault(), a, User("買房")], "全部", "未指定組合");
+        Assert.Equal(a.Id, vm.SelectedGroupId);               // selection survives a catalog refresh
     }
 }
 ```
 
-- [ ] **Step 2: Run it — Expected: FAIL (type not defined).** `dotnet test Assetra.Tests/Assetra.Tests.csproj --filter FullyQualifiedName~PortfolioTabsViewModel`
-
+- [ ] **Step 2: Run — Expected: FAIL.** `dotnet test Assetra.Tests/Assetra.Tests.csproj --filter FullyQualifiedName~PortfolioTabsViewModel`
 - [ ] **Step 3: Implement.**
 
 ```csharp
@@ -140,72 +163,70 @@ public sealed partial class PortfolioTabsViewModel : ObservableObject
 
     public Guid? SelectedGroupId => SelectedTab?.GroupId;
 
-    public PortfolioTabsViewModel(IEnumerable<PortfolioGroup> groups, string allLabel = "全部")
-    {
-        Tabs.Add(new PortfolioTabViewModel { IsAll = true, Name = allLabel });
-        foreach (var g in groups)
-            Tabs.Add(new PortfolioTabViewModel { GroupId = g.Id, Name = g.Name, ColorHex = g.ColorHex });
-        SelectedTab = Tabs[0];
-    }
+    public PortfolioTabsViewModel(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel)
+        => Rebuild(groups, allLabel, ungroupedLabel, keepSelection: null);
 
     partial void OnSelectedTabChanged(PortfolioTabViewModel? value) =>
         OnPropertyChanged(nameof(SelectedGroupId));
 
-    /// <summary>Rebuilds tabs from the latest catalog, preserving the current selection by GroupId.</summary>
-    public void Sync(IEnumerable<PortfolioGroup> groups, string allLabel)
+    /// <summary>Rebuilds from the latest catalog, preserving the selection by GroupId.</summary>
+    public void Sync(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel)
+        => Rebuild(groups, allLabel, ungroupedLabel, keepSelection: SelectedGroupId);
+
+    private void Rebuild(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel, Guid? keepSelection)
     {
-        var keep = SelectedGroupId;
+        var users = groups.Where(g => !g.IsSystem).ToList();
         Tabs.Clear();
         Tabs.Add(new PortfolioTabViewModel { IsAll = true, Name = allLabel });
-        foreach (var g in groups)
-            Tabs.Add(new PortfolioTabViewModel { GroupId = g.Id, Name = g.Name, ColorHex = g.ColorHex });
-        SelectedTab = Tabs.FirstOrDefault(t => t.GroupId == keep) ?? Tabs[0];
+        if (users.Count > 0)
+        {
+            // 未指定組合 tab — positions whose effective group is the system default.
+            Tabs.Add(new PortfolioTabViewModel { GroupId = PortfolioGroup.DefaultId, Name = ungroupedLabel });
+            foreach (var g in users)
+                Tabs.Add(new PortfolioTabViewModel { GroupId = g.Id, Name = g.Name, ColorHex = g.ColorHex });
+        }
+        SelectedTab = Tabs.FirstOrDefault(t => t.GroupId == keepSelection) ?? Tabs[0];
     }
 }
 ```
 
 - [ ] **Step 4: Run — Expected: PASS.**
-- [ ] **Step 5: Commit.** `git commit -m "feat(portfolio): PortfolioTabsViewModel（投資組合分頁狀態）"`
+- [ ] **Step 5: Commit.** `git commit -m "feat(portfolio): PortfolioTabsViewModel（投資組合分頁狀態，含系統預設組合語意）"`
 
-### Task 1.3: Filter the holdings view by `SelectedGroupId`; own the tabs VM in `PortfolioViewModel`
+### Task 1.3: Wire tab selection to the EXISTING `PortfolioGroupFilter` (no new view, no rebinding)
 
-**Files:**
-- Modify: `Assetra.WPF/Features/Portfolio/PortfolioViewModel.cs`
+**Files:** Modify `PortfolioViewModel.cs` (+ touch `PortfolioViewModel.Filtering.cs` only if needed)
 
-- [ ] **Step 1: Read the existing position-group resolution.** In `PortfolioViewModel.cs` locate where 依群組 resolves a `PortfolioRowViewModel` → its `PortfolioGroup` (search `PositionViewGroup`, the ViewMode build, and how a row maps to a group via its trades' `GroupId`). Note the exact helper/predicate — Task 1.3 reuses it; do NOT invent a new mapping.
+**Do NOT create any new `CollectionViewSource`/`ICollectionView` and do NOT rebind the holdings XAML** — `PositionsView` + `FilterPosition` + `PortfolioGroupFilter` already exist, are unit-tested, and both presenters already bind `PositionsView` (see Data-model section). The whole task is:
 
-- [ ] **Step 2: Add the tabs VM + a filtered view.** Construct `PortfolioTabsViewModel` from `GroupCatalog.Groups` (the localized 全部 label via `_localization`). Expose `public PortfolioTabsViewModel PortfolioTabs { get; }`. Add a `CollectionViewSource`/`ICollectionView` over `Positions` whose `Filter` keeps rows whose resolved group == `PortfolioTabs.SelectedGroupId` (or all when null). Subscribe to `PortfolioTabs.PropertyChanged(SelectedGroupId)` → `view.Refresh()` + recompute header/composition (Tasks 1.4/1.5). Re-`Sync` the tabs when `GroupCatalog.Groups` changes (the catalog is observable) and after `RebuildTotals`.
+- [ ] **Step 1: Construct + expose the tabs VM.** In `PortfolioViewModel`: `public PortfolioTabsViewModel PortfolioTabs { get; }`, built from `GroupCatalog?.Groups ?? []` with localized labels (`Common.All`/`Portfolio.Group.Ungrouped` via the existing `L(...)` helper). Re-`Sync` it where `RefreshPortfolioGroupFilterChips()` is called today (catalog changes already flow there).
+- [ ] **Step 2: Selection → filter.** Subscribe to `PortfolioTabs.PropertyChanged` for `SelectedGroupId` → set `PortfolioGroupFilter = PortfolioTabs.SelectedGroupId`. `OnPortfolioGroupFilterChanged` (Filtering.cs:63-69) already refreshes `PositionsView`, group summaries, and footer stats — no manual refresh wiring. The null→DefaultId coalesce for ungrouped rows is already inside `FilterPosition:303-308`. Also hook the Task 1.4/1.5 recompute (header aggregates + composition) into this same handler.
+- [ ] **Step 3: Interim-window note (no code yet).** Until Task 1.6 deletes the ViewMode, toggling the old ViewMode control auto-clears `PortfolioGroupFilter` (`Filtering.cs:83-84`) and would desync the tab strip. Accept this transient (1.6 lands in the same phase) — do NOT pre-patch it here; 1.6 deletes the whole handler.
+- [ ] **Step 4: Test.** Extend `PortfolioViewModelTests` mirroring `SetPortfolioGroupFilter_FiltersPositionsToSelectedGroup` (`:388-415`): selecting a tab on `PortfolioTabs` filters `PositionsView` to that group's rows; selecting the 全部 tab restores all. Run full suite — Expected: green.
+- [ ] **Step 5: Commit.** `git commit -m "feat(portfolio): 分頁選擇驅動既有 PortfolioGroupFilter（沿用 PositionsView）"`
 
-- [ ] **Step 3: Bind in `PositionsTabPanel.xaml`** — point the holdings `ItemsControl`/`DataGrid` at the new filtered view instead of raw `Positions`. (XAML wiring is finished in Task 1.6.)
+### Task 1.4: Per-portfolio detail header (value / change / trend / period / ＋投資)
 
-- [ ] **Step 4: Build + run the full suite — Expected: 0/0, all green** (no behavior regression for existing tests; the default 全部 tab shows all positions exactly as before). `dotnet build Assetra.slnx && dotnet test Assetra.Tests/Assetra.Tests.csproj`
+**Files:** Create `Controls/PortfolioDetailHeader.xaml` (+ `.cs`); Modify `PortfolioViewModel.cs`
 
-- [ ] **Step 5: Commit.** `git commit -m "feat(portfolio): 持股依選定投資組合過濾（全部=不過濾）"`
+- [ ] **Step 1: Selected-tab aggregates.** Add `SelectedPortfolioName / MarketValue / Cost / Pnl / DayPnl` computed by **summing the tab-filtered rows**, mirroring `PortfolioGroupDetailViewModel.cs:25-30` (note `DayPnl = Σ row.DayChange` — the old `PositionViewGroup*` values are NOT usable: they're only populated in Group ViewMode and are deleted in 1.6). 全部 tab → reuse the existing whole-portfolio totals. Raise PropertyChanged from the Task 1.3 Step 2 handler and from `RebuildTotals`.
+- [ ] **Step 2: Trend — two sources, by tab type (a period-selectable per-group chart does NOT exist today; snapshots have no group dimension):**
+  - 全部 tab → reuse `PortfolioViewModel.History` (`PortfolioHistoryViewModel`) **with** its period selector.
+  - Portfolio tab → reuse the `PortfolioGroupDetailViewModel`-style **fixed-window** trend built from the filtered rows' `SparklinePoints` (`BuildMarketValueTrend` pattern), and **hide the period selector** (show the existing note 「依目前投資組合成員與近月價格估算」). Per-portfolio period history is real new work → P4.
+- [ ] **Step 3: ＋投資 button.** In the header, a `＋ 投資` button that opens the existing buy/add-transaction flow with the selected tab's `GroupId` preselected (the transaction dialog already supports group preselection — find how `TransactionDialogViewModel` receives a group and pass `SelectedGroupId`; on the 全部 tab it opens with the default behavior).
+- [ ] **Step 4: Build `PortfolioDetailHeader.xaml`** — large value, signed day change + %, trend chart area (template-switched by tab type), period selector (全部 only), ＋投資. Design-system tokens throughout.
+- [ ] **Step 5: Build — Expected 0/0.** (Presentation binding; aggregates covered by the 1.3 test + existing totals tests.)
+- [ ] **Step 6: Commit.** `git commit -m "feat(portfolio): 投資組合詳情標題列（總值/漲跌/趨勢/期間/＋投資）"`
 
-### Task 1.4: Per-portfolio detail header (value / change / trend / period)
+### Task 1.5: 投資組合焦點 card (股票 vs ETF) — keyed on the EFFECTIVE ETF flag
 
-**Files:**
-- Create: `Assetra.WPF/Features/Portfolio/Controls/PortfolioDetailHeader.xaml` (+ `.xaml.cs`)
-- Modify: `Assetra.WPF/Features/Portfolio/PortfolioViewModel.cs`
+**Files:** Create `SubViewModels/PortfolioCompositionViewModel.cs`, `Controls/PortfolioCompositionCard.xaml` (+ `.cs`); Test `Assetra.Tests/WPF/PortfolioCompositionViewModelTests.cs`
 
-- [ ] **Step 1: Expose selected-tab aggregates on `PortfolioViewModel`.** Add read-only properties `SelectedPortfolioName`, `SelectedPortfolioMarketValue`, `SelectedPortfolioCost`, `SelectedPortfolioPnl`, `SelectedPortfolioDayPnl` computed by summing the *filtered* rows (全部 → reuse existing whole-portfolio totals; a group tab → reuse the existing per-group KPI already computed for 依群組). Raise `PropertyChanged` for all of them from the same place the filter refreshes (Task 1.3 Step 2) and from `RebuildTotals`.
+⚠️ ETFs are stored as `AssetType.Stock` + `IsEtf=true` (see Data-model section). The VM takes a **precomputed flag**, and the caller computes it with the same predicate the asset-type chips use.
 
-- [ ] **Step 2: Build `PortfolioDetailHeader.xaml`** mirroring the Google PoHan header: large `SelectedPortfolioMarketValue`, signed `SelectedPortfolioDayPnl` + %, then the existing trend chart + period selector. Reuse `PortfolioHistoryViewModel` (already on `PortfolioViewModel.History`) for the chart/period; scope its series to the selected tab (全部 → existing whole-portfolio series; group tab → the existing per-group trend `Portfolio.Group.Trend.*`). Use design-system text tokens (`Font.Size.*`, `AppText*`).
-
-- [ ] **Step 3: No new unit test** (presentation binding over already-tested aggregates); verify via build. `dotnet build Assetra.slnx` — Expected: 0/0.
-
-- [ ] **Step 4: Commit.** `git commit -m "feat(portfolio): 投資組合詳情頁標題列（總值/漲跌/趨勢/期間）"`
-
-### Task 1.5: 投資組合焦點 card (股票 vs ETF) — the one genuinely-new piece
-
-**Files:**
-- Create: `Assetra.WPF/Features/Portfolio/SubViewModels/PortfolioCompositionViewModel.cs`, `Assetra.WPF/Features/Portfolio/Controls/PortfolioCompositionCard.xaml` (+ `.xaml.cs`)
-- Test: `Assetra.Tests/WPF/PortfolioCompositionViewModelTests.cs`
-
-- [ ] **Step 1: Write the failing test.** (Composition splits the selected tab's holdings into ETF vs 股票 by base-currency market value. `Apply` takes simple `(AssetType, decimal marketValueBase)` tuples so it's UI-thread-free and pure.)
+- [ ] **Step 1: Write the failing tests.**
 
 ```csharp
-using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Xunit;
 
@@ -219,14 +240,14 @@ public class PortfolioCompositionViewModelTests
         var vm = new PortfolioCompositionViewModel();
         vm.Apply(
         [
-            (AssetType.Etf, 4_000_000m),
-            (AssetType.Stock, 6_000_000m),
+            (IsEtf: true, MarketValueBase: 4_000_000m),   // e.g. 0056 — stored Stock+IsEtf, flag already resolved
+            (IsEtf: false, MarketValueBase: 6_000_000m),  // e.g. 3231
         ]);
 
         Assert.True(vm.HasData);
         Assert.Equal(6_000_000m, vm.StockValue);
         Assert.Equal(4_000_000m, vm.EtfValue);
-        Assert.Equal(60.0, vm.StockPercent, 1);   // 6M / 10M
+        Assert.Equal(60.0, vm.StockPercent, 1);
         Assert.Equal(40.0, vm.EtfPercent, 1);
     }
 
@@ -241,12 +262,10 @@ public class PortfolioCompositionViewModelTests
 }
 ```
 
-- [ ] **Step 2: Run — Expected: FAIL.** `dotnet test Assetra.Tests/Assetra.Tests.csproj --filter FullyQualifiedName~PortfolioCompositionViewModel`
-
-- [ ] **Step 3: Implement.** (Design note: `Etf` → ETF bucket; all other held asset types → 股票 bucket, matching Google's two-way split. Percentages over the summed total; guard divide-by-zero.)
+- [ ] **Step 2: Run — Expected: FAIL.**
+- [ ] **Step 3: Implement.**
 
 ```csharp
-using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels;
@@ -259,13 +278,18 @@ public sealed partial class PortfolioCompositionViewModel : ObservableObject
     [ObservableProperty] private double _etfPercent;
     [ObservableProperty] private bool _hasData;
 
-    public void Apply(IReadOnlyList<(AssetType Type, decimal MarketValueBase)> holdings)
+    /// <summary>
+    /// IsEtf is the EFFECTIVE flag — caller resolves it as
+    /// row.AssetType == AssetType.Etf || row.IsEtf (ETFs are stored Stock+IsEtf;
+    /// see PortfolioViewModel.Filtering.FilterPosition's asset-type predicate).
+    /// </summary>
+    public void Apply(IReadOnlyList<(bool IsEtf, decimal MarketValueBase)> holdings)
     {
         decimal etf = 0m, stock = 0m;
-        foreach (var (type, mv) in holdings)
+        foreach (var (isEtf, mv) in holdings)
         {
             if (mv <= 0m) continue;
-            if (type == AssetType.Etf) etf += mv; else stock += mv;
+            if (isEtf) etf += mv; else stock += mv;
         }
         var total = etf + stock;
         StockValue = stock; EtfValue = etf;
@@ -277,65 +301,51 @@ public sealed partial class PortfolioCompositionViewModel : ObservableObject
 ```
 
 - [ ] **Step 4: Run — Expected: PASS.**
-
-- [ ] **Step 5: Build `PortfolioCompositionCard.xaml`** — a **bordered** card (see Task 1.7): 今日漲幅 / 總漲幅 (from the Task 1.4 aggregates) on top, then a two-segment bar + `57.0% 股票 / 43.0% ETF` rows with values, matching the screenshot. Bind to `PortfolioCompositionViewModel`. Wire `PortfolioViewModel` to call `Composition.Apply(...)` with the filtered rows' `(AssetType, MarketValueBase)` (reuse `MarketValueBase` populated by `ApplyPositionBaseValuations` in `RebuildTotals`) whenever the filter/totals change.
-
+- [ ] **Step 5: Card + wiring.** `PortfolioCompositionCard.xaml`: 今日漲幅/總漲幅 (Task 1.4 aggregates), two-segment bar, `57.0% 股票 / 43.0% ETF` rows — **bordered** per Task 1.7. Wire `PortfolioViewModel` to call `Composition.Apply(...)` over the tab-filtered rows with `(row.AssetType == AssetType.Etf || row.IsEtf, row.MarketValueBase)` whenever filter/totals change (same hook as 1.4 Step 1).
 - [ ] **Step 6: Build + test — Expected: 0/0, green.**
-- [ ] **Step 7: Commit.** `git commit -m "feat(portfolio): 投資組合焦點卡（股票 vs ETF 佔比）"`
+- [ ] **Step 7: Commit.** `git commit -m "feat(portfolio): 投資組合焦點卡（股票 vs ETF，依有效 IsEtf 旗標）"`
 
-### Task 1.6: Replace the old ViewMode toggle with the tab strip; remove 全部/依群組/依市場/依類型
+### Task 1.6: Tab strip control; remove the ViewMode machinery
 
-**Files:**
-- Create: `Assetra.WPF/Features/Portfolio/Controls/PortfolioTabStrip.xaml` (+ `.xaml.cs`)
-- Modify: `Assetra.WPF/Features/Portfolio/Controls/PositionsTabPanel.xaml`, `PortfolioViewModel.cs`, `zh-TW.xaml`/`en-US.xaml`
+**Files:** Create `Controls/PortfolioTabStrip.xaml` (+ `.cs`); Modify `PositionsTabPanel.xaml`, **`PortfolioViewModel.Filtering.cs`** (most ViewMode code lives HERE, not PortfolioViewModel.cs), `PortfolioViewModel.cs`, `PortfolioRowViewModel.cs`, both language files
 
-- [ ] **Step 1: Build `PortfolioTabStrip.xaml`** — a horizontal pill row bound to `PortfolioTabs.Tabs`, `SelectedItem`↔`SelectedTab`, each pill showing `Name` (and the group `ColorHex` dot). Use the same bordered/selected styling as the NavRail leaf or the Settings category list for consistency.
+- [ ] **Step 1: Build `PortfolioTabStrip.xaml`** — pill row bound to `PortfolioTabs.Tabs`, `SelectedItem`↔`SelectedTab`, group `ColorHex` dot. **Wrap in a horizontal `ScrollViewer`** (hidden scrollbar, wheel-scroll): the codebase deliberately removed an unbounded chip row before (comment at `PositionsTabPanel.xaml:946` 「避免使用者建立多個策略群組後擠爆工具列」) — this consciously overrides that with overflow handling, not silently regresses it.
+- [ ] **Step 2: Rewire `PositionsTabPanel.xaml`** — top: `PortfolioTabStrip` → `PortfolioDetailHeader` → `PortfolioCompositionCard` → the existing holdings presenters (still bound to `PositionsView` — unchanged). Remove the ViewMode toggle row AND the `PositionGroupHeaderTemplate` GroupStyle (`:55-101`), AND the old group-filter chip row (superseded by tabs).
+- [ ] **Step 3: Delete dead code — checklist (verified locations):**
+  - `Filtering.cs`: `InvestmentPositionViewMode` enum (`:11-17`), `PositionViewMode` property + `OnPositionViewModeChanged` (`:77-93`, incl. the `:83-84` auto-clear), `IsGroupViewMode`/`IsAssetTypeFilterRowVisible` (`:28-29`), `ApplyPositionViewGrouping`/`RefreshPositionViewGroupSummaries`/`GetPositionViewGroupKey` (`:175-241`), `PortfolioGroupFilterChips` + builders (`:103-137`).
+  - `PortfolioViewModel.cs`: `_hasAppliedInitialPositionViewMode` (`:95`), `ApplyInitialPositionViewMode` (`:898-906`, call site `:928`).
+  - `PortfolioRowViewModel.cs`: the `PositionViewGroup*` properties.
+  - Language keys: `Portfolio.ViewMode.All/Group/Market/Type` (both files). (ViewMode is NOT persisted in AppSettings — verified; no settings cleanup.)
+- [ ] **Step 4: Fix the 5 affected tests (all in `PortfolioViewModelTests.cs`):** delete `SetPositionViewMode_GroupsPositionsViewBySelectedDimension` (`:256`) + `SetPositionViewMode_Group_UpdatesVisibleGroupSummaries` (`:272`); rewrite `LoadAsync_DefaultsToGroupViewWhenCustomGroupsExist` (`:308`) + `LoadAsync_KeepsFlatViewWhenOnlySystemGroupExists` (`:328`) to assert the new tab-strip defaults; trim the `SetPositionViewModeCommand` line (`:409`) from `SetPortfolioGroupFilter_FiltersPositionsToSelectedGroup`.
+- [ ] **Step 5: Build + full suite — Expected 0/0, green. Grep `PositionViewMode|PositionViewGroup` repo-wide → zero production references.**
+- [ ] **Step 6: Commit.** `git commit -m "feat(portfolio): 頂部投資組合分頁取代舊檢視模式（含 ViewMode 機制移除）"`
 
-- [ ] **Step 2: Rewire `PositionsTabPanel.xaml`** — at the top: `PortfolioTabStrip`, then `PortfolioDetailHeader`, then `PortfolioCompositionCard`, then the (now filtered) holdings list. **Remove** the old `全部/依群組/依市場/依類型` ViewMode control.
+### Task 1.7: Bordered card styling (theme-safe)
 
-- [ ] **Step 3: Delete the now-dead ViewMode code + strings.** Remove the ViewMode enum/property/build logic in `PortfolioViewModel.cs` that powered 依群組/依市場/依類型 grouping (the tab strip + filter replace it). Remove keys `Portfolio.ViewMode.All/Group/Market/Type` from both language files. Grep to confirm no remaining references.
+**Files:** Modify **BOTH** `DesignSystem/Themes/Light.xaml` AND `Themes/Dark.xaml` (+ optionally `Tokens/Colors.xaml` for raw colors); `PortfolioCompositionCard.xaml`, `PortfolioDetailHeader.xaml`
 
-- [ ] **Step 4: Build + full suite — Expected: 0/0; fix/remove any tests asserting the old ViewMode.** Report which tests changed and why.
-
-- [ ] **Step 5: Commit.** `git commit -m "feat(portfolio): 頂部投資組合分頁取代舊檢視模式（移除 依群組/依市場/依類型）"`
-
-### Task 1.7: Bordered card styling (design principle from #3, applied here)
-
-**Files:**
-- Modify: `Assetra.WPF/DesignSystem/Tokens/Colors.xaml` (or wherever `AppBorder*` live) — verify, do not guess the path; `PortfolioCompositionCard.xaml`
-
-- [ ] **Step 1: Locate the card border tokens.** Grep `AppBorder` / `AppBorderLight` / `FormCard` in `DesignSystem/`. Identify a clearly-visible border brush (the user finds `AppBorderLight` too faint). If none exists, add `AppCardBorder` (a 1px, clearly-visible neutral, e.g. ~`#D0D5DD` light / a suitable dark-theme counterpart — match existing token naming + provide both theme values).
-
-- [ ] **Step 2: Apply it to the new cards** — `PortfolioCompositionCard` (and the detail header card) use `BorderBrush={DynamicResource AppCardBorder}` `BorderThickness="1"` `CornerRadius="12"` (Google-like), NOT `AppBorderLight`. Do NOT restyle other screens here — global card-border tuning is #3's job; this task only ensures the *new* cards have a clear outline.
-
-- [ ] **Step 3: Build — Expected: 0/0.** Visual confirmation is the user's (relaunch).
-- [ ] **Step 4: Commit.** `git commit -m "style(portfolio): 投資組合卡片改用明顯邊框（呼應 #3）"`
+- [ ] **Step 1: Add `AppCardBorder`** — a clearly-visible 1px neutral border brush — **to BOTH theme dictionaries** (Light ≈ `#D0D5DD`-class; Dark = a visible counterpart consistent with `Color.Cis.Dark.*`). ⚠️ Theme switching swaps exactly these two files; defining it in only one yields an **invisible border in the other theme with NO build error** — treat "defined in both" as an explicit checklist item.
+- [ ] **Step 2: Apply to the new cards** — `BorderBrush={DynamicResource AppCardBorder}`, `BorderThickness="1"`, `CornerRadius="{StaticResource Radius.2Xl}"` (18 — the codebase card baseline per `Styles/Cards.xaml`; conformance over Google's 12). Scope: only the NEW cards — global card-border tuning is #3's job.
+- [ ] **Step 3: Build — Expected 0/0.** Visual check (both themes!) is the user's on relaunch.
+- [ ] **Step 4: Commit.** `git commit -m "style(portfolio): AppCardBorder 雙主題明顯邊框（新卡片）"`
 
 ---
 
-## Phase 2 — 購買細項 (expandable per-holding lot breakdown)  *(own detailed plan when P1 lands)*
+## Phase 2 — 購買細項 *(own detailed plan when P1 lands)*
 
-**Goal:** Each holding row in 投資項目 expands to show the buy trades (lots) composing that position: date / shares / price, like Google.
+Expandable per-holding lot breakdown (buy date / shares / price). Data: `Trades` (`TradeRowViewModel`) filtered to the position's symbol; check the asset-detail KPI path (P4.1) for an existing per-position trade aggregation to reuse. Outline: `PositionLotsViewModel` (TDD) → expander row template → lazy population → tests.
 
-**Data:** `PortfolioViewModel.Trades` (`TradeRowViewModel`) already hold the buys; group by the position's symbol (+ the selected portfolio's `GroupId`). The asset-detail KPI path (`P4.1`) may already aggregate per-position trades — reuse if so.
+## Phase 3 — 活動 *(own detailed plan when P1 lands)*
 
-**Task outline:** (1) `PositionLotsViewModel` — given a position + the trades, project its buy lots (failing test: N buys → N lots, correct date/shares/price, sorted). (2) Expander row template in the holdings list bound to a lazily-built lots VM. (3) Wire expansion to populate lots on demand. (4) Tests + commit per task.
+Portfolio-scoped transaction feed (買入/賣出 · date · shares · price · amount, newest first). Filter trades via **`TradeRowViewModel.PortfolioGroupId`** (`TradeRowViewModel.cs:128`, from `Trade.PortfolioGroupId` — the historical per-trade context; this is its correct use). Reuse `TradeRowViewModel` formatting. Global 交易記錄 unchanged. Outline: filtered trades view keyed on `SelectedGroupId` → 投資項目/活動 sub-tab switch → feed item template → tests.
 
-## Phase 3 — 活動 (portfolio-scoped activity feed)  *(own detailed plan when P1 lands)*
+## Phase 4 (optional) — 比較對象 + per-portfolio period history *(own plan, only if requested)*
 
-**Goal:** A 活動 sub-tab next to 投資項目 showing the selected portfolio's transactions as a feed (買入/賣出 · date · shares · price · amount), newest first.
-
-**Data:** `Trades` filtered by the selected tab's `GroupId` (`Trade.GroupId`); reuse `TradeRowViewModel` formatting — do NOT duplicate trade logic. Global 交易記錄 (`TradesTabPanel`) stays unchanged.
-
-**Task outline:** (1) Filtered trades `ICollectionView` keyed on `SelectedGroupId` (failing test: only that group's trades appear; 全部 → all). (2) 投資項目/活動 sub-tab switch in `PositionsTabPanel`. (3) Activity-feed item template. (4) Tests + commit per task.
-
-## Phase 4 (optional) — 比較對象 (per-portfolio benchmarks)  *(own detailed plan, only if requested)*
-
-**Goal:** The detail header's "比較對象" strip compares the portfolio vs benchmarks. The benchmark infrastructure exists (`PortfolioHistoryViewModel` custom benchmarks, the P5 work) but is whole-portfolio; making it per-portfolio is the real work. Deferred unless the user asks.
+Two real pieces of new work deferred from P1: (a) per-portfolio benchmark comparison (existing benchmark infra is whole-portfolio); (b) period-selectable per-portfolio trend — requires a group dimension on snapshots or on-the-fly historical recomputation (neither exists today).
 
 ---
 
-## Self-review notes
-- **Spec coverage:** rename (1.1), top tabs (1.2/1.3/1.6), detail header value/change/trend/period (1.4), 股票-vs-ETF focus card (1.5), bordered cards (1.7), lot dropdown (P2), 活動 (P3), benchmarks (P4-optional), old-ViewMode removal (1.6). Out-of-scope items explicitly listed. ✔
-- **Identifier safety:** only UI strings renamed; `PortfolioGroup`/`GroupId`/DB untouched. ✔
-- **Reuse over fabrication:** group-resolution, per-group KPIs, trend chart/period, trade formatting, `MarketValueBase` are reused with file pointers rather than re-implemented — the implementer must read the referenced existing code (called out in 1.3 Step 1, 1.4 Step 1/2). The only fully-new, fully-specified units are `PortfolioTabsViewModel` and `PortfolioCompositionViewModel` (with complete code + tests). ✔
+## Self-review notes (Rev 2)
+- All four major review findings applied: `Trade.PortfolioGroupId` + direct row→group resolution; Task 1.3 reuses `PortfolioGroupFilter`/`PositionsView` instead of inventing a view; Task 1.4 splits the trend by tab type and stops claiming a per-group period chart exists; Task 1.5 keys on the effective `IsEtf` flag with the storage rule encoded in its doc + caller.
+- Minor findings applied: system-default-group tab semantics + tests (1.2), DayPnl via `row.DayChange` (1.4), ＋投資 button task (1.4), tab-strip overflow ScrollViewer + prior-design citation (1.6), 1.6 deletion checklist with verified file:line locations + the 5 named tests, theme-safe `AppCardBorder` in both dictionaries + `Radius.2Xl` (1.7), Task 1.1 double-replace warning + expanded seed list.
+- Identifier safety: only UI strings renamed. ✔
