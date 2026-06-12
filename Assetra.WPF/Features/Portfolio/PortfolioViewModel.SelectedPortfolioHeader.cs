@@ -1,4 +1,5 @@
 using Assetra.Core.Models;
+using Assetra.WPF.Features.Portfolio.SubViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
@@ -24,6 +25,9 @@ namespace Assetra.WPF.Features.Portfolio;
 /// </summary>
 public partial class PortfolioViewModel
 {
+    // ── 投資組合焦點 (Task 1.5) — stock vs ETF composition ──────────────────────────
+    public PortfolioCompositionViewModel Composition { get; } = new();
+
     // ── Selected-portfolio display values ────────────────────────────────────────────
 
     [ObservableProperty] private string _selectedPortfolioName = string.Empty;
@@ -99,6 +103,11 @@ public partial class PortfolioViewModel
             SelectedPortfolioTrendSeries = null;
             SelectedPortfolioTrendXAxes = null;
             SelectedPortfolioTrendYAxes = null;
+
+            // 全部 tab: composition over every position.
+            Composition.Apply(Positions
+                .Select(row => (row.AssetType == AssetType.Etf || row.IsEtf, row.MarketValueBase))
+                .ToList());
         }
         else
         {
@@ -135,6 +144,13 @@ public partial class PortfolioViewModel
             SelectedPortfolioTrendSeries = series.Length > 0 ? series : null;
             SelectedPortfolioTrendXAxes = xAxes.Length > 0 ? xAxes : null;
             SelectedPortfolioTrendYAxes = yAxes.Length > 0 ? yAxes : null;
+
+            // Portfolio tab: composition over the same filtered rows.
+            // Effective ETF flag: row.AssetType == AssetType.Etf || row.IsEtf
+            // (TW ETFs are stored as AssetType.Stock + IsEtf=true by the buy flow).
+            Composition.Apply(filtered
+                .Select(row => (row.AssetType == AssetType.Etf || row.IsEtf, row.MarketValueBase))
+                .ToList());
         }
 
         OnPropertyChanged(nameof(IsSelectedPortfolioTrendVisible));

@@ -1,0 +1,175 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.PortfolioCompositionCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:subvm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
+    d:DataContext="{d:DesignInstance Type={x:Type subvm:PortfolioCompositionViewModel}}"
+    mc:Ignorable="d">
+
+    <Border
+        BorderBrush="{DynamicResource AppBorder}"
+        BorderThickness="1"
+        CornerRadius="{StaticResource Radius.2Xl}"
+        Padding="20">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            </Style>
+        </Border.Style>
+
+        <StackPanel>
+
+            <!--  Card title  -->
+            <TextBlock
+                Margin="0,0,0,12"
+                FontSize="{StaticResource Font.Size.Md}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Portfolio.Composition.Title}" />
+
+            <!--  No-data state  -->
+            <TextBlock
+                FontSize="{StaticResource Font.Size.Sm}"
+                Foreground="{DynamicResource AppTextMuted}"
+                Text="—"
+                Visibility="{Binding HasData, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+
+            <!--  Data content  -->
+            <StackPanel Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                <!--  Two-segment horizontal bar  -->
+                <Grid
+                    x:Name="BarContainer"
+                    Height="8"
+                    Margin="0,0,0,12"
+                    ClipToBounds="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Stock segment (left)  -->
+                    <Border
+                        Grid.Column="0"
+                        Background="{DynamicResource AppAccent}"
+                        CornerRadius="4,0,0,4">
+                        <Border.Width>
+                            <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                <Binding Path="StockPercent" />
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                            </MultiBinding>
+                        </Border.Width>
+                    </Border>
+
+                    <!--  ETF segment (right)  -->
+                    <Border
+                        Grid.Column="1"
+                        Background="{DynamicResource AppTextMuted}"
+                        CornerRadius="0,4,4,0">
+                        <Border.Width>
+                            <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                <Binding Path="EtfPercent" />
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                            </MultiBinding>
+                        </Border.Width>
+                    </Border>
+                </Grid>
+
+                <!--  股票 row  -->
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Color dot  -->
+                    <Border
+                        Grid.Column="0"
+                        Width="8"
+                        Height="8"
+                        Background="{DynamicResource AppAccent}"
+                        CornerRadius="{StaticResource Radius.Full}"
+                        VerticalAlignment="Center" />
+
+                    <!--  Percent  -->
+                    <TextBlock
+                        Grid.Column="2"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding StockPercent, StringFormat={}{0:F1}%}"
+                        Typography.NumeralAlignment="Tabular" />
+
+                    <!--  Label  -->
+                    <TextBlock
+                        Grid.Column="2"
+                        HorizontalAlignment="Left"
+                        Margin="40,0,0,0"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Filter.AssetType.Stock}" />
+
+                    <!--  Value  -->
+                    <TextBlock
+                        Grid.Column="4"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding StockValue, Converter={StaticResource CurrencyConverter}}"
+                        Typography.NumeralAlignment="Tabular" />
+                </Grid>
+
+                <!--  ETF row  -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Color dot  -->
+                    <Border
+                        Grid.Column="0"
+                        Width="8"
+                        Height="8"
+                        Background="{DynamicResource AppTextMuted}"
+                        CornerRadius="{StaticResource Radius.Full}"
+                        VerticalAlignment="Center" />
+
+                    <!--  Percent  -->
+                    <TextBlock
+                        Grid.Column="2"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding EtfPercent, StringFormat={}{0:F1}%}"
+                        Typography.NumeralAlignment="Tabular" />
+
+                    <!--  Label  -->
+                    <TextBlock
+                        Grid.Column="2"
+                        HorizontalAlignment="Left"
+                        Margin="40,0,0,0"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Filter.AssetType.Etf}" />
+
+                    <!--  Value  -->
+                    <TextBlock
+                        Grid.Column="4"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{Binding EtfValue, Converter={StaticResource CurrencyConverter}}"
+                        Typography.NumeralAlignment="Tabular" />
+                </Grid>
+
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

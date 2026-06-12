@@ -390,6 +390,7 @@
     <sys:String x:Key="Portfolio.Filter.AssetType.Bond">Bonds</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.Crypto">Crypto</sys:String>
     <sys:String x:Key="Portfolio.Filter.AssetType.PreciousMetal">Metals</sys:String>
+    <sys:String x:Key="Portfolio.Composition.Title">Portfolio focus</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowAllocation">Show allocation</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">Show daily P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Kpi.AllocationTitle">Holdings allocation</sys:String>
