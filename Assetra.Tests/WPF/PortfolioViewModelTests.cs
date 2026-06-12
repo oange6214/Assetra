@@ -414,6 +414,47 @@ public class PortfolioViewModelTests
         Assert.False(vm.PortfolioGroupFilterChips.Single(chip => chip.Id == longTermId).IsSelected);
     }
 
+    // ── Task 1.3 — PortfolioTabs → PortfolioGroupFilter wiring ─────────────────
+
+    [Fact]
+    public async Task SelectingGroupTab_FiltersPositionsToThatGroup()
+    {
+        // WHY: PortfolioTabs.SelectedTab → PortfolioGroupFilter → PositionsView.Filter must form
+        // a closed loop. This test exercises the TAB path specifically (not SetPortfolioGroupFilter
+        // directly) so that if the PropertyChanged subscription is missing the test fails.
+        var longTermId = Guid.NewGuid();
+        var incomeId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+            new PortfolioGroup(incomeId, "現金流"),
+        ]));
+        var longFund  = new PortfolioEntry(Guid.NewGuid(), "LONGF", "", AssetType.Fund, PortfolioGroupId: longTermId);
+        var incomeFund = new PortfolioEntry(Guid.NewGuid(), "INCF",  "", AssetType.Fund, PortfolioGroupId: incomeId);
+        var snapshots = SnapshotsFor([
+            (longFund,  100m, 10),
+            (incomeFund, 50m,  4),
+        ]);
+        var (vm, _) = CreateVm(
+            [longFund, incomeFund],
+            PositionQueryMock(snapshots).Object,
+            catalog);
+
+        await vm.LoadAsync();
+
+        // Select the "現金流" tab via PortfolioTabs (not SetPortfolioGroupFilterCommand).
+        var incomeTab = vm.PortfolioTabs.Tabs.Single(t => t.GroupId == incomeId);
+        vm.PortfolioTabs.SelectedTab = incomeTab;
+
+        Assert.Equal(["INCF"], vm.PositionsView.Cast<PortfolioRowViewModel>().Select(r => r.Symbol));
+
+        // Selecting the 全部 tab must restore all rows.
+        var allTab = vm.PortfolioTabs.Tabs.Single(t => t.IsAll);
+        vm.PortfolioTabs.SelectedTab = allTab;
+
+        Assert.Equal(2, vm.PositionsView.Cast<PortfolioRowViewModel>().Count());
+    }
+
     [Fact]
     public async Task OpenSelectedPositionGroupDetail_BuildsCurrentMembershipSummary()
     {

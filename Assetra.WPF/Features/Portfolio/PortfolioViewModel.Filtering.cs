@@ -126,6 +126,12 @@ public partial class PortfolioViewModel
         if (defaultGroup is null && PortfolioGroupFilter == PortfolioGroup.DefaultId)
             PortfolioGroupFilter = null;
 
+        // Task 1.3 — keep the Google-style tab strip in sync with the group catalog.
+        PortfolioTabs.Sync(
+            GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>(),
+            L("Common.All", "全部"),
+            L("Portfolio.Group.Ungrouped", "未指定組合"));
+
         RefreshPortfolioGroupFilterChipSelection();
         OnPropertyChanged(nameof(HasPortfolioGroupFilterChips));
     }

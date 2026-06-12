@@ -129,6 +129,13 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     public DashboardViewModel? Dashboard { get; private set; }
     public Controls.AllocationViewModel? AllocationAnalysis { get; private set; }
 
+    /// <summary>
+    /// Task 1.3 — Google-style portfolio tab strip.
+    /// Constructed in the ctor after GroupCatalog is assigned.
+    /// Tab selection drives <see cref="PortfolioGroupFilter"/> via a PropertyChanged subscription.
+    /// </summary>
+    public PortfolioTabsViewModel PortfolioTabs { get; }
+
     // Asset allocation (pie chart) — owned by AllocationPanelViewModel.
     public AllocationPanelViewModel Allocation { get; }
     [ObservableProperty] private bool _isAllocationVisible = true;
@@ -398,6 +405,25 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 })
                 .DisposeWith(_disposables);
         }
+        // Task 1.3 — construct the Google-style tab strip from the current catalog groups.
+        // _localization is assigned later in this ctor, but L() is null-safe (returns fallback when null),
+        // so the labels are correct immediately. Catalog groups are empty until LoadAsync(); Sync() in
+        // RefreshPortfolioGroupFilterChips() re-populates the tabs once the catalog is loaded.
+        PortfolioTabs = new PortfolioTabsViewModel(
+            GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>(),
+            allLabel: L("Common.All", "全部"),
+            ungroupedLabel: L("Portfolio.Group.Ungrouped", "未指定組合"));
+
+        // Task 1.3 — selection → filter: propagate tab changes to the existing PortfolioGroupFilter.
+        // OnPortfolioGroupFilterChanged already calls PositionsView.Refresh() + summaries + stats.
+        // TODO (Task 1.4): also recompute per-portfolio header aggregates from this handler.
+        // TODO (Task 1.5): also refresh stock-vs-ETF focus card from this handler.
+        PortfolioTabs.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(PortfolioTabsViewModel.SelectedGroupId))
+                PortfolioGroupFilter = PortfolioTabs.SelectedGroupId;
+        };
+
         // P4.1 — Asset detail KPI 矩陣 XIRR 計算。null = XIRR row 顯示「—」。
         _xirrCalculator = services.Xirr;
         _cryptoService = services.Crypto;
