@@ -21,6 +21,7 @@
     <!--  Borders  -->
     <SolidColorBrush x:Key="AppBorder" Color="{StaticResource Color.Cis.Dark.Layer3}" />
     <SolidColorBrush x:Key="AppBorderLight" Color="{StaticResource Color.Cis.Dark.Layer2}" />
+    <SolidColorBrush x:Key="AppCardBorder" Color="{StaticResource Color.Slate.600}" />
 
     <!--  Text — Slate ramp (dark)  -->
     <SolidColorBrush x:Key="AppTextPrimary" Color="{StaticResource Color.Cis.Dark.TextPrimary}" />

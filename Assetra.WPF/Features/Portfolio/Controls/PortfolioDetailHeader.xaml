@@ -23,8 +23,9 @@
     <Border
         Padding="16,12,16,14"
         Background="{DynamicResource AppSurface}"
-        BorderBrush="{DynamicResource AppBorder}"
-        BorderThickness="0,0,0,1">
+        BorderBrush="{DynamicResource AppCardBorder}"
+        BorderThickness="1"
+        CornerRadius="{StaticResource Radius.2Xl}">
 
         <StackPanel>
 
