@@ -1275,13 +1275,6 @@
                 <DataGrid.RowStyle>
                     <Style BasedOn="{StaticResource AppDataGridRowSelectable}" TargetType="DataGridRow" />
                 </DataGrid.RowStyle>
-                <DataGrid.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <StaticResource ResourceKey="PositionGroupHeaderTemplate" />
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </DataGrid.GroupStyle>
 
                 <DataGrid.Columns>
                     <!--  資產 — 代號 + 類型 badge + 名稱（P5.11：幣別已拆到下一欄，這裡不再 inline）  -->
