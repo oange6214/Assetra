@@ -246,6 +246,7 @@
     <sys:String x:Key="Portfolio.Tab.Liability">負債</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">配置分析</sys:String>
     <sys:String x:Key="Portfolio.Tab.Trades">交易記錄</sys:String>
+    <sys:String x:Key="Portfolio.AddPortfolio">＋ 新增投資組合</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalRemaining">剩餘待還</sys:String>
     <sys:String x:Key="Portfolio.Liability.PaidPercent">已繳</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalLoan">總借款</sys:String>

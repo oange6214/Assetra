@@ -82,46 +82,113 @@
             </Setter>
         </Style>
 
+        <!--
+            "＋ 新增投資組合" button style — subtle inline text button, no filled background.
+            Sits at the end of the pill row; navigates to the Portfolio Groups management page.
+        -->
+        <Style x:Key="AddPortfolioButton" TargetType="Button">
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Lg}">
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.FontFamily="{TemplateBinding FontFamily}"
+                                TextElement.FontSize="{TemplateBinding FontSize}"
+                                TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
     <!--
         Horizontal pill row bound to PortfolioTabs.Tabs.
-        Wrapped in a horizontal ScrollViewer (scrollbar hidden, mouse-wheel enabled) to
-        handle overflow gracefully when many portfolios exist.
-        See comment in PositionsTabPanel.xaml: this re-introduces the chip row but WITH
-        overflow handling instead of an unbounded StackPanel.
+        Layout: Border (left-padding aligned with page content, fixed 40px height) contains a
+        DockPanel — the AddPortfolio button is docked right, the ScrollViewer fills the rest.
+        ScrollViewer handles overflow when many portfolios exist (scrollbar hidden, wheel enabled).
+        Fix 1: TextBlock in ItemTemplate now explicitly binds Foreground to the ListBoxItem's
+                Foreground so selected (white-on-accent) state is always readable.
+        Fix 2: Border height 40px, vertical padding 4px top/bottom; Margin="0,0,0,6" bottom gap
+                before the detail header; left padding 12 aligns with the cards below.
+        Fix 3: AddPortfolioGroup button docked at the end of the strip.
     -->
     <Border
-        Padding="12,8,12,0"
+        Height="40"
+        Padding="12,4,12,4"
+        Margin="0,0,0,6"
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="0,0,0,0">
 
-        <ScrollViewer
-            HorizontalScrollBarVisibility="Hidden"
-            VerticalScrollBarVisibility="Disabled"
-            PreviewMouseWheel="OnPreviewMouseWheel">
+        <DockPanel LastChildFill="True">
 
-            <ListBox
-                Background="Transparent"
-                BorderThickness="0"
-                ItemContainerStyle="{StaticResource PortfolioTabPill}"
-                ItemsSource="{Binding PortfolioTabs.Tabs}"
-                SelectedItem="{Binding PortfolioTabs.SelectedTab, Mode=TwoWay}"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type subvm:PortfolioTabViewModel}">
-                        <TextBlock Text="{Binding Name}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <!--  ＋ 新增投資組合 — docked to the right end of the pill row  -->
+            <Button
+                DockPanel.Dock="Right"
+                Command="{Binding AddPortfolioGroupCommand}"
+                Content="{DynamicResource Portfolio.AddPortfolio}"
+                Style="{StaticResource AddPortfolioButton}" />
 
-        </ScrollViewer>
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Hidden"
+                VerticalScrollBarVisibility="Disabled"
+                PreviewMouseWheel="OnPreviewMouseWheel">
+
+                <ListBox
+                    Background="Transparent"
+                    BorderThickness="0"
+                    ItemContainerStyle="{StaticResource PortfolioTabPill}"
+                    ItemsSource="{Binding PortfolioTabs.Tabs}"
+                    SelectedItem="{Binding PortfolioTabs.SelectedTab, Mode=TwoWay}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type subvm:PortfolioTabViewModel}">
+                            <!--
+                                Fix 1: Explicitly bind Foreground to the ancestor ListBoxItem's
+                                Foreground so the selected trigger (AppTextOnAccent = white) is
+                                propagated to the TextBlock. Without this, WPF's TextElement
+                                inheritance on a ContentPresenter wrapping a DataTemplate can fail
+                                to update in all themes, leaving white text invisible on the
+                                AppAccent pill background.
+                            -->
+                            <TextBlock
+                                Text="{Binding Name}"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+            </ScrollViewer>
+        </DockPanel>
     </Border>
 
 </UserControl>

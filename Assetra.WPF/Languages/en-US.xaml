@@ -250,6 +250,7 @@
     <sys:String x:Key="Portfolio.Tab.Liability">Liabilities</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">Allocation Analysis</sys:String>
     <sys:String x:Key="Portfolio.Tab.Trades">Trade History</sys:String>
+    <sys:String x:Key="Portfolio.AddPortfolio">＋ New portfolio</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalRemaining">Remaining</sys:String>
     <sys:String x:Key="Portfolio.Liability.PaidPercent">Paid</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalLoan">Total Loan</sys:String>
