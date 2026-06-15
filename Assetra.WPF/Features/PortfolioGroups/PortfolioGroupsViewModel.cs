@@ -34,9 +34,16 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
 
     [ObservableProperty] private bool _isFormOpen;
     [ObservableProperty] private string _formName = string.Empty;
-    [ObservableProperty] private string _formDescription = string.Empty;
-    [ObservableProperty] private string _formColorHex = string.Empty;
     [ObservableProperty] private string? _formError;
+
+    /// <summary>
+    /// Auto-color palette cycled by user-group count on new portfolio creation.
+    /// Matches the PiePalette colours used elsewhere in the portfolio UI.
+    /// </summary>
+    private static readonly string[] _colorPalette =
+    [
+        "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#06B6D4",
+    ];
 
     /// <summary>True 編輯模式（vs 新增）。</summary>
     public bool IsEditing => EditingId.HasValue;
@@ -120,8 +127,6 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
             return;
         EditingId = row.Id;
         FormName = row.Name;
-        FormDescription = row.Description ?? string.Empty;
-        FormColorHex = row.ColorHex ?? string.Empty;
         FormError = null;
         IsFormOpen = true;
     }
@@ -143,11 +148,17 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
         // 取既有 row 的 IsSystem flag（編輯模式才有）；新增一律 false
         var existing = EditingId is { } id ? _groups.FirstOrDefault(g => g.Id == id) : null;
 
+        // For new groups, auto-pick a color from the palette by cycling through
+        // the count of non-system user groups so each portfolio gets a distinct dot.
+        var autoColor = EditingId is null
+            ? _colorPalette[_groups.Count(g => !g.IsSystem) % _colorPalette.Length]
+            : existing?.ColorHex;
+
         var group = new PortfolioGroup(
             Id: EditingId ?? Guid.NewGuid(),
             Name: name,
-            ColorHex: string.IsNullOrWhiteSpace(FormColorHex) ? null : FormColorHex.Trim(),
-            Description: string.IsNullOrWhiteSpace(FormDescription) ? null : FormDescription.Trim(),
+            ColorHex: autoColor,
+            Description: existing?.Group.Description,
             IconKey: existing?.Group.IconKey,
             SortOrder: existing?.Group.SortOrder ?? _groups.Count,
             DefaultCashAccountId: existing?.Group.DefaultCashAccountId,
@@ -209,8 +220,6 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
     {
         EditingId = null;
         FormName = string.Empty;
-        FormDescription = string.Empty;
-        FormColorHex = string.Empty;
         FormError = null;
         IsFormOpen = false;
     }

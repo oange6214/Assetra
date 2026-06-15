@@ -70,8 +70,22 @@ public partial class PortfolioViewModel
     /// Syncs the Google-style tab strip with the current group catalog.
     /// Called whenever the catalog changes (initial load or user edits groups).
     /// </summary>
+    /// <remarks>
+    /// Threading: PortfolioTabs.Tabs is data-bound to a CollectionView that is
+    /// thread-affine. If called from a background thread (e.g. after a catalog
+    /// RefreshAsync completes off the UI thread), Tabs.Clear/Add throws
+    /// NotSupportedException. Marshal back to the UI Dispatcher exactly as
+    /// RebuildPositionPieCharts does.  In headless tests Application.Current is
+    /// null, so the guard runs inline — unit tests are unaffected.
+    /// </remarks>
     private void SyncPortfolioTabs()
     {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.CheckAccess())
+        {
+            dispatcher.Invoke(SyncPortfolioTabs);
+            return;
+        }
         PortfolioTabs.Sync(
             GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>(),
             L("Common.All", "全部"),

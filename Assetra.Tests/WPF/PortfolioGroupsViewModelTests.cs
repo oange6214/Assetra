@@ -54,8 +54,6 @@ public sealed class PortfolioGroupsViewModelTests : IDisposable
 
         _vm.StartAddCommand.Execute(null);
         _vm.FormName = "退休帳戶";
-        _vm.FormColorHex = "#3B82F6";
-        _vm.FormDescription = "Long-term FIRE bucket";
         await _vm.SaveCommand.ExecuteAsync(null);
 
         Assert.Equal(2, _vm.Groups.Count);
@@ -84,11 +82,12 @@ public sealed class PortfolioGroupsViewModelTests : IDisposable
     [Fact]
     public async Task StartEdit_PopulatesFormWithExistingRowFields()
     {
+        // WHY: StartEdit must open the form with the row's name pre-filled so the
+        // user can rename without clearing the field; EditingId must be set so
+        // SaveAsync routes to UpdateAsync rather than AddAsync.
         await _vm.LoadAsync();
         _vm.StartAddCommand.Execute(null);
         _vm.FormName = "買房儲蓄";
-        _vm.FormColorHex = "#10B981";
-        _vm.FormDescription = "Down-payment fund";
         await _vm.SaveCommand.ExecuteAsync(null);
 
         var newRow = _vm.Groups.First(g => g.Name == "買房儲蓄");
@@ -98,26 +97,25 @@ public sealed class PortfolioGroupsViewModelTests : IDisposable
         Assert.True(_vm.IsEditing);
         Assert.Equal(newRow.Id, _vm.EditingId);
         Assert.Equal("買房儲蓄", _vm.FormName);
-        Assert.Equal("#10B981", _vm.FormColorHex);
-        Assert.Equal("Down-payment fund", _vm.FormDescription);
     }
 
     [Fact]
     public async Task Save_Edit_PreservesIsSystemFlagAndUpdatesRow()
     {
+        // WHY: Editing the system default group must persist the name change
+        // but must NOT flip IsSystem to false — that would expose a Delete button
+        // for the default group and allow repo-level removal.
         await _vm.LoadAsync();
         var def = _vm.Groups.Single();
         Assert.True(def.IsSystem);
 
         _vm.StartEditCommand.Execute(def);
         _vm.FormName = "My Default";
-        _vm.FormColorHex = "#FFAA00";
         await _vm.SaveCommand.ExecuteAsync(null);
 
         var reloaded = await _repo.GetByIdAsync(PortfolioGroup.DefaultId);
         Assert.NotNull(reloaded);
         Assert.Equal("My Default", reloaded!.Name);
-        Assert.Equal("#FFAA00", reloaded.ColorHex);
         Assert.True(reloaded.IsSystem); // must NOT be flipped off by an edit
     }
 

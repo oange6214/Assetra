@@ -188,28 +188,6 @@
                                    Text="{DynamicResource PortfolioGroups.Form.Name}" />
                         <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
 
-                        <TextBlock Margin="0,12,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource PortfolioGroups.Form.Description}" />
-                        <TextBox AcceptsReturn="True"
-                                 MinHeight="60"
-                                 TextWrapping="Wrap"
-                                 Text="{Binding FormDescription, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Margin="0,12,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource PortfolioGroups.Form.Color}" />
-                        <TextBox Text="{Binding FormColorHex, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Margin="0,4,0,0"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource PortfolioGroups.Form.ColorHint}"
-                                   TextWrapping="Wrap" />
-
                         <TextBlock Margin="0,8,0,0"
                                    Foreground="{DynamicResource AppDown}"
                                    FontSize="{StaticResource Font.Size.Xs}"
