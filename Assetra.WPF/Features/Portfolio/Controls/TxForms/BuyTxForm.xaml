@@ -19,7 +19,7 @@
             類別現在由統一資產選擇器決定（SelectedAsset.Kind → Buy.AssetType，
             由 SyncSelectedAssetIntoBuyState() 同步）。使用者選 NVDA 即 Stock，
             選 Vanguard Total World Stock 即 Fund — 不必再 dropdown 選一次。
-            
+
             同樣地，「代號」輸入框也拿掉 — Symbol 由 SelectedAsset.Symbol 帶。
             非 Stock 子表單（Non-stock / Crypto）下面仍保留自己的 Name / Symbol
             輸入欄位作為過渡，直到 + 新增資產 CTA 完整接上前不動。
@@ -43,9 +43,10 @@
 
                 <!--
                     P2.4 reorganization — 對齊使用者提供的參考設計：
-                    Row 1: 數量 | 價格輸入模式 toggle [單價/總額]   ← 2 欄平排
-                    Row 2: 單位價格 / 總價值 (label 隨 toggle 切換)，右上 inline 「⚡ 取得市價」link
-                    Row 3: 即時計算 mirror — 單價模式顯示「總計: X」、總額模式顯示「單位價格: X」
+                    Row 1: 數量（全寬，價格模式 toggle 移至進階區）
+                    Row 2: 單位價格 label，右上 inline 「⚡ 取得市價」link
+                    Row 3: 單位價格 TextBox（預設只顯示 unit-mode input）
+                    Row 4: 即時計算 mirror — 單價模式顯示「總計: X」、總額模式顯示「單位價格: X」
                     Bindings 仍走 Buy.PriceMode / AddAssetDialog.AddPrice / Buy.TotalCost
                     （沒有 lift 到 parent VM 的 facade，因為 sub-VM 已是同一個 dialog DataContext 可訪問），
                     所以下游 ConfirmBuyAsync 邏輯不受影響。
@@ -63,67 +64,24 @@
                     Text="{DynamicResource Portfolio.Tx.TradeDetailsHint}"
                     TextWrapping="Wrap" />
 
-                <!--  Row 1：數量 + 價格輸入模式 toggle  -->
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock
-                            Margin="0,0,0,6"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.AddQuantity}" />
-                        <TextBox
-                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                            IsEnabled="{Binding AreEconomicFieldsEditable}"
-                            Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
-                            Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock
-                            Style="{StaticResource FormFieldError}"
-                            Text="{Binding AddAssetDialog.AddQuantityError}"
-                            Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2">
-                        <TextBlock
-                            Margin="0,0,0,6"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Tx.PriceMode}" />
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <RadioButton
-                                Grid.Column="0"
-                                Margin="0,0,3,0"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center"
-                                Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
-                                GroupName="TxBuyPriceMode"
-                                IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
-                                IsEnabled="{Binding AreEconomicFieldsEditable}"
-                                Style="{StaticResource SegmentBtn}" />
-                            <RadioButton
-                                Grid.Column="1"
-                                Margin="3,0,0,0"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center"
-                                Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
-                                GroupName="TxBuyPriceMode"
-                                IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
-                                IsEnabled="{Binding AreEconomicFieldsEditable}"
-                                Style="{StaticResource SegmentBtn}" />
-                        </Grid>
-                    </StackPanel>
-                </Grid>
+                <!--  Row 1：數量（全寬；價格模式 toggle 已移至進階區）  -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        Margin="0,0,0,6"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.AddQuantity}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        IsEnabled="{Binding AreEconomicFieldsEditable}"
+                        Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
+                        Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding AddAssetDialog.AddQuantityError}"
+                        Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
+                </StackPanel>
 
                 <!--
                     Row 2：價格 label + inline 「取得市價」 link。Bottom-align 兩邊讓 baseline 一致
@@ -198,8 +156,9 @@
                 </Grid>
 
                 <!--
-                    單一 input — 依 PriceMode 切換 binding。Total mode 用 Buy.TotalCost，
-                    Unit mode 用 AddAssetDialog.AddPrice。兩個 TextBox 互相疊著、由 Visibility 切換。
+                    單一 input — 依 PriceMode 切換 binding。Unit mode 用 AddAssetDialog.AddPrice（預設可見）。
+                    Total mode 用 Buy.TotalCost（移至進階區）。
+                    unit-mode TextBox 留在此處（預設可見）；total-mode TextBox 移入進階 Expander。
                 -->
                 <TextBox
                     behaviors:ThousandSeparatorBehavior.IsEnabled="True"
@@ -207,20 +166,10 @@
                     Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
                     Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                    IsEnabled="{Binding AreEconomicFieldsEditable}"
-                    Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
-                    Text="{Binding Buy.TotalCost, UpdateSourceTrigger=PropertyChanged}"
-                    Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding AddAssetDialog.AddPriceError}"
                     Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
-                <TextBlock
-                    Style="{StaticResource FormFieldError}"
-                    Text="{Binding Buy.TotalCostError}"
-                    Visibility="{Binding Buy.TotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--  Row 3: inline mirror — 對稱顯示另一邊的計算值  -->
                 <!--  unit mode → 「總計: X」  -->
@@ -243,15 +192,6 @@
                     <Run Text="{DynamicResource Portfolio.Tx.UnitPriceMirrorPrefix}" />
                     <Run Text="{Binding TxBuyComputedUnitPriceDisplay, Mode=OneWay}" />
                 </TextBlock>
-
-                <!--  Total mode only: 「金額已含手續費」CheckBox  -->
-                <CheckBox
-                    Margin="0,8,0,8"
-                    Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
-                    IsChecked="{Binding Buy.TotalIncludesFee, Mode=TwoWay}"
-                    IsEnabled="{Binding AreEconomicFieldsEditable}"
-                    ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}"
-                    Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--  ClosePrice 自動抓取後的 hint（只在 unit mode 才相關）  -->
                 <TextBlock
@@ -278,7 +218,7 @@
                     「手續費折扣」欄位已搬到「設定 → 預設手續費折扣」(AppSettings.DefaultCommissionDiscount)。
                     Dialog 開啟時自動由 SeedCommissionDiscountFromSettings() 帶入；
                     使用者鮮少每筆交易改券商折扣，移除減少 dialog 噪音。下方「手續費（選填）」
-                    手動覆寫欄位仍保留作 per-trade override。
+                    手動覆寫欄位仍保留作 per-trade override（移至進階區）。
                 -->
 
                 <!--  Fee preview  -->
@@ -428,89 +368,180 @@
                 Visibility="{Binding AddAssetDialog.AddCryptoPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
 
-        <!--  Fee + cash-account — hidden in meta-only mode  -->
-        <StackPanel>
-            <StackPanel.Style>
-                <Style TargetType="StackPanel">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </StackPanel.Style>
+        <!--
+            進階區塊 Expander — 收合進階選項：
+            • Stock only: 價格模式 toggle (單價/總額)、總額輸入、金額已含手續費
+            • Shared: 手續費 override、從現金帳戶扣款、CrossCurrencyOverlay
+            IsExpanded 綁定 Buy.IsAdvancedExpanded（cross-currency 自動展開）
+        -->
+        <Expander
+            Margin="0,12,0,0"
+            Style="{StaticResource AppExpander}"
+            Header="{DynamicResource Portfolio.Tx.AdvancedSection}"
+            IsExpanded="{Binding Buy.IsAdvancedExpanded, Mode=TwoWay}">
+            <StackPanel>
 
-            <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
-            <TextBlock
-                Margin="0,14,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.Fee}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
-                Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding TxFeeError}"
-                Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
-            <TextBlock
-                Margin="0,4,0,14"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextMuted}"
-                Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
-                TextWrapping="Wrap" />
+                <!--  Stock-only advanced fields: 價格模式 toggle + 總額輸入 + 已含手續費  -->
+                <StackPanel Visibility="{Binding Buy.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
 
-            <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
-            <CheckBox
-                Margin="0,0,0,6"
-                Content="{Binding TxUseCashAccountLabel}"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextSecondary}"
-                IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
-                    Margin="0,0,0,6"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxCashAccountLabel}" />
-                <ComboBox
-                    Margin="0,0,0,4"
-                    DisplayMemberPath="Name"
-                    IsEditable="True"
-                    IsTextSearchEnabled="True"
-                    ItemsSource="{Binding CashAccounts}"
-                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                    Style="{StaticResource FormComboBox}"
-                    Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                    <ComboBox.Resources>
-                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                    </ComboBox.Resources>
-                </ComboBox>
-                <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppAccent}"
-                    Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
-                    Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <!--  MetaOnly 隱藏（Stock economic fields 同步隱藏）  -->
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
 
-                <!--
-                    P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                    UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                    這裡只負責設定 4 個 DP 把 Buy 專屬的差異塞進去（GroupName / FetchCommand /
-                    Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
-                -->
-                <txforms:CrossCurrencyOverlay
-                    ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
-                    ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
-                    DataContext="{Binding Buy}"
-                    FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
-                    GroupName="TxBuySettlementInputMode" />
+                        <!--  價格輸入模式 toggle（單價 / 總額）  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.PriceMode}" />
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <RadioButton
+                                Grid.Column="0"
+                                Margin="0,0,3,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
+                                GroupName="TxBuyPriceMode"
+                                IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
+                                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                                Style="{StaticResource SegmentBtn}" />
+                            <RadioButton
+                                Grid.Column="1"
+                                Margin="3,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
+                                GroupName="TxBuyPriceMode"
+                                IsChecked="{Binding Buy.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
+                                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                                Style="{StaticResource SegmentBtn}" />
+                        </Grid>
+
+                        <!--  Total mode: 總額輸入 TextBox  -->
+                        <TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            IsEnabled="{Binding AreEconomicFieldsEditable}"
+                            Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
+                            Text="{Binding Buy.TotalCost, UpdateSourceTrigger=PropertyChanged}"
+                            Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding Buy.TotalCostError}"
+                            Visibility="{Binding Buy.TotalCostError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                        <!--  Total mode only: 「金額已含手續費」CheckBox  -->
+                        <CheckBox
+                            Margin="0,8,0,8"
+                            Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
+                            IsChecked="{Binding Buy.TotalIncludesFee, Mode=TwoWay}"
+                            IsEnabled="{Binding AreEconomicFieldsEditable}"
+                            ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}"
+                            Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  Fee + cash-account — hidden in meta-only mode  -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
+                    <TextBlock
+                        Margin="0,14,0,6"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.Fee}" />
+                    <TextBox
+                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                        Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
+                        Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Style="{StaticResource FormFieldError}"
+                        Text="{Binding TxFeeError}"
+                        Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,4,0,14"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
+                        TextWrapping="Wrap" />
+
+                    <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
+                    <CheckBox
+                        Margin="0,0,0,6"
+                        Content="{Binding TxUseCashAccountLabel}"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
+                    <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding TxCashAccountLabel}" />
+                        <ComboBox
+                            Margin="0,0,0,4"
+                            DisplayMemberPath="Name"
+                            IsEditable="True"
+                            IsTextSearchEnabled="True"
+                            ItemsSource="{Binding CashAccounts}"
+                            SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                            Style="{StaticResource FormComboBox}"
+                            Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                            <ComboBox.Resources>
+                                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                            </ComboBox.Resources>
+                        </ComboBox>
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
+                            Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <!--
+                            P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
+                            UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
+                            這裡只負責設定 4 個 DP 把 Buy 專屬的差異塞進去（GroupName / FetchCommand /
+                            Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
+                        -->
+                        <txforms:CrossCurrencyOverlay
+                            ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
+                            ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
+                            DataContext="{Binding Buy}"
+                            FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
+                            GroupName="TxBuySettlementInputMode" />
+
+                    </StackPanel>
+                </StackPanel>
 
             </StackPanel>
-        </StackPanel>
+        </Expander>
+
     </StackPanel>
 </UserControl>
