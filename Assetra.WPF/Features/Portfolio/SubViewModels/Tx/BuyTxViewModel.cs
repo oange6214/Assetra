@@ -117,6 +117,10 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// <summary>True 代表使用者手動覆寫匯率，日期/幣別變動時不自動蓋掉。</summary>
     [ObservableProperty] private bool _isFxManual;
 
+    /// <summary>True 時「進階」區塊展開。跨幣別交易會自動設為 true（FX/結算為必填），
+    /// 但同幣別不會強制收合，避免跟手動展開的使用者打架。</summary>
+    [ObservableProperty] private bool _isAdvancedExpanded;
+
     /// <summary>匯率查詢失敗或缺資料的可見錯誤訊息。</summary>
     [ObservableProperty] private string _fxFetchError = string.Empty;
 
@@ -140,6 +144,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(InstrumentCurrencyBadge));
         OnPropertyChanged(nameof(SettlementPairDisplay));
+        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnCashAccountCurrencyChanged(string value)
@@ -149,6 +154,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
             : value.Trim().ToUpperInvariant();
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
+        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnSettlementInputModeChanged(string value)
@@ -164,6 +170,13 @@ public sealed partial class BuyTxViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
+        AutoExpandAdvancedIfCrossCurrency();
+    }
+
+    private void AutoExpandAdvancedIfCrossCurrency()
+    {
+        if (IsCrossCurrency)
+            IsAdvancedExpanded = true;   // one-way: open when needed, never force-close
     }
 
     private string NormalizeSettlementCurrency() =>
@@ -256,5 +269,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
         FxSourceLabel = string.Empty;
         IsFxManual = false;
         FxFetchError = string.Empty;
+        IsAdvancedExpanded = false;
     }
 }
