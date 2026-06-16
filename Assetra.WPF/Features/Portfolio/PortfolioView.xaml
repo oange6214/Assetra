@@ -165,9 +165,9 @@
                             -->
                             <StackPanel Orientation="Horizontal">
                                 <!--  主要類型徽章（股 / 基 / 金 / 債 / 密）— 顏色依資產類型  -->
-                                <Border Padding="8,2" CornerRadius="{StaticResource Radius.Sm}">
+                                <Border>
                                     <Border.Style>
-                                        <Style TargetType="Border">
+                                        <Style BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
                                             <Setter Property="Background" Value="#0062AD" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedPositionRow.AssetType, FallbackValue={x:Null}}" Value="{x:Static models:AssetType.Fund}">
@@ -186,20 +186,16 @@
                                         </Style>
                                     </Border.Style>
                                     <TextBlock
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
+                                        Style="{StaticResource PortfolioBadgeText}"
                                         Text="{Binding SelectedPositionRow.AssetTypeBadgeLabel, FallbackValue=''}" />
                                 </Border>
                                 <!--  ETF 副徽章 — 僅股票型 ETF 顯示（非債券 ETF）  -->
                                 <Border
                                     Margin="6,0,0,0"
-                                    Padding="8,2"
                                     Background="{DynamicResource Brush.Info}"
-                                    CornerRadius="{StaticResource Radius.Sm}"
                                     ToolTip="證交稅 0.1%">
                                     <Border.Style>
-                                        <Style TargetType="Border">
+                                        <Style BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                             <Style.Triggers>
                                                 <MultiDataTrigger>
@@ -212,33 +208,21 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBlock
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="ETF" />
+                                    <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="ETF" />
                                 </Border>
                                 <!--  債券 ETF 副徽章 — 深灰提示免徵證交稅  -->
                                 <Border
                                     Margin="6,0,0,0"
-                                    Padding="8,2"
+                                    Style="{StaticResource PortfolioBadgeBase}"
                                     Background="{DynamicResource Brush.Neutral}"
-                                    CornerRadius="{StaticResource Radius.Sm}"
                                     ToolTip="{DynamicResource Portfolio.AssetType.BondEtf.Tooltip}"
                                     Visibility="{Binding SelectedPositionRow.IsBondEtf, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                                    <TextBlock
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
-                                        Text="{DynamicResource Portfolio.AssetType.BondEtf}" />
+                                    <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{DynamicResource Portfolio.AssetType.BondEtf}" />
                                 </Border>
                                 <!--  P4.3 #4 — 幣別 chip：TWD = 中性 slate / USD = violet（外幣突出）  -->
-                                <Border
-                                    Margin="6,0,0,0"
-                                    Padding="8,2"
-                                    CornerRadius="{StaticResource Radius.Sm}">
+                                <Border Margin="6,0,0,0">
                                     <Border.Style>
-                                        <Style TargetType="Border">
+                                        <Style BasedOn="{StaticResource PortfolioBadgeBase}" TargetType="Border">
                                             <Setter Property="Background" Value="{DynamicResource Brush.Neutral}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedPositionRow.Currency, FallbackValue=''}" Value="USD">
@@ -248,9 +232,7 @@
                                         </Style>
                                     </Border.Style>
                                     <TextBlock
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        FontWeight="SemiBold"
-                                        Foreground="{DynamicResource AppTextOnAccent}"
+                                        Style="{StaticResource PortfolioBadgeText}"
                                         Text="{Binding SelectedPositionRow.Currency, FallbackValue='TWD'}" />
                                 </Border>
                                 <!--  投資群組 chip：只有使用者已建立群組時顯示；跨群組彙總時用 warning 提醒整理。  -->
