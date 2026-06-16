@@ -758,6 +758,7 @@
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint.Short">Trade details preserve investment cost in the instrument currency; account debit records cash movement in the funds-account currency.</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">Statement amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.Advanced">Advanced</sys:String>
+    <sys:String x:Key="Portfolio.Tx.AdvancedSection">Advanced (fees / FX / settlement)</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">Detected a cross-currency trade. To record cost basis and cash balance correctly, choose either the broker/account statement amount or an FX estimate.</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate">FX rate (trade currency → debit currency)</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">Example: US stock paid from a TWD account uses USD → TWD. If the actual cash debit is entered, FX is supporting estimate metadata.</sys:String>

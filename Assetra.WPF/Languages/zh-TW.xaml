@@ -756,6 +756,7 @@
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint.Short">成交明細以標的幣別保存投資成本；帳戶扣款以資金帳戶幣別記錄現金流水。</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">明細金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.Advanced">進階</sys:String>
+    <sys:String x:Key="Portfolio.Tx.AdvancedSection">進階（手續費 / 跨幣別 / 結算）</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">系統偵測到此交易跨幣別。為了正確記錄持倉成本與現金餘額，請選擇以券商或帳戶明細金額為準，或用匯率估算扣款。</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate">匯率（成交幣別 → 扣款幣別）</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">例：美股以 TWD 帳戶扣款時，請填 USD → TWD 匯率。若已填實際扣款金額，匯率只作為估算與紀錄參考。</sys:String>
