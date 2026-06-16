@@ -1026,7 +1026,6 @@
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock
@@ -1073,19 +1072,6 @@
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
-                                    <Button
-                                        Grid.Row="0"
-                                        Grid.RowSpan="2"
-                                        Grid.Column="3"
-                                        Height="28"
-                                        MinWidth="0"
-                                        Padding="10,0"
-                                        Command="{Binding DataContext.Account.OpenEditPositionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                        CommandParameter="{Binding}"
-                                        Content="{DynamicResource Portfolio.Group.MoveToGroup}"
-                                        Style="{StaticResource AppSecondaryButton}"
-                                        ToolTip="{DynamicResource Portfolio.Group.MoveToGroup}"
-                                        Visibility="{Binding DataContext.HasPortfolioGroups, RelativeSource={RelativeSource AncestorType=ListBox}, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                 </Grid>
 
                                 <Border
@@ -1292,7 +1278,6 @@
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Column="0"
@@ -1319,17 +1304,6 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
-                                    <Button
-                                        Grid.Column="3"
-                                        Height="28"
-                                        MinWidth="0"
-                                        Padding="10,0"
-                                        Command="{Binding DataContext.Account.OpenEditPositionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
-                                        Content="{DynamicResource Portfolio.Group.MoveToGroup}"
-                                        Style="{StaticResource AppSecondaryButton}"
-                                        ToolTip="{DynamicResource Portfolio.Group.MoveToGroup}"
-                                        Visibility="{Binding DataContext.HasPortfolioGroups, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
