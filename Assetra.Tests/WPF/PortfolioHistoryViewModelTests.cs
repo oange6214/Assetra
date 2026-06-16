@@ -488,4 +488,65 @@ public sealed class PortfolioHistoryViewModelTests
                 : Task.FromResult<decimal?>(null);
         }
     }
+
+    // ── Incomplete-snapshot filtering tests (fix/trend-skip-incomplete) ─────
+
+    /// <summary>
+    /// When the series contains at least one complete-breakdown snapshot, rows that
+    /// lack CashValue / EquityValue (the early "缺歷史價" days) must be excluded so
+    /// the chart does not show a false basis-jump at the first complete day.
+    /// </summary>
+    [Fact]
+    public async Task MixedBreakdown_SkipsIncompleteRows_SeriesStartsAtFirstComplete()
+    {
+        // 3 early snapshots with only MarketValue (no breakdown — the "缺歷史價" days).
+        var incomplete1 = new PortfolioDailySnapshot(new DateOnly(2026, 4, 21), 0m, 8_500_000m, 0m, 5);
+        var incomplete2 = new PortfolioDailySnapshot(new DateOnly(2026, 4, 22), 0m, 8_500_000m, 0m, 5);
+        var incomplete3 = new PortfolioDailySnapshot(new DateOnly(2026, 4, 23), 0m, 8_500_000m, 0m, 5);
+
+        // 5 complete snapshots where net worth = Cash + Equity − Liability.
+        var firstCompleteDate = new DateOnly(2026, 5, 5);
+        var complete1 = new PortfolioDailySnapshot(firstCompleteDate,          0m, 7_000_000m, 0m, 5, CashValue: 3_000_000m, EquityValue: 4_000_000m);
+        var complete2 = new PortfolioDailySnapshot(new DateOnly(2026, 5, 6),   0m, 7_100_000m, 0m, 5, CashValue: 3_100_000m, EquityValue: 4_000_000m);
+        var complete3 = new PortfolioDailySnapshot(new DateOnly(2026, 5, 7),   0m, 7_200_000m, 0m, 5, CashValue: 3_200_000m, EquityValue: 4_000_000m);
+        var complete4 = new PortfolioDailySnapshot(new DateOnly(2026, 5, 8),   0m, 7_300_000m, 0m, 5, CashValue: 3_300_000m, EquityValue: 4_000_000m);
+        var complete5 = new PortfolioDailySnapshot(new DateOnly(2026, 5, 9),   0m, 7_400_000m, 0m, 5, CashValue: 3_400_000m, EquityValue: 4_000_000m);
+
+        var snapshots = new[] { incomplete1, incomplete2, incomplete3, complete1, complete2, complete3, complete4, complete5 };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+        vm.SelectedDays = 0; // "All" — include every snapshot
+
+        await vm.LoadAsync();
+
+        var values = ChartValues(vm);
+        // Only the 5 complete rows should appear — the 3 incomplete rows must be skipped.
+        Assert.Equal(5, values.Count);
+        // The first plotted point must correspond to the first complete date's net worth (Cash + Equity = 7_000_000).
+        Assert.Equal(7_000_000d, values[0]);
+    }
+
+    /// <summary>
+    /// When ALL snapshots lack a breakdown (legacy-only data), the chart must still
+    /// render using raw MarketValue — the all-legacy fallback must not produce an empty series.
+    /// </summary>
+    [Fact]
+    public async Task AllLegacyNoBreakdown_StillPlotsRawMarketValue()
+    {
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(new DateOnly(2025, 6, 1), 0m, 1_000_000m, 0m, 3),
+            new PortfolioDailySnapshot(new DateOnly(2025, 6, 2), 0m, 1_010_000m, 0m, 3),
+            new PortfolioDailySnapshot(new DateOnly(2025, 6, 3), 0m, 1_020_000m, 0m, 3),
+        };
+        var vm = new PortfolioHistoryViewModel(new StubHistoryQuery(snapshots));
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+
+        var values = ChartValues(vm);
+        // Must NOT be empty — raw MarketValue fallback must be preserved for all-legacy data.
+        Assert.NotEmpty(values);
+        Assert.Equal(3, values.Count);
+        Assert.Equal(1_000_000d, values[0]);
+    }
 }

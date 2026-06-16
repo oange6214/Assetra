@@ -631,12 +631,22 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             .ToList();
     }
 
+    private static bool HasCompleteBreakdown(PortfolioDailySnapshot s) =>
+        s.CashValue.HasValue && s.EquityValue.HasValue;
+
     private async Task<IReadOnlyList<DateTimePoint>> BuildPointsAsync(
         IReadOnlyList<PortfolioDailySnapshot> snapshots)
     {
+        // P5.2 — 略過缺 breakdown 的早期快照（缺歷史價日），避免基準跳動。
+        // 只要系列中存在至少一個完整 breakdown 快照，就跳過沒有 CashValue/EquityValue 的列。
+        // 若全部都是舊格式（無 breakdown），保留 MarketValue fallback，讓圖表不空白。
+        var hasAnyBreakdown = snapshots.Any(HasCompleteBreakdown);
+
         var raw = new List<(DateTime When, decimal Val)>(snapshots.Count);
         foreach (var snapshot in snapshots.OrderBy(s => s.SnapshotDate))
         {
+            if (hasAnyBreakdown && !HasCompleteBreakdown(snapshot))
+                continue;
             var value = await ConvertMarketValueToBaseAsync(snapshot);
             if (value is null)
                 continue;
