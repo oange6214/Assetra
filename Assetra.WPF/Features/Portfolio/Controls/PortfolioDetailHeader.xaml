@@ -10,6 +10,40 @@
     d:DataContext="{d:DesignInstance Type={x:Type vm:PortfolioViewModel}}"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <!--
+            Accent split-button 內段：透明底（露出外層 Border 的 accent 色），hover/pressed 疊一層
+            淡白做回饋；圓角 6 搭外層 8。文字/icon 顏色由各按鈕自身 Foreground 指定。
+        -->
+        <Style x:Key="AccentSplitSegment" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#26FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#40FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <!--
         Task 1.4 — Google-Finance-style per-portfolio detail header.
 
@@ -70,30 +104,53 @@
                     </Button>
                 </StackPanel>
 
-                <!--  ＋新增交易 split button：主鈕＝新增交易；▾＝加入觀察（合併原獨立「新增標的」入口）  -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button
-                        Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
-                        Content="{DynamicResource Portfolio.DetailHeader.AddInvestment}"
-                        Style="{StaticResource AppPrimaryButton}" />
-                    <Button
-                        Margin="2,0,0,0"
-                        Padding="8,0"
-                        Click="OnAddMenuClick"
-                        FocusVisualStyle="{x:Null}"
-                        Style="{StaticResource AppPrimaryButton}"
-                        ToolTip="{DynamicResource Portfolio.DetailHeader.MoreAddOptions}">
-                        <ds:AppIcon
-                            FontSize="10"
-                            Foreground="{DynamicResource Brush.Text.OnAccent}"
-                            Symbol="ChevronDown24" />
-                        <Button.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Command="{Binding OpenAddWatchlistDialogCommand}" Header="{DynamicResource Portfolio.Watchlist.AddCommand}" />
-                            </ContextMenu>
-                        </Button.ContextMenu>
-                    </Button>
-                </StackPanel>
+                <!--  ＋新增交易 split button：外層 Border 統一成一個 accent 形狀，內部兩段（主＝新增交易、
+                      ▾＝加入觀察）共用同底色＋中間細分隔線，視覺一體不再像兩顆獨立按鈕。  -->
+                <Border
+                    Grid.Column="1"
+                    Background="{DynamicResource AppAccent}"
+                    CornerRadius="8"
+                    SnapsToDevicePixels="True">
+                    <StackPanel Orientation="Horizontal">
+                        <Button
+                            Padding="16,8"
+                            Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
+                            Style="{StaticResource AccentSplitSegment}">
+                            <StackPanel Orientation="Horizontal">
+                                <ds:AppIcon
+                                    Margin="0,0,6,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                    Text="{DynamicResource Portfolio.DetailHeader.AddInvestment}" />
+                            </StackPanel>
+                        </Button>
+                        <Border
+                            Width="1"
+                            Margin="0,7"
+                            Background="{DynamicResource Brush.Text.OnAccent}"
+                            Opacity="0.3" />
+                        <Button
+                            Padding="9,8"
+                            Click="OnAddMenuClick"
+                            Style="{StaticResource AccentSplitSegment}"
+                            ToolTip="{DynamicResource Portfolio.DetailHeader.MoreAddOptions}">
+                            <ds:AppIcon
+                                FontSize="10"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Symbol="ChevronDown24" />
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Command="{Binding OpenAddWatchlistDialogCommand}" Header="{DynamicResource Portfolio.Watchlist.AddCommand}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <!-- ── Row 1: Market value + day P&L ── -->
