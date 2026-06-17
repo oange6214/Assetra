@@ -16,11 +16,12 @@ public partial class PortfolioViewModel
     [ObservableProperty] private string _filterText = string.Empty;
 
     /// <summary>
-    /// When true, closed positions (zero projected quantity — fully sold-out or 'watchlist')
-    /// are shown in the Positions list. Default false: the list shows only current holdings;
-    /// sold-out positions are hidden but reappear when toggled on (or when re-bought).
-    /// Replaces the old HideEmpty + ShowArchived toggles — positions have no user-facing
-    /// archive action, so "closed" (qty 0) is the only meaningful non-holding state.
+    /// When true, closed (sold-out) positions are shown in the Positions list. Default false:
+    /// the list shows only current holdings. A position is "closed" once fully sold — the sell
+    /// flow archives its entry (is_active=0), and/or its projected quantity nets to 0 with a
+    /// trade history. Hidden by default; reappears when toggled on (or when re-bought).
+    /// A never-traded watchlist entry ("+觀察", qty 0, no snapshot) is NOT closed and stays visible.
+    /// Replaces the old separate HideEmpty + ShowArchived toggles with one clear control.
     /// </summary>
     [ObservableProperty] private bool _showClosedPositions;
 
@@ -131,7 +132,7 @@ public partial class PortfolioViewModel
 
     /// <summary>
     /// 投資資產篩選後彙總 — Footer 用。跟著 PositionsView 同步刷新（FilterText
-    /// / AssetTypeFilter / ShowArchived / HideEmpty 等任一切換時）。
+    /// / AssetTypeFilter / ShowClosedPositions 等任一切換時）。
     /// </summary>
     public int PositionsFilteredCount => PositionsView?.Cast<PortfolioRowViewModel>().Count() ?? 0;
     public decimal PositionsFilteredMarketValue => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => p.MarketValue) ?? 0m;

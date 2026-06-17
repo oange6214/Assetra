@@ -262,21 +262,25 @@ public class PortfolioViewModelTests
             new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
         ]));
         var held = new PortfolioEntry(Guid.NewGuid(), "2330", "TWSE", AssetType.Stock, "台積電");
-        var soldOut = new PortfolioEntry(Guid.NewGuid(), "0050", "TWSE", AssetType.Stock, "元大台灣50");
+        // Sold-out: the sell flow archives the entry (IsActive=false) once fully sold.
+        var soldOut = new PortfolioEntry(Guid.NewGuid(), "0050", "TWSE", AssetType.Stock, "元大台灣50", IsActive: false);
+        // Watchlist ("+觀察"): never traded → no snapshot → must stay visible (NOT closed).
+        var watchlist = new PortfolioEntry(Guid.NewGuid(), "2317", "TWSE", AssetType.Stock, "鴻海");
         var snapshots = SnapshotsFor([(held, 600m, 10), (soldOut, 100m, 0)]);
-        var (vm, _) = CreateVm([held, soldOut], PositionQueryMock(snapshots).Object, catalog);
+        var (vm, _) = CreateVm([held, soldOut, watchlist], PositionQueryMock(snapshots).Object, catalog);
 
         await vm.LoadAsync();
 
-        // Default: closed positions hidden — only the qty>0 holding is listed.
+        // Default: the archived sold-out position is hidden; held + watchlist stay visible.
         Assert.False(vm.ShowClosedPositions);
-        Assert.Equal("2330", Assert.Single(vm.Positions).Symbol);
+        Assert.DoesNotContain(vm.Positions, p => p.Symbol == "0050");
+        Assert.Contains(vm.Positions, p => p.Symbol == "2330");
+        Assert.Contains(vm.Positions, p => p.Symbol == "2317");
 
-        // Toggle on, reload: the sold-out position re-appears.
+        // Toggle on, reload: the sold-out (archived) position re-appears.
         vm.ShowClosedPositions = true;
         await vm.LoadAsync();
 
-        Assert.Equal(2, vm.Positions.Count);
         Assert.Contains(vm.Positions, p => p.Symbol == "0050");
     }
 

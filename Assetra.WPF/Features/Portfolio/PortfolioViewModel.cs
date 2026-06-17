@@ -806,9 +806,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 ? null
                 : groupIds.Count == 0 ? PortfolioGroup.DefaultId : groupIds[0];
 
-            // Hide positions whose lots are all inactive (archived / soft-deleted leftovers).
-            // Positions have no user-facing archive action, so this is just a safety guard.
-            if (lots.All(l => !l.IsActive))
+            // Sold-out positions: the sell flow archives the entry (is_active=0) once fully sold.
+            // Hidden by default; "顯示已平倉" (ShowClosedPositions) reveals them.
+            if (!ShowClosedPositions && lots.All(l => !l.IsActive))
                 continue;
 
             PortfolioRowViewModel row;
