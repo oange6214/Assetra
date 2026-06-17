@@ -274,4 +274,47 @@ public class PortfolioDetailHeaderAggregateTests
         Assert.True(vm.IsSelectedPortfolioHistoryVisible);
         Assert.False(vm.IsSelectedPortfolioTrendVisible);
     }
+
+    [Fact]
+    public async Task FooterTotals_SumBaseConvertedAmounts_NotRawNative()
+    {
+        // WHY: 持股表 footer 的 市值/成本/損益 必須先換算成 base 幣別再加總，與頂部 header 一致。
+        // 先前 bug：footer 直接 Sum(p.Cost)/Sum(p.MarketValue)（原幣），外幣部位的 USD 金額被當成
+        // TWD 直接相加 → 含外幣的投資組合 footer 全失真（真實畫面：footer 9,901,993 vs 正確 10,930,240）。
+        // 這裡用一個 TWD + 一個 USD 部位，直接給 USD 列 base 值（模擬 FX 換算），驗證 footer 走
+        // DisplayAmount（base 優先）而非原幣加總。
+        var groupId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(groupId, "Test"),
+        ]));
+
+        var twdEntry = MakeEntry("2330", groupId, 500m, 10);          // cost 5000 TWD
+        var usdEntry = MakeEntry("AAPL", groupId, 100m, 10, "USD");   // cost 1000 USD (native)
+        var snapshots = SnapshotsFor([(twdEntry, 500m, 10), (usdEntry, 100m, 10)]);
+
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync()).ReturnsAsync(snapshots);
+        positionQuery.Setup(s => s.GetPositionAsync(It.IsAny<Guid>()))
+            .Returns<Guid>(id => Task.FromResult(snapshots.TryGetValue(id, out var s) ? s : null));
+        positionQuery.Setup(s => s.ComputeRealizedPnlAsync(
+                It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<decimal>(),
+                It.IsAny<decimal>(), It.IsAny<decimal>()))
+            .ReturnsAsync(0m);
+
+        var vm = CreateVm([twdEntry, usdEntry], positionQuery.Object, catalog);
+        await vm.LoadAsync();
+
+        // Simulate FX conversion on the USD row (no rate provider in tests).
+        var usdRow = vm.Positions.First(p => p.Cost == 1000m);
+        usdRow.CostBase = 31500m;          // 1000 USD → 31,500 TWD
+        usdRow.MarketValueBase = 35000m;   // market value → 35,000 TWD
+
+        // Cost: 5000 (TWD native) + 31,500 (USD base) = 36,500 — NOT the buggy 5000 + 1000 = 6000.
+        Assert.Equal(36500m, vm.PositionsFilteredCost);
+        Assert.NotEqual(6000m, vm.PositionsFilteredCost);
+
+        // Market value: 0 (TWD, no live price in tests) + 35,000 (USD base) = 35,000 — not 0.
+        Assert.Equal(35000m, vm.PositionsFilteredMarketValue);
+    }
 }

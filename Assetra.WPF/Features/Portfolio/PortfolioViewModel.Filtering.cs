@@ -135,9 +135,12 @@ public partial class PortfolioViewModel
     /// / AssetTypeFilter / ShowClosedPositions 等任一切換時）。
     /// </summary>
     public int PositionsFilteredCount => PositionsView?.Cast<PortfolioRowViewModel>().Count() ?? 0;
-    public decimal PositionsFilteredMarketValue => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => p.MarketValue) ?? 0m;
-    public decimal PositionsFilteredCost => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => p.Cost) ?? 0m;
-    public decimal PositionsFilteredPnl => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => p.Pnl) ?? 0m;
+
+    // 用 DisplayAmount（base 優先）彙總，與頂部卡片 header 一致：外幣部位必須換算成 base
+    // 幣別再加總，否則 USD 等原幣金額會被當成 TWD 直接相加，footer 市值/成本/損益全失真。
+    public decimal PositionsFilteredMarketValue => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => DisplayAmount(p.MarketValue, p.MarketValueBase)) ?? 0m;
+    public decimal PositionsFilteredCost => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => DisplayAmount(p.Cost, p.CostBase)) ?? 0m;
+    public decimal PositionsFilteredPnl => PositionsView?.Cast<PortfolioRowViewModel>().Sum(p => DisplayAmount(p.Pnl, p.PnlBase)) ?? 0m;
     public bool IsPositionsFiltered =>
         AssetTypeFilter.HasValue
         || PortfolioGroupFilter.HasValue
