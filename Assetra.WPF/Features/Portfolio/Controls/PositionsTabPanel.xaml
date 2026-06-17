@@ -1110,7 +1110,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!--  股數  -->
+                    <!--  部位 — 數量 + 成本均價（v3：數量／成本均價／付出成本 三欄收斂為一；付出成本已於頁尾彙總）  -->
                     <DataGridTemplateColumn Width="150" SortMemberPath="Quantity">
                         <DataGridTemplateColumn.HeaderStyle>
                             <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
@@ -1118,30 +1118,7 @@
                             </Style>
                         </DataGridTemplateColumn.HeaderStyle>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.Shares}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Sm}"
-                                    Text="{Binding QuantityDisplay}"
-                                    Typography.NumeralAlignment="Tabular" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  成本/股（含手續費）  -->
-                    <DataGridTemplateColumn Width="120" SortMemberPath="BuyPrice">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.CostPerShare.Native}" />
+                            <TextBlock Text="{DynamicResource Portfolio.PositionCol}" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1150,47 +1127,30 @@
                                         HorizontalAlignment="Right"
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Sm}"
-                                        Text="{Binding BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding QuantityDisplay}"
                                         Typography.NumeralAlignment="Tabular" />
+                                    <!--  成本均價（含手續費）小字第二行；外幣再加 ≈base 估值  -->
+                                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                        <TextBlock
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="＠" />
+                                        <TextBlock
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Text="{Binding BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                    </StackPanel>
                                     <TextBlock
                                         HorizontalAlignment="Right"
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Xs}"
                                         Foreground="{DynamicResource AppTextMuted}"
                                         Text="{Binding BuyPriceBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price-approx}"
-                                        Typography.NumeralAlignment="Tabular"
-                                        Visibility="{Binding IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--  付出成本（含買入手續費）  -->
-                    <DataGridTemplateColumn Width="150" SortMemberPath="Cost">
-                        <DataGridTemplateColumn.HeaderStyle>
-                            <Style BasedOn="{StaticResource AppDataGridColHeader}" TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Right" />
-                            </Style>
-                        </DataGridTemplateColumn.HeaderStyle>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.TotalCostPaid.Native}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <TextBlock
-                                        HorizontalAlignment="Right"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Sm}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
-                                        Text="{Binding CostAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                        Typography.NumeralAlignment="Tabular" />
-                                    <TextBlock
-                                        HorizontalAlignment="Right"
-                                        FontFamily="{StaticResource Font.Family.Base}"
-                                        FontSize="{StaticResource Font.Size.Xs}"
-                                        Foreground="{DynamicResource AppTextMuted}"
-                                        Text="{Binding CostBaseAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount-approx}"
                                         Typography.NumeralAlignment="Tabular"
                                         Visibility="{Binding IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 </StackPanel>
@@ -1371,7 +1331,7 @@
                     <!--
                         市值（未扣預估賣出費/稅）— 最右側欄位。
                         v3：淨值（市值扣預估賣出費/稅）已從獨立欄折進此欄第二行（小字＋tooltip）。
-                        現在資產表欄位：資產 / 幣別 / 數量 / 成本均價 / 付出成本 / 現價 / 淨損益試算 / 市值(含淨值)。
+                        現在資產表 5 欄：資產(含幣別) / 部位(數量＋成本均價) / 現價 / 淨損益試算 / 市值(含淨值)。
                     -->
                     <DataGridTemplateColumn Width="150" SortMemberPath="MarketValue">
                         <DataGridTemplateColumn.HeaderStyle>
