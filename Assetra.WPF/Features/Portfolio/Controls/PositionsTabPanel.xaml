@@ -670,20 +670,11 @@
                     <CheckBox
                         Margin="0,0,8,0"
                         VerticalAlignment="Center"
-                        IsChecked="{Binding HideEmptyPositions}">
+                        IsChecked="{Binding ShowClosedPositions}">
                         <TextBlock
                             FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Position.HideEmpty}" />
-                    </CheckBox>
-                    <CheckBox
-                        Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        IsChecked="{Binding ShowArchivedPositions}">
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{DynamicResource Portfolio.Position.ShowArchived}" />
+                            Text="{DynamicResource Portfolio.Position.ShowClosed}" />
                     </CheckBox>
                     <!--
                         +觀察：建立 PortfolioEntry 但不下單。對齊「先看一段時間再決定買」的

@@ -369,7 +369,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     // Q02 — the trade row currently being edited, kept so BuildAvailableAssets can inject a
     // synthesized subject for an asset that's no longer in the live Positions/CashAccounts/
-    // Liabilities view (e.g. a CLOSED lot excluded by HideEmptyPositions). The asset picker
+    // Liabilities view (e.g. a CLOSED lot excluded by ShowClosedPositions, off by default). The asset picker
     // ComboBox renders blank unless SelectedItem ∈ ItemsSource, so the synthesized subject must
     // be part of AvailableAssets — not just assigned to SelectedAsset. Edit-only: OpenTxDialog
     // clears it so the create path never carries a synthesized entry and the next open is clean.
@@ -739,7 +739,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 Currency: liab.BalanceAsMoney.Currency));
         }
 
-        // Q02 — 編輯一筆標的已不在 live view 的交易（例：已平倉持倉被 HideEmptyPositions 排除）時，
+        // Q02 — 編輯一筆標的已不在 live view 的交易（例：已平倉持倉被 ShowClosedPositions 預設關排除）時，
         // 合成該交易的 subject 併入 regular，否則 picker ComboBox 因 SelectedItem ∉ ItemsSource 而空白、
         // AvailableTradeTypes 也因 SelectedAsset.Kind 過濾不到而清空。已存在等價 subject（同 Kind+Id/Symbol）
         // 時優先用真的那筆，不重複加入。
@@ -872,7 +872,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     /// <summary>
     /// Q02 — 依交易類型從 <see cref="TradeRowViewModel"/> 合成一個 <see cref="TxAssetSubject"/>，
-    /// 供 live view 找不到對應標的時 fallback 用（典型情境：已平倉/空持倉被 HideEmptyPositions 濾掉）。
+    /// 供 live view 找不到對應標的時 fallback 用（典型情境：已平倉持倉被 ShowClosedPositions 預設關濾掉）。
     /// Kind 對齊交易類型的標的種類：Buy/Sell/Dividend → Investment、Loan/CreditCard → Liability、
     /// Cash flow → CashAccount。資料不足以合成（缺 Symbol/帳戶 id/標籤）時回 null。
     /// </summary>

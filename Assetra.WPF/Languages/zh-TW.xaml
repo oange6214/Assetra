@@ -817,8 +817,7 @@
     <sys:String x:Key="Portfolio.Account.Unarchive">取消封存</sys:String>
     <sys:String x:Key="Portfolio.Account.PermanentDelete">永久刪除…</sys:String>
     <sys:String x:Key="Portfolio.Account.ShowArchived">顯示已封存</sys:String>
-    <sys:String x:Key="Portfolio.Position.ShowArchived">顯示已封存</sys:String>
-    <sys:String x:Key="Portfolio.Position.HideEmpty">隱藏空倉</sys:String>
+    <sys:String x:Key="Portfolio.Position.ShowClosed">顯示已平倉</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key 尚未設定</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Message">

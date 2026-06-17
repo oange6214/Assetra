@@ -806,8 +806,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 ? null
                 : groupIds.Count == 0 ? PortfolioGroup.DefaultId : groupIds[0];
 
-            // Archive filter: hide when all lots are archived and ShowArchivedPositions is off.
-            if (!ShowArchivedPositions && lots.All(l => !l.IsActive))
+            // Hide positions whose lots are all inactive (archived / soft-deleted leftovers).
+            // Positions have no user-facing archive action, so this is just a safety guard.
+            if (lots.All(l => !l.IsActive))
                 continue;
 
             PortfolioRowViewModel row;
@@ -815,8 +816,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             {
                 snapshots.TryGetValue(primary.Id, out var snap);
 
-                // Hide-empty filter: projection says qty == 0 (position closed out).
-                if (HideEmptyPositions && (snap?.Quantity ?? 0m) == 0m)
+                // Closed-position filter: a *traded* position now at qty 0 (sold-out) is hidden
+                // unless ShowClosedPositions. A never-traded entry (watchlist / "+觀察") has no
+                // snapshot (snap == null) → it stays visible regardless.
+                if (!ShowClosedPositions && snap is { Quantity: 0m })
                     continue;
 
                 row = ToRow(primary, snap);
@@ -841,7 +844,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                     lots.Sum(e => snapshots.TryGetValue(e.Id, out var s) ? s.RealizedPnl : 0m),
                     firstBuyDate == default ? null : firstBuyDate);
 
-                if (HideEmptyPositions && totalQty == 0m)
+                // Sold-out aggregate: nets to 0 and at least one lot was actually traded
+                // (has a snapshot). Untraded watchlist lots have no snapshot → stay visible.
+                if (!ShowClosedPositions && totalQty == 0m && lots.Any(l => snapshots.ContainsKey(l.Id)))
                     continue;
 
                 row = ToRow(primary, aggregatedSnap);

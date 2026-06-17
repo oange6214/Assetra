@@ -541,8 +541,9 @@ public partial class AddAssetDialogViewModel : ObservableObject
                     EmptyToNull(AddSymbolName)))
                 .ConfigureAwait(true);
 
-            // No trade written. Clear input + refresh via AssetAdded event so the
-            // parent reloads and the new Qty=0 row appears (when HideEmptyPositions is off).
+            // No trade written. Clear input + refresh via AssetAdded event so the parent reloads
+            // and the new Qty=0 watchlist row appears (it has no snapshot, so the sold-out
+            // ShowClosedPositions filter never hides it).
             AddSymbol = string.Empty;
             AddPrice = string.Empty;
             AddQuantity = string.Empty;

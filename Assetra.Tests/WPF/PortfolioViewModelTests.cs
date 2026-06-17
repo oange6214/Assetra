@@ -253,6 +253,34 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
+    public async Task ShowClosedPositions_DefaultHidesSoldOut_ToggleReveals()
+    {
+        // WHY: a sold-out (qty 0) holding is not a current holding — the list should default to
+        // showing only what you still hold, so 筆數/市值 stay clean. The single "顯示已平倉" toggle
+        // brings closed positions back (the entry is retained, so it also reappears if re-bought).
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+        ]));
+        var held = new PortfolioEntry(Guid.NewGuid(), "2330", "TWSE", AssetType.Stock, "台積電");
+        var soldOut = new PortfolioEntry(Guid.NewGuid(), "0050", "TWSE", AssetType.Stock, "元大台灣50");
+        var snapshots = SnapshotsFor([(held, 600m, 10), (soldOut, 100m, 0)]);
+        var (vm, _) = CreateVm([held, soldOut], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+
+        // Default: closed positions hidden — only the qty>0 holding is listed.
+        Assert.False(vm.ShowClosedPositions);
+        Assert.Equal("2330", Assert.Single(vm.Positions).Symbol);
+
+        // Toggle on, reload: the sold-out position re-appears.
+        vm.ShowClosedPositions = true;
+        await vm.LoadAsync();
+
+        Assert.Equal(2, vm.Positions.Count);
+        Assert.Contains(vm.Positions, p => p.Symbol == "0050");
+    }
+
+    [Fact]
     public async Task LoadAsync_DefaultsToAllTabWhenCustomGroupsExist()
     {
         // WHY: after Task 1.6, ViewMode is gone. When user has custom groups the tab strip

@@ -16,16 +16,13 @@ public partial class PortfolioViewModel
     [ObservableProperty] private string _filterText = string.Empty;
 
     /// <summary>
-    /// When true, archived (soft-deleted) positions are shown in the Positions list.
-    /// Plan Task 15 + Task 20 (XAML toggle to be wired later).
+    /// When true, closed positions (zero projected quantity — fully sold-out or 'watchlist')
+    /// are shown in the Positions list. Default false: the list shows only current holdings;
+    /// sold-out positions are hidden but reappear when toggled on (or when re-bought).
+    /// Replaces the old HideEmpty + ShowArchived toggles — positions have no user-facing
+    /// archive action, so "closed" (qty 0) is the only meaningful non-holding state.
     /// </summary>
-    [ObservableProperty] private bool _showArchivedPositions;
-
-    /// <summary>
-    /// When true, positions with zero projected quantity (fully sold-out or 'watchlist')
-    /// are hidden from the Positions list.
-    /// </summary>
-    [ObservableProperty] private bool _hideEmptyPositions;
+    [ObservableProperty] private bool _showClosedPositions;
 
     /// <summary>
     /// 篩選持倉資產類型；null = 顯示全部。XAML 上方 chip row 透過
@@ -143,9 +140,7 @@ public partial class PortfolioViewModel
     public bool IsPositionsFiltered =>
         AssetTypeFilter.HasValue
         || PortfolioGroupFilter.HasValue
-        || !string.IsNullOrEmpty(FilterText)
-        || ShowArchivedPositions
-        || HideEmptyPositions;
+        || !string.IsNullOrEmpty(FilterText);
     public bool IsPositionsFilteredPnlPositive => PositionsFilteredPnl > 0m;
 
     private void RaisePositionsFilterStatsChanged()
@@ -274,8 +269,7 @@ public partial class PortfolioViewModel
            && (string.IsNullOrEmpty(LiabilityFilterText)
                || row.Name.Contains(LiabilityFilterText, StringComparison.OrdinalIgnoreCase));
 
-    partial void OnShowArchivedPositionsChanged(bool value) => _ = LoadPositionsAsync();
-    partial void OnHideEmptyPositionsChanged(bool value) => _ = LoadPositionsAsync();
+    partial void OnShowClosedPositionsChanged(bool value) => _ = LoadPositionsAsync();
 
     /// <summary>Called from DividendCalendarPanel when a month cell is clicked.</summary>
     [RelayCommand]

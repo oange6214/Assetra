@@ -818,8 +818,7 @@
     <sys:String x:Key="Portfolio.Account.Unarchive">Unarchive</sys:String>
     <sys:String x:Key="Portfolio.Account.PermanentDelete">Permanent delete…</sys:String>
     <sys:String x:Key="Portfolio.Account.ShowArchived">Show archived</sys:String>
-    <sys:String x:Key="Portfolio.Position.ShowArchived">Show archived</sys:String>
-    <sys:String x:Key="Portfolio.Position.HideEmpty">Hide empty</sys:String>
+    <sys:String x:Key="Portfolio.Position.ShowClosed">Show closed</sys:String>
     <sys:String x:Key="Portfolio.Position.Summary.MarketValue">Total Market Value</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Title">Twelve Data API key is not configured</sys:String>
     <sys:String x:Key="Portfolio.QuoteSetup.Message">To fetch US stock quotes, open Settings > Data Source, enter an API key, and pass the connection test.</sys:String>

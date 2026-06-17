@@ -446,7 +446,7 @@ public class TransactionDialogViewModelTests
     }
 
     // ── Q02: editing a trade whose asset is no longer in the live view ───────────
-    // Closed/empty lots are excluded from Positions by HideEmptyPositions, so editing a
+    // Closed lots are excluded from Positions by ShowClosedPositions (off by default), so editing a
     // Sell/Buy/StockDividend on such a lot used to leave SelectedAsset null (asset-subject
     // resolution searched only the live collections) — which ALSO blanked the type picker,
     // since AvailableTradeTypes is filtered by SelectedAsset.Kind. The fix synthesizes an
