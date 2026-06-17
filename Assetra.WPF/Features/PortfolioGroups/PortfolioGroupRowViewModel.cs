@@ -20,6 +20,9 @@ public sealed partial class PortfolioGroupRowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(SortOrder))]
     private PortfolioGroup _group;
 
+    /// <summary>True 當此列正在「就地編輯」名稱（由 PortfolioGroupsViewModel 依 EditingId 設定）。</summary>
+    [ObservableProperty] private bool _isBeingEdited;
+
     public PortfolioGroupRowViewModel(PortfolioGroup group)
     {
         ArgumentNullException.ThrowIfNull(group);

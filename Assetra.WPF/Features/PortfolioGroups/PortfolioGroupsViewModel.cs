@@ -30,10 +30,13 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
     // ── Add / Edit form ──
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditing))]
+    [NotifyPropertyChangedFor(nameof(IsAddingNew))]
     [NotifyPropertyChangedFor(nameof(CanDelete))]
     private Guid? _editingId;
 
-    [ObservableProperty] private bool _isFormOpen;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAddingNew))]
+    private bool _isFormOpen;
     [ObservableProperty] private string _formName = string.Empty;
     [ObservableProperty] private string? _formError;
 
@@ -48,6 +51,16 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
 
     /// <summary>True 編輯模式（vs 新增）。</summary>
     public bool IsEditing => EditingId.HasValue;
+
+    /// <summary>True 當正在「就地新增」（清單頂端冒出輸入列）；編輯既有列時為 false。</summary>
+    public bool IsAddingNew => IsFormOpen && !IsEditing;
+
+    // 依 EditingId 標記哪一列正在就地編輯，供 row template 切換「顯示 ↔ 輸入」。
+    partial void OnEditingIdChanged(Guid? value)
+    {
+        foreach (var row in _groups)
+            row.IsBeingEdited = value.HasValue && row.Id == value.Value;
+    }
 
     /// <summary>True 當編輯目標非系統群組，允許 Delete 按鈕。</summary>
     public bool CanDelete =>

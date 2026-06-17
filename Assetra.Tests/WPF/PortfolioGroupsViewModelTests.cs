@@ -124,6 +124,54 @@ public sealed class PortfolioGroupsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task StartAdd_SetsIsAddingNew_AndLeavesNoRowInInlineEdit()
+    {
+        // WHY: 就地新增的頂端輸入列由 IsAddingNew 控制（= IsFormOpen && !IsEditing）；
+        // 開啟「新增」時不可有任何既有列誤入就地編輯模式（否則畫面會同時冒出兩個輸入）。
+        await _vm.LoadAsync();
+
+        _vm.StartAddCommand.Execute(null);
+
+        Assert.True(_vm.IsAddingNew);
+        Assert.False(_vm.IsEditing);
+        Assert.All(_vm.Groups, g => Assert.False(g.IsBeingEdited));
+    }
+
+    [Fact]
+    public async Task StartEdit_MarksOnlyTargetRowInline_AndNotAddingNew()
+    {
+        // WHY: 就地編輯時只有被點的那一列 IsBeingEdited=true（其餘 false），row template
+        // 才會只在該列把名稱換成輸入框；同時不能是「新增」狀態（頂端列不應一起冒出）。
+        await _vm.LoadAsync();
+        _vm.StartAddCommand.Execute(null);
+        _vm.FormName = "退休帳戶";
+        await _vm.SaveCommand.ExecuteAsync(null);
+        var target = _vm.Groups.First(g => g.Name == "退休帳戶");
+
+        _vm.StartEditCommand.Execute(target);
+
+        Assert.False(_vm.IsAddingNew);
+        Assert.True(target.IsBeingEdited);
+        Assert.All(_vm.Groups.Where(g => g.Id != target.Id), g => Assert.False(g.IsBeingEdited));
+    }
+
+    [Fact]
+    public async Task Cancel_ClearsInlineAddAndEditState()
+    {
+        // WHY: 取消（含 Esc）必須同時收起頂端新增列與任何就地編輯列，下次開啟才乾淨；
+        // 殘留的 IsBeingEdited 會讓某列一直卡在輸入狀態。
+        await _vm.LoadAsync();
+        var def = _vm.Groups.Single();
+        _vm.StartEditCommand.Execute(def);
+        Assert.True(def.IsBeingEdited);
+
+        _vm.CancelCommand.Execute(null);
+
+        Assert.False(_vm.IsAddingNew);
+        Assert.All(_vm.Groups, g => Assert.False(g.IsBeingEdited));
+    }
+
+    [Fact]
     public async Task Save_Edit_PreservesIsSystemFlagAndUpdatesRow()
     {
         // WHY: Editing the system default group must persist the name change

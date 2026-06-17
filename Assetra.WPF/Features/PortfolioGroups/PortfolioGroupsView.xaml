@@ -13,163 +13,152 @@
     mc:Ignorable="d">
 
     <!--
-        Portfolio-Groups-Refactor P2：簡易 CRUD page。
-        左：群組列表（card 樣式 + 顯色 swatch + edit / delete）
-        右：可選的 add/edit 表單（IsFormOpen 控制 visibility）
-        系統預設群組顯示「系統」badge 且 Delete 按鈕停用。
+        Portfolio-Groups-Refactor P2：簡易 CRUD page（現於 shell 對話框內）。
+        標題／副標／「+ 新增」鈕在對話框 header（MainWindow）。此處 = 就地新增列 + 群組清單。
+        每一列：顯示模式（名稱 + 系統 badge + 編輯/刪除）↔ 就地編輯模式（名稱輸入 + 儲存/取消），
+        依 row.IsBeingEdited 切換（PortfolioGroupsViewModel 依 EditingId 設定）。
+        系統預設群組顯示「系統」badge 且 Delete 按鈕隱藏。
     -->
-    <!--  標題／副標／新增 鈕在對話框 header（MainWindow）；此處只剩清單 + add/edit 表單。  -->
     <Grid>
-        <Grid>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-                <!--  List of groups  -->
-                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Groups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:PortfolioGroupRowViewModel}">
-                                <Border Margin="0,0,12,8"
-                                        Padding="14,12"
-                                        Background="{DynamicResource AppCardBackground}"
-                                        BorderBrush="{DynamicResource AppBorder}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource Radius.Sm}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="6" />
-                                            <ColumnDefinition Width="12" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
+        <!--  就地「新增」列：點對話框 header 的「+ 新增投資組合」時冒出（IsAddingNew）。  -->
+        <Border Grid.Row="0"
+                Margin="0,0,12,12"
+                Padding="14,10"
+                Background="{DynamicResource AppCardBackground}"
+                BorderBrush="{DynamicResource AppAccent}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Sm}"
+                behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelCommand}"
+                Visibility="{Binding IsAddingNew, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel>
+                <DockPanel LastChildFill="True">
+                    <Button DockPanel.Dock="Right"
+                            Margin="8,0,0,0"
+                            Padding="12,4"
+                            Command="{Binding SaveCommand}"
+                            Content="{DynamicResource Common.Save}"
+                            Style="{StaticResource AppPrimaryButton}" />
+                    <Button DockPanel.Dock="Right"
+                            Padding="12,4"
+                            Command="{Binding CancelCommand}"
+                            Content="{DynamicResource Common.Cancel}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                    <TextBox VerticalAlignment="Center"
+                             Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
+                </DockPanel>
+                <TextBlock Margin="0,8,0,0"
+                           FontSize="{StaticResource Font.Size.Xs}"
+                           Foreground="{DynamicResource AppDown}"
+                           Text="{Binding FormError}"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding FormError, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
+        </Border>
 
-                                        <!--  Color swatch (left strip)  -->
-                                        <Border Grid.Column="0"
-                                                Background="{Binding EffectiveColorHex, Converter={StaticResource HexToBrushConverter}}"
-                                                CornerRadius="3"
-                                                VerticalAlignment="Stretch" />
+        <!--  群組清單  -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:PortfolioGroupRowViewModel}">
+                        <Border Margin="0,0,12,8"
+                                Padding="14,12"
+                                Background="{DynamicResource AppCardBackground}"
+                                BorderBrush="{DynamicResource AppBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Sm}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                        <!--  Name + description + system badge  -->
-                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontSize="{StaticResource Font.Size.Sm}"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource AppTextPrimary}"
-                                                           Text="{Binding Name}" />
-                                                <Border Margin="8,0,0,0"
-                                                        Padding="6,1"
-                                                        VerticalAlignment="Center"
-                                                        Background="{DynamicResource AppSurface}"
-                                                        BorderBrush="{DynamicResource AppBorder}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="{StaticResource Radius.Lg}"
-                                                        Visibility="{Binding IsSystem, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock FontSize="{StaticResource Font.Size.Xs}"
-                                                               Foreground="{DynamicResource AppTextMuted}"
-                                                               Text="{DynamicResource PortfolioGroups.SystemBadge}" />
-                                                </Border>
-                                            </StackPanel>
-                                            <TextBlock Margin="0,2,0,0"
-                                                       FontSize="{StaticResource Font.Size.Xs}"
+                                <!--  Color swatch (left strip)  -->
+                                <Border Grid.Column="0"
+                                        Background="{Binding EffectiveColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                        CornerRadius="3"
+                                        VerticalAlignment="Stretch" />
+
+                                <!--  顯示模式：名稱 + 系統 badge + 說明  -->
+                                <StackPanel Grid.Column="2"
+                                            VerticalAlignment="Center"
+                                            Visibility="{Binding IsBeingEdited, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontSize="{StaticResource Font.Size.Sm}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppTextPrimary}"
+                                                   Text="{Binding Name}" />
+                                        <Border Margin="8,0,0,0"
+                                                Padding="6,1"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource AppSurface}"
+                                                BorderBrush="{DynamicResource AppBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource Radius.Lg}"
+                                                Visibility="{Binding IsSystem, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock FontSize="{StaticResource Font.Size.Xs}"
                                                        Foreground="{DynamicResource AppTextMuted}"
-                                                       Text="{Binding Description}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       Visibility="{Binding Description, Converter={StaticResource StringToVisibilityConverter}}" />
-                                        </StackPanel>
+                                                       Text="{DynamicResource PortfolioGroups.SystemBadge}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Margin="0,2,0,0"
+                                               FontSize="{StaticResource Font.Size.Xs}"
+                                               Foreground="{DynamicResource AppTextMuted}"
+                                               Text="{Binding Description}"
+                                               TextTrimming="CharacterEllipsis"
+                                               Visibility="{Binding Description, Converter={StaticResource StringToVisibilityConverter}}" />
+                                </StackPanel>
 
-                                        <!--  Edit / Delete buttons  -->
-                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Margin="0,0,4,0"
-                                                    Padding="8,4"
-                                                    Command="{Binding DataContext.StartEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Content="{DynamicResource Common.Edit}"
-                                                    Style="{StaticResource AppSecondaryButton}" />
-                                            <Button Padding="8,4"
-                                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Content="{DynamicResource Common.Delete}"
-                                                    Style="{StaticResource AppSecondaryButton}"
-                                                    Visibility="{Binding IsSystem, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                                <!--  就地編輯模式：名稱輸入（綁父 VM 的 FormName 緩衝，Esc 取消）  -->
+                                <TextBox Grid.Column="2"
+                                         VerticalAlignment="Center"
+                                         behaviors:EscapeKeyCommandBehavior.Command="{Binding DataContext.CancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         Text="{Binding DataContext.FormName, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                         Visibility="{Binding IsBeingEdited, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                <!--  Add / Edit form (side panel)  -->
-                <Border Grid.Column="1"
-                        Width="360"
-                        Padding="20,16"
-                        Background="{DynamicResource AppCardBackground}"
-                        BorderBrush="{DynamicResource AppBorder}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource Radius.Sm}"
-                        VerticalAlignment="Top"
-                        behaviors:EscapeKeyCommandBehavior.Command="{Binding CancelCommand}"
-                        Visibility="{Binding IsFormOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel>
-                        <Grid>
-                            <TextBlock Margin="0,4,40,0"
-                                       FontSize="{StaticResource Font.Size.Md}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AppTextPrimary}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{DynamicResource PortfolioGroups.Add.Title}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                <Setter Property="Text" Value="{DynamicResource PortfolioGroups.Edit.Title}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <Button Width="32" Height="32" Padding="0"
-                                    Margin="0,-4,-4,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Top"
-                                    Command="{Binding CancelCommand}"
-                                    Style="{StaticResource AppIconButton}"
-                                    ToolTip="{DynamicResource Common.Close}">
-                                <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
-                            </Button>
-                        </Grid>
-
-                        <TextBlock Margin="0,16,0,4"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextSecondary}"
-                                   Text="{DynamicResource PortfolioGroups.Form.Name}" />
-                        <TextBox Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Margin="0,8,0,0"
-                                   Foreground="{DynamicResource AppDown}"
-                                   FontSize="{StaticResource Font.Size.Xs}"
-                                   Text="{Binding FormError}"
-                                   TextWrapping="Wrap"
-                                   Visibility="{Binding FormError, Converter={StaticResource StringToVisibilityConverter}}" />
-
-                        <DockPanel Margin="0,16,0,0" LastChildFill="False">
-                            <Button DockPanel.Dock="Left"
-                                    Padding="10,4"
-                                    Command="{Binding CancelCommand}"
-                                    Content="{DynamicResource Common.Cancel}"
-                                    Style="{StaticResource AppSecondaryButton}" />
-                            <Button DockPanel.Dock="Right"
-                                    Padding="10,4"
-                                    Command="{Binding SaveCommand}"
-                                    Content="{DynamicResource Common.Save}"
-                                    Style="{StaticResource AppPrimaryButton}" />
-                        </DockPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Grid>
+                                <!--  Actions  -->
+                                <Grid Grid.Column="3" VerticalAlignment="Center">
+                                    <!--  顯示模式：編輯 / 刪除  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                Visibility="{Binding IsBeingEdited, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        <Button Margin="0,0,4,0"
+                                                Padding="8,4"
+                                                Command="{Binding DataContext.StartEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="{DynamicResource Common.Edit}"
+                                                Style="{StaticResource AppSecondaryButton}" />
+                                        <Button Padding="8,4"
+                                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="{DynamicResource Common.Delete}"
+                                                Style="{StaticResource AppSecondaryButton}"
+                                                Visibility="{Binding IsSystem, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                    </StackPanel>
+                                    <!--  就地編輯模式：儲存 / 取消  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                Visibility="{Binding IsBeingEdited, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Button Margin="0,0,4,0"
+                                                Padding="10,4"
+                                                Command="{Binding DataContext.SaveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Content="{DynamicResource Common.Save}"
+                                                Style="{StaticResource AppPrimaryButton}" />
+                                        <Button Padding="10,4"
+                                                Command="{Binding DataContext.CancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Content="{DynamicResource Common.Cancel}"
+                                                Style="{StaticResource AppSecondaryButton}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>
