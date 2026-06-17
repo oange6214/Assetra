@@ -22,7 +22,6 @@
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:physicalasset="clr-namespace:Assetra.WPF.Features.PhysicalAsset"
     xmlns:portfolio="clr-namespace:Assetra.WPF.Features.Portfolio"
-    xmlns:portfoliogroups="clr-namespace:Assetra.WPF.Features.PortfolioGroups"
     xmlns:realestate="clr-namespace:Assetra.WPF.Features.RealEstate"
     xmlns:reconciliation="clr-namespace:Assetra.WPF.Features.Reconciliation"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
@@ -453,10 +452,6 @@
             <goals:GoalsView DataContext="{Binding Goals}" />
         </DataTemplate>
 
-        <DataTemplate x:Key="PortfolioGroupsContentTemplate">
-            <portfoliogroups:PortfolioGroupsView DataContext="{Binding PortfolioGroups}" />
-        </DataTemplate>
-
         <DataTemplate x:Key="TrendsContentTemplate">
             <trends:TrendsView DataContext="{Binding Portfolio.History}" />
         </DataTemplate>
@@ -741,9 +736,6 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Goals}">
                             <Setter Property="ContentTemplate" Value="{StaticResource GoalsContentTemplate}" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.PortfolioGroups}">
-                            <Setter Property="ContentTemplate" Value="{StaticResource PortfolioGroupsContentTemplate}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NavRail.ActiveSection}" Value="{x:Static shell:NavSection.Trends}">
                             <Setter Property="ContentTemplate" Value="{StaticResource TrendsContentTemplate}" />

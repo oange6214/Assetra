@@ -29,6 +29,4 @@ public enum NavSection
     Assistant,
     /// <summary>交易稽核日誌 — 顯示 trade_audit 表內容（被刪/被替換的歷史 Trade）。</summary>
     AuditLog,
-    /// <summary>Portfolio Groups (群組) CRUD — see Portfolio-Groups-Refactor P2.</summary>
-    PortfolioGroups,
 }
