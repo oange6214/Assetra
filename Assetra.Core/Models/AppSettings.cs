@@ -257,7 +257,16 @@ public sealed record AppSettings(
     int ReportsYear = 0,
 
     /// <summary>月結報告上次檢視的月（1–12）。0 = 用當月。</summary>
-    int ReportsMonth = 0)
+    int ReportsMonth = 0,
+
+    /// <summary>報酬日曆色階基準：true = 按絕對值、false = 按 %（預設）。使用者切換後持久化。</summary>
+    bool CalendarUseAbsoluteTone = false,
+
+    /// <summary>報酬日曆檢視模式：true = 年度熱度圖、false = 月格（預設）。</summary>
+    bool CalendarYearView = false,
+
+    /// <summary>FIRE 路徑分頁（FirePathTab enum 名："Wealth" / "Drawdown"）。空字串 = Wealth。</summary>
+    string FirePathTab = "")
 {
     /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
     public const int MaxRecentlyUsedAssets = 6;

@@ -1,5 +1,7 @@
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.WPF.Features.FinancialOverview.Calendar;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -14,6 +16,41 @@ public sealed class ReturnCalendarViewModelTests
         Assert.False(vm.HasData);
         Assert.False(vm.CanGoPrev);
         Assert.Equal(42, vm.Cells.Count); // 6 weeks × 7 days grid always renders
+    }
+
+    [Fact]
+    public void Ctor_RestoresViewPreferencesFromSettings()
+    {
+        // WHY: year-view + tone-mode are display preferences that should survive restart.
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current)
+            .Returns(new AppSettings(CalendarYearView: true, CalendarUseAbsoluteTone: true));
+
+        var vm = new ReturnCalendarViewModel(settings.Object);
+
+        Assert.True(vm.IsYearView);
+        Assert.True(vm.UseAbsoluteForTone);
+    }
+
+    [Fact]
+    public void TogglingViewMode_PersistsWithoutRaisingChanged()
+    {
+        // WHY: must save with raiseChanged: false so the bookkeeping write doesn't trigger the
+        // app-wide Changed reload (settings-Changed flicker loop).
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings());
+        AppSettings? saved = null;
+        bool? raised = null;
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, r) => { saved = s; raised = r; })
+            .Returns(Task.CompletedTask);
+
+        var vm = new ReturnCalendarViewModel(settings.Object);
+        vm.IsYearView = true;
+
+        Assert.NotNull(saved);
+        Assert.True(saved!.CalendarYearView);
+        Assert.False(raised!.Value);
     }
 
     [Fact]

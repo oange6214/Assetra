@@ -55,7 +55,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// </summary>
     public Assetra.WPF.Features.FinancialOverview.Calendar.ReturnCalendarViewModel
         ReturnCalendar
-    { get; } = new();
+    { get; }
 
     // Chart series
     [ObservableProperty] private ISeries[] _valueSeries = [];
@@ -175,6 +175,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
         _settings = settings;
+        ReturnCalendar = new Assetra.WPF.Features.FinancialOverview.Calendar.ReturnCalendarViewModel(_settings);
         _fx = fx;
         _drawdown = drawdown;
         _benchmark = benchmark;

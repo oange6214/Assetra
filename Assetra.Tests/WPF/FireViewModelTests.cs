@@ -31,7 +31,8 @@ public sealed class FireViewModelTests
         IAppNetWorthProvider? appNetWorthProvider = null,
         Mock<IFirePlanningService>? planning = null,
         Mock<IFireDrawdownService>? drawdown = null,
-        Mock<IFireMonteCarloService>? monteCarlo = null)
+        Mock<IFireMonteCarloService>? monteCarlo = null,
+        Mock<IAppSettingsService>? settings = null)
     {
         calculator ??= new Mock<IFireCalculatorService>();
         if (goals is null)
@@ -50,7 +51,39 @@ public sealed class FireViewModelTests
             appNetWorthProvider: appNetWorthProvider,
             planningService: planning?.Object,
             drawdownService: drawdown?.Object,
-            monteCarloService: monteCarlo?.Object);
+            monteCarloService: monteCarlo?.Object,
+            appSettings: settings?.Object);
+    }
+
+    [Fact]
+    public void Ctor_RestoresPathTabFromSettings()
+    {
+        // WHY: the Wealth/Drawdown path tab is a display preference that should survive restart.
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings(FirePathTab: "Drawdown"));
+
+        var vm = CreateVm(settings: settings);
+
+        Assert.Equal(FirePathTab.Drawdown, vm.SelectedPathTab);
+    }
+
+    [Fact]
+    public void ChangingPathTab_PersistsWithoutRaisingChanged()
+    {
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings());
+        AppSettings? saved = null;
+        bool? raised = null;
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, r) => { saved = s; raised = r; })
+            .Returns(Task.CompletedTask);
+
+        var vm = CreateVm(settings: settings);
+        vm.SelectedPathTab = FirePathTab.Drawdown;
+
+        Assert.NotNull(saved);
+        Assert.Equal("Drawdown", saved!.FirePathTab);
+        Assert.False(raised!.Value);   // raiseChanged: false
     }
 
     [Theory]

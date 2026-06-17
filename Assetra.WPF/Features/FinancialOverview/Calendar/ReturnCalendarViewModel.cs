@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Media;
+using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -78,13 +79,17 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// 切換不重抓資料，只重算 cell tone。
     /// </summary>
     [ObservableProperty] private bool _useAbsoluteForTone;
-    partial void OnUseAbsoluteForToneChanged(bool _)
+    partial void OnUseAbsoluteForToneChanged(bool value)
     {
         Rebuild();
         // 年度檢視也要立即重算 tone — 否則切換後得切走再切回來才生效。
         OnPropertyChanged(nameof(YearViewCells));
         OnPropertyChanged(nameof(YearViewWeekColumns));
+        _ = PersistAsync(s => s with { CalendarUseAbsoluteTone = UseAbsoluteForTone });
     }
+
+    partial void OnIsYearViewChanged(bool value) =>
+        _ = PersistAsync(s => s with { CalendarYearView = value });
 
     /// <summary>
     /// v2 #6d：年度檢視 — 把 12 個月併成一個熱度圖（GitHub contribution graph style）。
@@ -144,17 +149,40 @@ public sealed partial class ReturnCalendarViewModel : ObservableObject
     /// <summary>是否可以往後一個月 — 不超過今天。</summary>
     public bool CanGoNext => CurrentMonth < new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
 
-    public ReturnCalendarViewModel()
+    private readonly IAppSettingsService? _settings;
+
+    public ReturnCalendarViewModel(IAppSettingsService? settings = null)
     {
+        _settings = settings;
         _uiContext = SynchronizationContext.Current;
         Cells = new ReadOnlyObservableCollection<DailyCellVm>(_cells);
         Weeks = new ReadOnlyObservableCollection<WeekRowVm>(_weeks);
         AvailableMonths = new ReadOnlyObservableCollection<MonthOption>(_availableMonths);
+
+        // 還原檢視偏好（backing field，不觸發 OnXChanged / Rebuild；下方 Rebuild 會用到）。
+        _useAbsoluteForTone = settings?.Current.CalendarUseAbsoluteTone ?? false;
+        _isYearView = settings?.Current.CalendarYearView ?? false;
+
         // 初始至少含 CurrentMonth — 避免 snapshots 還沒載入時，ComboBox 因
         // ItemsSource 空但 SelectedValue 設了 CurrentMonth 而清空，造成 dropdown
         // 顯示空白。UpdateSnapshots 之後會用完整月份清單覆寫。
         _availableMonths.Add(ToOption(CurrentMonth));
         Rebuild();
+    }
+
+    /// <summary>持久化日曆檢視偏好。raiseChanged: false —— 純 UI 記帳，不觸發全 App reload。</summary>
+    private async Task PersistAsync(Func<AppSettings, AppSettings> mutate)
+    {
+        if (_settings is null)
+            return;
+        try
+        {
+            await _settings.SaveAsync(mutate(_settings.Current), raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Calendar] 持久化日曆偏好失敗");
+        }
     }
 
     /// <summary>

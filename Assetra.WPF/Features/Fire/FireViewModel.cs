@@ -349,6 +349,8 @@ public sealed partial class FireViewModel : ObservableObject
             ScenarioDraftError = null;
     }
 
+    private readonly IAppSettingsService? _settings;
+
     public FireViewModel(
         IFireCalculatorService calculator,
         IFinancialGoalRepository goals,
@@ -360,7 +362,8 @@ public sealed partial class FireViewModel : ObservableObject
         IFirePlanningService? planningService = null,
         IFireScenarioRepository? scenarioRepository = null,
         IFireDrawdownService? drawdownService = null,
-        IFireMonteCarloService? monteCarloService = null)
+        IFireMonteCarloService? monteCarloService = null,
+        IAppSettingsService? appSettings = null)
     {
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(goals);
@@ -375,9 +378,36 @@ public sealed partial class FireViewModel : ObservableObject
         _scenarioRepository = scenarioRepository;
         _drawdownService = drawdownService;
         _monteCarloService = monteCarloService;
+        _settings = appSettings;
+        // 還原 FIRE 路徑分頁（backing field，不觸發 OnSelectedPathTabChanged）。
+        if (appSettings?.Current.FirePathTab is { Length: > 0 } tab
+            && Enum.TryParse<FirePathTab>(tab, out var savedTab))
+        {
+            _selectedPathTab = savedTab;
+        }
         WealthPath = new ReadOnlyObservableCollection<FireWealthPoint>(_wealthPath);
         WealthPathTiles = new ReadOnlyObservableCollection<FireWealthPathTile>(_wealthPathTiles);
         DrawdownPathTiles = new ReadOnlyObservableCollection<FireDrawdownPathTile>(_drawdownPathTiles);
+    }
+
+    /// <summary>持久化 FIRE 路徑分頁。raiseChanged: false —— 純 UI 記帳，不觸發全 App reload。</summary>
+    partial void OnSelectedPathTabChanged(FirePathTab value)
+    {
+        if (_settings is null)
+            return;
+        _ = PersistPathTabAsync(value);
+    }
+
+    private async Task PersistPathTabAsync(FirePathTab value)
+    {
+        try
+        {
+            await _settings!.SaveAsync(_settings.Current with { FirePathTab = value.ToString() }, raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[FIRE] 持久化路徑分頁失敗");
+        }
     }
 
     /// <summary>
