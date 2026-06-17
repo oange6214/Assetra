@@ -18,13 +18,18 @@ namespace Assetra.Tests.WPF;
 public sealed class PortfolioViewModelFactoryTests
 {
     [Fact]
-    public void BuildPortfolioServices_WiresPositionMetadata()
+    public void BuildPortfolioServices_WiresMutationServicesThatFallBackToSilentNullNoOps()
     {
-        // Regression: a null PositionMetadata here is exactly the shipped bug — the dialog's
-        // group reassignment would silently no-op instead of persisting.
+        // Regression: the 2-arg PortfolioViewModel ctor falls back to Null no-op services for
+        // these when the factory omits them. Two such omissions shipped as user-facing bugs:
+        //   - PositionMetadata null → "移至投資組合" silently dropped (no DB write).
+        //   - TradeMetadata null    → editing a trade's date/note always failed
+        //     ("找不到此筆記錄或記錄已被修改"), because NullTradeMetadataWorkflowService.UpdateAsync
+        //     returns false.
         var services = PortfolioViewModelFactory.BuildPortfolioServices(new AutoMockServiceProvider());
 
         Assert.NotNull(services.PositionMetadata);
+        Assert.NotNull(services.TradeMetadata);
     }
 
     /// <summary>

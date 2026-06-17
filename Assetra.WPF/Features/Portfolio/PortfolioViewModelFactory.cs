@@ -63,6 +63,9 @@ internal sealed class PortfolioViewModelFactory
             // 必須注入：缺了它時 2-arg ctor 會 fallback 到 NullPositionMetadataWorkflowService，
             // 導致「移至投資組合」靜默不寫 DB（in-session 看似成功、重啟即失）。
             PositionMetadata: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
+            // 必須注入：缺了它時 fallback 到 NullTradeMetadataWorkflowService（UpdateAsync 永遠回 false），
+            // 導致在「交易記錄」編輯日期/備註一律失敗「找不到此筆記錄或記錄已被修改」。
+            TradeMetadata: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
             LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
             CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
             CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
