@@ -134,4 +134,33 @@ public class RowMoneyAccessorTests
         Assert.Equal(1200m, row.NetValue);
         Assert.Equal(200m, row.Pnl);
     }
+
+    [Theory]
+    [InlineData(AssetType.Stock)]
+    [InlineData(AssetType.Etf)]
+    [InlineData(AssetType.Fund)]
+    [InlineData(AssetType.Bond)]
+    [InlineData(AssetType.PreciousMetal)]
+    [InlineData(AssetType.Crypto)]
+    public void PortfolioRow_IsTradeableSecurity_TrueForEveryInvestmentType(AssetType type)
+    {
+        // WHY: 側邊 position-detail 面板的「＋ 新增交易」CTA 改綁 IsTradeableSecurity。每種投資部位
+        // 都可下單，按鈕必須一致出現；舊的 IsStock gate 只認 Stock，對 Etf/Fund 等錯誤隱藏。
+        var row = new PortfolioRowViewModel { AssetType = type };
+
+        Assert.True(row.IsTradeableSecurity);
+    }
+
+    [Fact]
+    public void PortfolioRow_EtfPosition_IsTradeableButNotIsStock()
+    {
+        // WHY: pin 住 EUV/DRAM 不一致的根因 —— Etf 部位的 badge 走 default case 顯示「股」，視覺上與
+        // Stock 無異，但 IsStock=false。舊 CTA gate 用 IsStock 會隱藏按鈕；新 gate 用 IsTradeableSecurity
+        // 仍顯示，兩者一致。
+        var row = new PortfolioRowViewModel { AssetType = AssetType.Etf };
+
+        Assert.False(row.IsStock);                    // 舊 gate 會因此隱藏「＋ 新增交易」
+        Assert.True(row.IsTradeableSecurity);         // 新 gate 仍顯示
+        Assert.Equal("股", row.AssetTypeBadgeLabel);  // badge 仍是「股」→ 與 Stock 視覺相同
+    }
 }

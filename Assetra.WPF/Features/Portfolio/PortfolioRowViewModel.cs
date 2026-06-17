@@ -39,6 +39,16 @@ public partial class PortfolioRowViewModel : ObservableObject
     public bool IsStock => AssetType == AssetType.Stock;
 
     /// <summary>
+    /// True 對任何「可下單的投資標的」（買／賣／股利 交易記錄皆適用）。Position-detail 側邊面板
+    /// 只會對投資部位開啟，所有 AssetType 都可交易，故涵蓋全部類型。用來取代側邊面板「＋ 新增交易」
+    /// CTA 原本的 IsStock gate —— 該 gate 會對非 Stock 部位錯誤隱藏按鈕（如 EUV 的 AssetType 是
+    /// Etf，badge 仍顯示「股」但 IsStock=false，造成 DRAM 有鈕、EUV 沒鈕的不一致）。
+    /// </summary>
+    public bool IsTradeableSecurity => AssetType is
+        AssetType.Stock or AssetType.Etf or AssetType.Fund or
+        AssetType.Bond or AssetType.PreciousMetal or AssetType.Crypto;
+
+    /// <summary>
     /// 數量顯示文字 — 股票整數（股不可拆分）；其他資產類型保留小數（基金、貴金屬、加密貨幣）。
     /// </summary>
     public string QuantityDisplay => IsStock
