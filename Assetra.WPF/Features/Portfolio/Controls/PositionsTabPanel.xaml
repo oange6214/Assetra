@@ -1052,7 +1052,7 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <!--  資產 — 代號 + 類型 badge + 名稱（P5.11：幣別已拆到下一欄，這裡不再 inline）  -->
+                    <!--  資產 — 代號 + 類型 badge + 名稱 + 幣別（v3：幣別折回此欄，僅外幣顯示；TWD 為 base 隱含）  -->
                     <DataGridTemplateColumn
                         Width="*"
                         MinWidth="200"
@@ -1067,6 +1067,7 @@
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Column="0"
@@ -1093,30 +1094,18 @@
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
+                                    <!--  幣別：折回資產欄，僅外幣（cross-currency）顯示；base(TWD) 隱含不顯示  -->
+                                    <TextBlock
+                                        Grid.Column="3"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Base}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppTextMuted}"
+                                        Text="{Binding CurrencyDisplay}"
+                                        Typography.NumeralAlignment="Tabular"
+                                        Visibility="{Binding IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!--
-                        幣別 — P5.11 新獨立欄。原本 chip-style inline 在 Asset col 內，
-                        現拆出純文字欄位（無背景無 chip border），用 AppTextSecondary 弱化
-                        顏色不搶資料主視覺。固定窄寬 70px 對 3-char 幣別代碼足夠。
-                    -->
-                    <DataGridTemplateColumn Width="70" SortMemberPath="CurrencyDisplay">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{DynamicResource Portfolio.Currency}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Sm}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{Binding CurrencyDisplay}"
-                                    Typography.NumeralAlignment="Tabular" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
