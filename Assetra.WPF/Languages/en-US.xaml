@@ -327,6 +327,7 @@
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">Today</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.Cost">Cost</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Empty">No asset data available</sys:String>
     <sys:String x:Key="Portfolio.Pagination.JumpTo">Page:</sys:String>
     <sys:String x:Key="Portfolio.Filter.AllAssets">All Assets</sys:String>
@@ -402,6 +403,10 @@
     <sys:String x:Key="Portfolio.Kpi.ShowPnlBreakdown">Show P&amp;L breakdown</sys:String>
     <sys:String x:Key="Portfolio.Kpi.CostTitle">Cost breakdown</sys:String>
     <sys:String x:Key="Portfolio.Kpi.PnlBreakdownTitle">P&amp;L distribution</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Allocation">Allocation</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Cost">Cost split</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Pnl">Win/Loss</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Daily">Daily P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Sparkline">30d trend</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddTitle">Add investment</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddHint">Add the symbol to your investments (quantity 0). Record actual buys later via the Buy dialog.</sys:String>

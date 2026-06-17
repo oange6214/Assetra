@@ -138,294 +138,89 @@
             外層 background 改 AppBackground (灰，跟下方 datagrid 同色)，
             內 cards 用 AppCardBackground (白)，padding 統一 Padding.Card token。
         -->
-        <Border
+        <!--
+            ═══ Row 3: 精簡 insights 切換列 ═══
+            取代原本與上方標題卡重複的 4 張 KPI 卡（市值／損益／今日漲跌）。
+            chip 沿用既有 ToggleKpiPanelCommand + 下方 Row 4 展開面板：
+            點一下展開對應分析圖、再點一下收合。標題卡為唯一頭條數字來源。
+        -->
+        <StackPanel
             Grid.Row="3"
-            Padding="{StaticResource Padding.SectionStrip}"
-            Background="{DynamicResource AppBackground}"
-            BorderBrush="{DynamicResource AppBorder}"
-            BorderThickness="0,0,0,1">
-            <!--
-                UniformGrid distributes width equally across 4 columns and
-                stretches each cell to fill the parent. The previous
-                WrapPanel ItemWidth="250" pinned each card to 250 px and
-                left 380+ px of dead space on a 1600-wide window — visually
-                reading as "content centered with margins on both sides."
-            -->
-            <UniformGrid Columns="4" Rows="1">
+            Margin="12,12,12,0"
+            Orientation="Horizontal">
 
-                <!--  Card 1: 總市值（右上 donut icon → 展開持股佔比圓環）  -->
-                <Border
-                    MinHeight="72"
-                    Margin="{StaticResource CardMarginLeft}"
-                    Padding="{StaticResource Padding.Card}"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Position.Summary.MarketValue}" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Lg}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding TotalMarketValue, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                Typography.NumeralAlignment="Tabular" />
-                        </StackPanel>
-                        <!--  右上展開鈕 — 點擊切換到「持股佔比」donut 面板  -->
-                        <Button
-                            Width="22"
-                            Height="22"
-                            Padding="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="marketvalue"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Portfolio.Kpi.ShowAllocation}">
-                            <ds:AppIcon FontSize="13" Symbol="DataPie24">
-                                <ds:AppIcon.Style>
-                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsKpiMarketValueExpanded}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ds:AppIcon.Style>
-                            </ds:AppIcon>
-                        </Button>
-                    </Grid>
-                </Border>
+            <!--  持股佔比  -->
+            <Button
+                Command="{Binding ToggleKpiPanelCommand}"
+                CommandParameter="marketvalue"
+                Content="{DynamicResource Portfolio.Kpi.Chip.Allocation}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKpiMarketValueExpanded}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
-                <!--  Card 2: 總付出成本（右上 donut icon → 展開成本分布）  -->
-                <Border
-                    MinHeight="72"
-                    Margin="{StaticResource CardMarginCenter}"
-                    Padding="{StaticResource Padding.Card}"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Position.Summary.TotalCost}" />
-                            <TextBlock
-                                Margin="0,4,0,0"
-                                FontFamily="{StaticResource Font.Family.Base}"
-                                FontSize="{StaticResource Font.Size.Lg}"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource AppTextPrimary}"
-                                Text="{Binding TotalCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
-                                Typography.NumeralAlignment="Tabular" />
-                        </StackPanel>
-                        <Button
-                            Width="22"
-                            Height="22"
-                            Padding="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="cost"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Portfolio.Kpi.ShowCost}">
-                            <ds:AppIcon FontSize="13" Symbol="DataPie24">
-                                <ds:AppIcon.Style>
-                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsKpiCostExpanded}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ds:AppIcon.Style>
-                            </ds:AppIcon>
-                        </Button>
-                    </Grid>
-                </Border>
+            <!--  成本分布  -->
+            <Button
+                Command="{Binding ToggleKpiPanelCommand}"
+                CommandParameter="cost"
+                Content="{DynamicResource Portfolio.Kpi.Chip.Cost}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKpiCostExpanded}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
-                <!--  Card 3: 損益試算（右上 pie icon → 展開盈虧檔數）  -->
-                <Border
-                    MinHeight="72"
-                    Margin="{StaticResource CardMarginCenter}"
-                    Padding="{StaticResource Padding.Card}"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Position.Summary.Pnl}" />
-                            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                <TextBlock
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Lg}"
-                                    FontWeight="SemiBold"
-                                    Text="{Binding TotalPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
-                                    Typography.NumeralAlignment="Tabular">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock
-                                    Margin="6,0,0,0"
-                                    VerticalAlignment="Bottom"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Text="{Binding TotalPnlPercent, StringFormat={}{0:+0.00;-0.00}%}"
-                                    Typography.NumeralAlignment="Tabular">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsTotalPositive}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
-                        <Button
-                            Width="22"
-                            Height="22"
-                            Padding="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="pnl"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Portfolio.Kpi.ShowPnlBreakdown}">
-                            <ds:AppIcon FontSize="13" Symbol="DataPie24">
-                                <ds:AppIcon.Style>
-                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsKpiPnlExpanded}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ds:AppIcon.Style>
-                            </ds:AppIcon>
-                        </Button>
-                    </Grid>
-                </Border>
+            <!--  盈虧檔數  -->
+            <Button
+                Command="{Binding ToggleKpiPanelCommand}"
+                CommandParameter="pnl"
+                Content="{DynamicResource Portfolio.Kpi.Chip.Pnl}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKpiPnlExpanded}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
-                <!--  Card 4: 今日漲跌（右上 bar icon → 展開過去 30 天每日 PnL 柱）  -->
-                <Border
-                    MinHeight="72"
-                    Margin="{StaticResource CardMarginRight}"
-                    Padding="{StaticResource Padding.Card}"
-                    Background="{DynamicResource AppCardBackground}"
-                    BorderBrush="{DynamicResource AppBorder}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource Radius.Sm}">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Position.Summary.DayChange}" />
-                            <!--  Shown only when quotes have loaded (HasDayPnl = true)  -->
-                            <StackPanel
-                                Margin="0,4,0,0"
-                                Orientation="Horizontal"
-                                Visibility="{Binding HasDayPnl, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Lg}"
-                                    FontWeight="SemiBold"
-                                    Text="{Binding DayPnl, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
-                                    Typography.NumeralAlignment="Tabular">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock
-                                    Margin="6,0,0,0"
-                                    VerticalAlignment="Bottom"
-                                    FontFamily="{StaticResource Font.Family.Base}"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Text="{Binding DayPnlPercentDisplay}"
-                                    Typography.NumeralAlignment="Tabular">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource AppDown}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDayPnlPositive}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppUp}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
-                            <!--  Placeholder while quotes are loading  -->
-                            <TextBlock
-                                Margin="0,6,0,0"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Text="{DynamicResource Portfolio.Position.Summary.Loading}"
-                                Visibility="{Binding HasDayPnl, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                        </StackPanel>
-                        <!--  右上展開鈕 — 點擊切換到「每日損益」柱狀圖面板  -->
-                        <Button
-                            Width="22"
-                            Height="22"
-                            Padding="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="daychange"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Portfolio.Kpi.ShowDailyPnl}">
-                            <ds:AppIcon FontSize="13" Symbol="DataBarVertical24">
-                                <ds:AppIcon.Style>
-                                    <Style BasedOn="{StaticResource AppIcon}" TargetType="{x:Type ds:AppIcon}">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppTextMuted}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsKpiDayChangeExpanded}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ds:AppIcon.Style>
-                            </ds:AppIcon>
-                        </Button>
-                    </Grid>
-                </Border>
-
-            </UniformGrid>
-        </Border>
+            <!--  每日損益  -->
+            <Button
+                Command="{Binding ToggleKpiPanelCommand}"
+                CommandParameter="daychange"
+                Content="{DynamicResource Portfolio.Kpi.Chip.Daily}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKpiDayChangeExpanded}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
 
         <!--
             ═══ Row 4: KPI expand panel ═══

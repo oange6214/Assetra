@@ -96,6 +96,23 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="·" />
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.DetailHeader.Cost}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            FontFamily="{StaticResource Font.Family.Numeric}"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding SelectedPortfolioCost, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                 </StackPanel>
 

@@ -325,6 +325,7 @@
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">損益</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.Cost">成本</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Empty">尚無資產數據</sys:String>
     <sys:String x:Key="Portfolio.Pagination.JumpTo">頁碼:</sys:String>
     <sys:String x:Key="Portfolio.Filter.AllAssets">所有資產</sys:String>
@@ -400,6 +401,10 @@
     <sys:String x:Key="Portfolio.Kpi.ShowPnlBreakdown">展開盈虧檔數</sys:String>
     <sys:String x:Key="Portfolio.Kpi.CostTitle">付出成本分布</sys:String>
     <sys:String x:Key="Portfolio.Kpi.PnlBreakdownTitle">盈虧檔數分布</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Allocation">持股佔比</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Cost">成本分布</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Pnl">盈虧檔數</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Chip.Daily">每日損益</sys:String>
     <sys:String x:Key="Portfolio.Sparkline">30 天走勢</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddTitle">新增投資</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddHint">先把標的加入投資資產列表（數量 0），之後再透過買入交易補上交易紀錄。</sys:String>
