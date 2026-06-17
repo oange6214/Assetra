@@ -32,6 +32,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     private readonly IStockSearchService _search;
     private readonly IStockService _stockService;
     private readonly IAppSettingsService? _settingsService;
+    /// <summary>One-shot guard: persisted UI prefs are restored only on the first LoadAsync,
+    /// so later reloads don't clobber in-session toggles.</summary>
+    private bool _uiPreferencesRestored;
     private readonly ISnackbarService? _snackbar;
     private readonly IThemeService? _themeService;
     private Action<ApplicationTheme>? _onThemeChanged;
@@ -950,9 +953,18 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
 
-        // Restore the user's last overview expand/collapse preference (default expanded on first run).
-        // No OnChanged save hook exists for this property, so setting it here does not re-persist.
-        IsOverviewExpanded = _settingsService?.Current?.PortfolioOverviewExpanded ?? true;
+        // Restore persisted UI preferences ONCE (first load). Subsequent reloads must NOT clobber
+        // in-session toggles — ShowClosedPositions is toggled via LoadPositionsAsync, not LoadAsync.
+        if (!_uiPreferencesRestored)
+        {
+            _uiPreferencesRestored = true;
+            // No OnChanged hook on IsOverviewExpanded → property set here does not re-persist.
+            IsOverviewExpanded = _settingsService?.Current?.PortfolioOverviewExpanded ?? true;
+            // Restore via the backing field — the property setter would fire
+            // OnShowClosedPositionsChanged (nested reload + redundant save). ApplyPositions reads it.
+            _showClosedPositions = _settingsService?.Current?.PortfolioShowClosed ?? false;
+            OnPropertyChanged(nameof(ShowClosedPositions));
+        }
 
         var loaded = await _loadService.LoadAsync();
 

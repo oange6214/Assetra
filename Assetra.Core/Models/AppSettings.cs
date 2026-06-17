@@ -242,7 +242,16 @@ public sealed record AppSettings(
     /// 預設 true（展開，首次使用展示組合輪廓）；使用者切換後持久化，下次啟動還原。
     /// 收合時頭條（市值／損益／今日漲跌）仍顯示，只收走勢圖與焦點卡 / insights。
     /// </summary>
-    bool PortfolioOverviewExpanded = true)
+    bool PortfolioOverviewExpanded = true,
+
+    /// <summary>投資資產頁「顯示已平倉」偏好。預設 false（隱藏賣光部位）；使用者切換後持久化、下次啟動還原。</summary>
+    bool PortfolioShowClosed = false,
+
+    /// <summary>
+    /// 資產趨勢／詳情走勢圖的期間選擇（chip key："5"/"30"/"180"/"YTD"/"365"/"1825"/"All"）。
+    /// 空字串 = 用預設 "30"。使用者切換後持久化、下次啟動還原。
+    /// </summary>
+    string PortfolioHistoryPeriod = "")
 {
     /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
     public const int MaxRecentlyUsedAssets = 6;

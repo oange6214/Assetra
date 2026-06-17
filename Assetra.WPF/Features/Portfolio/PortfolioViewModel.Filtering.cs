@@ -270,7 +270,11 @@ public partial class PortfolioViewModel
            && (string.IsNullOrEmpty(LiabilityFilterText)
                || row.Name.Contains(LiabilityFilterText, StringComparison.OrdinalIgnoreCase));
 
-    partial void OnShowClosedPositionsChanged(bool value) => _ = LoadPositionsAsync();
+    partial void OnShowClosedPositionsChanged(bool value)
+    {
+        _ = LoadPositionsAsync();
+        _ = PersistUiPreferenceAsync(s => s with { PortfolioShowClosed = value });
+    }
 
     /// <summary>Called from DividendCalendarPanel when a month cell is clicked.</summary>
     [RelayCommand]

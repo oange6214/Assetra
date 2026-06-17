@@ -201,6 +201,37 @@ public class PortfolioDetailHeaderAggregateTests
     }
 
     [Fact]
+    public void ToggleShowClosed_PersistsPreference_WithoutRaisingChanged()
+    {
+        // WHY: "顯示已平倉" is a per-user preference that must survive restart, and (like the
+        // overview toggle) it must save with raiseChanged: false to avoid the settings-Changed
+        // flicker loop.
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+        ]));
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync())
+            .ReturnsAsync(new Dictionary<Guid, PositionSnapshot>());
+
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings());
+        AppSettings? saved = null;
+        bool? raised = null;
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, r) => { saved = s; raised = r; })
+            .Returns(Task.CompletedTask);
+
+        var vm = CreateVm([], positionQuery.Object, catalog, settings.Object);
+
+        Assert.False(vm.ShowClosedPositions);   // default: hide closed
+        vm.ShowClosedPositions = true;          // user reveals closed positions
+
+        Assert.NotNull(saved);
+        Assert.True(saved!.PortfolioShowClosed);   // persisted
+        Assert.False(raised!.Value);               // raiseChanged: false
+    }
+
+    [Fact]
     public async Task SelectingAllTab_ReusesWholePorfoliTotals()
     {
         // WHY: 全部 tab must not sum rows independently (which would double-count base vs native

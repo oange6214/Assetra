@@ -192,6 +192,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         // P5：記住建構當下的自訂對標清單；之後 Changed 觸發時與此比對偵測變動。
         _lastBenchmarkSymbols = (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).ToList();
+
+        // 還原使用者上次選的走勢圖期間（一次性；之後由 ChangePeriod 負責持久化）。
+        var savedPeriod = _settings?.Current.PortfolioHistoryPeriod;
+        if (!string.IsNullOrWhiteSpace(savedPeriod))
+            ApplyPeriodKey(savedPeriod);
+
         // app-lifetime singleton（由 PortfolioViewModel 持有），無 Dispose 生命週期；
         // 訂閱隨 app 存活，與 PortfolioViewModel 對 Changed 的訂閱相同模式。
         if (_settings is not null)
@@ -259,12 +265,25 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         CustomStartDate = null;
         CustomEndDate = null;
 
+        if (!ApplyPeriodKey(period))
+            return;
+
+        await RefreshChartAsync();
+        // 持久化使用者選的期間（raiseChanged: false —— 純 UI 記帳，不觸發全 App reload）。
+        _ = PersistPeriodAsync();
+    }
+
+    /// <summary>
+    /// 套用期間 chip key 到 <see cref="ActivePeriodKey"/> + <see cref="SelectedDays"/>，不重繪、不持久化。
+    /// 供 ChangePeriod（使用者點選）與建構子還原共用。回傳 false = 無法識別的 key。
+    /// </summary>
+    private bool ApplyPeriodKey(string period)
+    {
         if (string.Equals(period, "All", StringComparison.OrdinalIgnoreCase))
         {
             ActivePeriodKey = "All";
             SelectedDays = AllPeriodDays;
-            await RefreshChartAsync();
-            return;
+            return true;
         }
 
         // P5.9 — YTD: 從今年 1/1 算到今天，動態天數但 chip 顯示為 "YTD" key
@@ -274,15 +293,30 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             var jan1 = new DateTime(today.Year, 1, 1);
             ActivePeriodKey = "YTD";
             SelectedDays = Math.Max(1, (today - jan1).Days + 1);
-            await RefreshChartAsync();
-            return;
+            return true;
         }
 
         if (int.TryParse(period, out var days) && days > 0)
         {
             ActivePeriodKey = period;
             SelectedDays = days;
-            await RefreshChartAsync();
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task PersistPeriodAsync()
+    {
+        if (_settings is null)
+            return;
+        try
+        {
+            await _settings.SaveAsync(_settings.Current with { PortfolioHistoryPeriod = ActivePeriodKey }, raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Trends] 持久化走勢圖期間失敗");
         }
     }
 
