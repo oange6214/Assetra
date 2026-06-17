@@ -251,7 +251,13 @@ public sealed record AppSettings(
     /// 資產趨勢／詳情走勢圖的期間選擇（chip key："5"/"30"/"180"/"YTD"/"365"/"1825"/"All"）。
     /// 空字串 = 用預設 "30"。使用者切換後持久化、下次啟動還原。
     /// </summary>
-    string PortfolioHistoryPeriod = "")
+    string PortfolioHistoryPeriod = "",
+
+    /// <summary>月結報告上次檢視的年（西元）。0 = 用當年。使用者切換月份後持久化、下次啟動還原。</summary>
+    int ReportsYear = 0,
+
+    /// <summary>月結報告上次檢視的月（1–12）。0 = 用當月。</summary>
+    int ReportsMonth = 0)
 {
     /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
     public const int MaxRecentlyUsedAssets = 6;

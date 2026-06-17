@@ -5,6 +5,7 @@ using Assetra.Core.Interfaces.Reports;
 using Assetra.Core.Models;
 using Assetra.Core.Models.Reports;
 using Assetra.WPF.Features.Reports;
+using Moq;
 using Xunit;
 
 namespace Assetra.Tests.WPF;
@@ -72,6 +73,43 @@ public sealed class ReportsViewModelTests
         Assert.Null(vm.CashFlowStatement);
         // Performance / Risk fields removed from ReportsViewModel — see commit log.
         Assert.NotNull(vm.ErrorMessage);
+    }
+
+    [Fact]
+    public void Ctor_RestoresLastViewedMonthFromSettings()
+    {
+        // WHY: the report month should survive restart — the ctor restores the persisted
+        // ReportsYear/Month (when set) instead of always defaulting to the current month.
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings(ReportsYear: 2025, ReportsMonth: 3));
+
+        var vm = new ReportsViewModel(CreateReportService(), appSettings: settings.Object);
+
+        Assert.Equal(2025, vm.Year);
+        Assert.Equal(3, vm.Month);
+    }
+
+    [Fact]
+    public void ChangingMonth_PersistsWithoutRaisingChanged()
+    {
+        // WHY: navigating months persists the choice, and (like other UI prefs) must save with
+        // raiseChanged: false so the bookkeeping write doesn't trigger the app-wide Changed reload.
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings());   // ReportsYear/Month = 0 → keeps today
+        AppSettings? saved = null;
+        bool? raised = null;
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, r) => { saved = s; raised = r; })
+            .Returns(Task.CompletedTask);
+
+        var vm = new ReportsViewModel(CreateReportService(), appSettings: settings.Object);
+        vm.Year = 2025;
+        vm.Month = 7;
+
+        Assert.NotNull(saved);
+        Assert.Equal(2025, saved!.ReportsYear);
+        Assert.Equal(7, saved.ReportsMonth);
+        Assert.False(raised!.Value);   // raiseChanged: false
     }
 
     private static MonthEndReportService CreateReportService(

@@ -190,6 +190,13 @@ public sealed partial class ReportsViewModel : ObservableObject
         _year = today.Year;
         _month = today.Month;
 
+        // 還原上次檢視的月份（一次性；backing field 不觸發 OnXChanged，故不會在建構時 reload / persist）。
+        if (_appSettings?.Current is { ReportsYear: > 0 } cur && cur.ReportsMonth is >= 1 and <= 12)
+        {
+            _year = cur.ReportsYear;
+            _month = cur.ReportsMonth;
+        }
+
         // Year picker covers 10 years back to 1 year forward — wide enough
         // for historical review yet tight enough to keep the dropdown short.
         YearOptions = Enumerable.Range(today.Year - 10, 12).ToList();
@@ -215,6 +222,8 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     partial void OnYearChanged(int value)
     {
+        // Persist 放在抑制旗標之前 —— 上/下月指令會用 _suppressAutoLoad 抑制 reload，但仍要記住月份。
+        _ = PersistReportsMonthAsync();
         if (_suppressAutoLoad)
             return;
         _ = LoadAsync();
@@ -222,9 +231,32 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     partial void OnMonthChanged(int value)
     {
+        _ = PersistReportsMonthAsync();
         if (_suppressAutoLoad)
             return;
         _ = LoadAsync();
+    }
+
+    /// <summary>
+    /// 持久化「上次檢視月份」。raiseChanged: false —— 純 UI 記帳，不觸發全 App reload。
+    /// Dedup：與已存值相同就跳過（上/下月一次改 Year+Month 會觸發兩次，避免無謂存檔）。
+    /// </summary>
+    private async Task PersistReportsMonthAsync()
+    {
+        if (_appSettings is null)
+            return;
+        if (_appSettings.Current.ReportsYear == Year && _appSettings.Current.ReportsMonth == Month)
+            return;
+        try
+        {
+            await _appSettings.SaveAsync(
+                _appSettings.Current with { ReportsYear = Year, ReportsMonth = Month },
+                raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Reports] 持久化檢視月份失敗");
+        }
     }
 
     public string MonthHeader => $"{Year}-{Month:D2}";
