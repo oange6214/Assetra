@@ -324,6 +324,7 @@
     <sys:String x:Key="Portfolio.Header.Cash">Cash</sys:String>
     <sys:String x:Key="Portfolio.Header.Liabilities">Liabilities</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">+ New trade</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.Overview">Overview</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">Today</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">P&amp;L</sys:String>

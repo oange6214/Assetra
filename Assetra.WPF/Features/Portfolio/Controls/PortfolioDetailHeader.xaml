@@ -37,13 +37,14 @@
                     Grid.Column="0"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
+                    <!--  概覽 標籤＋收合鈕（取代原本顯示組合名「全部」，避免被誤認為換組合的下拉；
+                          目前組合已由上方分頁高亮顯示）。chevron 朝上＝展開、朝下＝收合。  -->
                     <TextBlock
                         VerticalAlignment="Center"
                         FontSize="{StaticResource Font.Size.Sm}"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{Binding SelectedPortfolioName}" />
-                    <!--  概覽收合鈕：chevron 朝上＝展開、朝下＝收合  -->
+                        Text="{DynamicResource Portfolio.DetailHeader.Overview}" />
                     <Button
                         Width="22"
                         Height="22"
