@@ -141,7 +141,7 @@ public sealed class TradeDeletionWorkflowService : ITradeDeletionWorkflowService
                 foreach (var entry in allEntries)
                 {
                     if (string.Equals(entry.Symbol, request.Symbol, StringComparison.OrdinalIgnoreCase)
-                        && !entry.IsActive)
+                        && entry.IsArchived)
                     {
                         await _portfolioRepository.UnarchiveAsync(entry.Id).ConfigureAwait(false);
                     }

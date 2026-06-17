@@ -808,7 +808,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
             // Sold-out positions: the sell flow archives the entry (is_active=0) once fully sold.
             // Hidden by default; "顯示已平倉" (ShowClosedPositions) reveals them.
-            if (!ShowClosedPositions && lots.All(l => !l.IsActive))
+            if (!ShowClosedPositions && lots.All(l => l.IsArchived))
                 continue;
 
             PortfolioRowViewModel row;
