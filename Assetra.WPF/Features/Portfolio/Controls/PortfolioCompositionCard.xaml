@@ -12,7 +12,7 @@
         BorderBrush="{DynamicResource AppCardBorder}"
         BorderThickness="1"
         CornerRadius="{StaticResource Radius.2Xl}"
-        Padding="20">
+        Padding="14">
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />

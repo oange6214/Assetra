@@ -38,6 +38,12 @@ public partial class PortfolioViewModel
     [ObservableProperty] private decimal _selectedPortfolioDayPnl;
     [ObservableProperty] private bool _isSelectedPortfolioDayPnlPositive;
 
+    /// <summary>
+    /// 上方概覽（走勢圖＋投資組合焦點卡＋insights chip）展開狀態。預設展開；
+    /// 收合後只留頭條（市值／損益・成本／今日漲跌），讓下方持股表格成為主角。
+    /// </summary>
+    [ObservableProperty] private bool _isOverviewExpanded = true;
+
     // ── Trend: portfolio tab — fixed-window sparkline-based trend ────────────────────
     // Null when there is no data (fewer than 2 points across all holdings in the group).
 
@@ -75,6 +81,18 @@ public partial class PortfolioViewModel
     private void AddInvestmentForSelectedPortfolio()
     {
         Transaction.OpenTxDialog(PortfolioTabs.SelectedGroupId);
+    }
+
+    /// <summary>
+    /// 切換上方概覽區的展開／收合。收合時一併關閉任何已展開的 KPI 下鑽面板，
+    /// 避免收合後仍殘留一塊孤立的圖表面板。
+    /// </summary>
+    [RelayCommand]
+    private void ToggleOverview()
+    {
+        IsOverviewExpanded = !IsOverviewExpanded;
+        if (!IsOverviewExpanded)
+            ExpandedKpiPanel = null;
     }
 
     // ── Recompute ────────────────────────────────────────────────────────────────────

@@ -141,6 +141,32 @@ public class PortfolioDetailHeaderAggregateTests
     }
 
     [Fact]
+    public void ToggleOverview_Collapsing_AlsoClosesExpandedKpiPanel()
+    {
+        // WHY: the insights chips and the KPI drill-down panel live inside the collapsible
+        // overview. If collapsing left ExpandedKpiPanel set, the drill-down panel would stay
+        // visible with no chip to close it. Collapsing must clear it; expanding must not.
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+        ]));
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync())
+            .ReturnsAsync(new Dictionary<Guid, PositionSnapshot>());
+
+        var vm = CreateVm([], positionQuery.Object, catalog);
+
+        Assert.True(vm.IsOverviewExpanded);   // default: expanded
+        vm.ExpandedKpiPanel = "marketvalue";  // a drill-down is open
+
+        vm.ToggleOverviewCommand.Execute(null);   // collapse
+        Assert.False(vm.IsOverviewExpanded);
+        Assert.Null(vm.ExpandedKpiPanel);         // drill-down closed with it
+
+        vm.ToggleOverviewCommand.Execute(null);   // expand again
+        Assert.True(vm.IsOverviewExpanded);
+    }
+
+    [Fact]
     public async Task SelectingAllTab_ReusesWholePorfoliTotals()
     {
         // WHY: 全部 tab must not sum rows independently (which would double-count base vs native

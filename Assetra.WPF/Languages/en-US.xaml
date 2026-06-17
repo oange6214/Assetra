@@ -328,6 +328,7 @@
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">Today</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Cost">Cost</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.ToggleOverview">Collapse / expand overview</sys:String>
     <sys:String x:Key="Portfolio.Allocation.Empty">No asset data available</sys:String>
     <sys:String x:Key="Portfolio.Pagination.JumpTo">Page:</sys:String>
     <sys:String x:Key="Portfolio.Filter.AllAssets">All Assets</sys:String>
