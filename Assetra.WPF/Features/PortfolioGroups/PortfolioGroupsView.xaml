@@ -18,39 +18,10 @@
         右：可選的 add/edit 表單（IsFormOpen 控制 visibility）
         系統預設群組顯示「系統」badge 且 Delete 按鈕停用。
     -->
+    <!--  標題／副標／新增 鈕在對話框 header（MainWindow）；此處只剩清單 + add/edit 表單。  -->
     <Grid>
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!--  Header row: title + 新增按鈕  -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,16">
-                <Button DockPanel.Dock="Right"
-                        MinHeight="32"
-                        Padding="12,0"
-                        Command="{Binding StartAddCommand}"
-                        Style="{StaticResource AppPrimaryButton}">
-                    <!--
-                        P5.13 (C3) — AppPrimaryButton 背景為 Accent 色，內層 StackPanel 不繼承
-                        Button.Foreground，需在 AppIcon + TextBlock 顯式指定 Brush.Text.OnAccent
-                        否則文字會吃 AppTextPrimary（深色）→ 主色塊上低對比看不清。
-                        同款修正已在 PositionsTabPanel.xaml 的 + 新增群組 button 套過。
-                    -->
-                    <StackPanel Orientation="Horizontal">
-                        <ds:AppIcon Margin="0,0,6,0" VerticalAlignment="Center"
-                                    FontSize="{StaticResource Font.Size.Xs}"
-                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                    Symbol="Add24" />
-                        <TextBlock VerticalAlignment="Center"
-                                   Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                   Text="{DynamicResource PortfolioGroups.Add}" />
-                    </StackPanel>
-                </Button>
-            </DockPanel>
-
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />

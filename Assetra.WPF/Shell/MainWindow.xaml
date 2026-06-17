@@ -1689,9 +1689,13 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!--  Header：標題 + 副標 + X 關閉  -->
+                    <!--  Header：標題 + 副標 ｜ 新增 + X 關閉（工具列）  -->
                     <Grid Grid.Row="0" Margin="0,0,0,16">
-                        <StackPanel Margin="0,0,40,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
                             <TextBlock
                                 Style="{StaticResource FormSectionTitle}"
                                 Text="{DynamicResource PortfolioGroups.Heading}" />
@@ -1702,18 +1706,41 @@
                                 Text="{DynamicResource PortfolioGroups.Subheading}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
-                        <Button
-                            Width="32"
-                            Height="32"
-                            Margin="0,-4,-4,0"
-                            Padding="0"
-                            HorizontalAlignment="Right"
+                        <StackPanel
+                            Grid.Column="1"
                             VerticalAlignment="Top"
-                            Command="{Binding CloseDialogCommand}"
-                            Style="{StaticResource AppIconButton}"
-                            ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
-                        </Button>
+                            Orientation="Horizontal">
+                            <Button
+                                MinHeight="32"
+                                Padding="12,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding StartAddCommand}"
+                                Style="{StaticResource AppPrimaryButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <ds:AppIcon
+                                        Margin="0,0,6,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                        Symbol="Add24" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                        Text="{DynamicResource PortfolioGroups.Add}" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Width="32"
+                                Height="32"
+                                Margin="8,0,-4,0"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                Command="{Binding CloseDialogCommand}"
+                                Style="{StaticResource AppIconButton}"
+                                ToolTip="{DynamicResource Common.Close}">
+                                <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                     <!--  Body：既有 PortfolioGroupsView（清單 + 新增 + add/edit 表單），繼承 PortfolioGroups DataContext  -->
