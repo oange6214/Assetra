@@ -950,6 +950,10 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         // Bypass OnMonthlyExpenseChanged (avoids premature save); RebuildTotals() below reads MonthlyExpense.
         Financial.InitializeMonthlyExpense(_settingsService?.Current?.MonthlyExpense ?? 0m);
 
+        // Restore the user's last overview expand/collapse preference (default expanded on first run).
+        // No OnChanged save hook exists for this property, so setting it here does not re-persist.
+        IsOverviewExpanded = _settingsService?.Current?.PortfolioOverviewExpanded ?? true;
+
         var loaded = await _loadService.LoadAsync();
 
         ApplyPositions(loaded);

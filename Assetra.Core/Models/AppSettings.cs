@@ -235,7 +235,14 @@ public sealed record AppSettings(
     /// </para>
     /// null = 還沒紀錄過任何資產（新使用者）；空 list = 紀錄過但都被清掉。
     /// </summary>
-    List<System.Guid>? RecentlyUsedAssetIds = null)
+    List<System.Guid>? RecentlyUsedAssetIds = null,
+
+    /// <summary>
+    /// 投資資產頁上方「概覽」（走勢圖＋投資組合焦點＋insights chips）的展開/收合偏好。
+    /// 預設 true（展開，首次使用展示組合輪廓）；使用者切換後持久化，下次啟動還原。
+    /// 收合時頭條（市值／損益／今日漲跌）仍顯示，只收走勢圖與焦點卡 / insights。
+    /// </summary>
+    bool PortfolioOverviewExpanded = true)
 {
     /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
     public const int MaxRecentlyUsedAssets = 6;

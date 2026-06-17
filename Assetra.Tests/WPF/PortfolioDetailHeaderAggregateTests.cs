@@ -56,7 +56,8 @@ public class PortfolioDetailHeaderAggregateTests
     private static PortfolioViewModel CreateVm(
         IReadOnlyList<PortfolioEntry> entries,
         IPositionQueryService positionQuery,
-        PortfolioGroupCatalog catalog)
+        PortfolioGroupCatalog catalog,
+        IAppSettingsService? settings = null)
     {
         var repo = new Mock<IPortfolioRepository>();
         repo.Setup(r => r.GetEntriesAsync()).ReturnsAsync(entries.ToList());
@@ -84,7 +85,7 @@ public class PortfolioDetailHeaderAggregateTests
                 HistoryMaintenance: new PortfolioHistoryMaintenanceService(snapshotSvc, backfill),
                 PositionQuery: positionQuery,
                 GroupCatalog: catalog),
-            new PortfolioUiServices(ImmediateScheduler.Instance));
+            new PortfolioUiServices(ImmediateScheduler.Instance, Settings: settings));
     }
 
     private sealed class FakeGroupRepo(IReadOnlyList<PortfolioGroup> groups) : IPortfolioGroupRepository
@@ -164,6 +165,39 @@ public class PortfolioDetailHeaderAggregateTests
 
         vm.ToggleOverviewCommand.Execute(null);   // expand again
         Assert.True(vm.IsOverviewExpanded);
+    }
+
+    [Fact]
+    public void ToggleOverview_PersistsPreference_WithoutRaisingChanged()
+    {
+        // WHY: the overview expand/collapse is a per-user UI preference that must survive restart,
+        // so toggling persists it. Critically it must save with raiseChanged: false — a bookkeeping
+        // save that triggers the app-wide Changed reload would re-introduce the settings-Changed
+        // flicker loop. This test pins both: the value is persisted AND Changed is not raised.
+        var catalog = new PortfolioGroupCatalog(new FakeGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+        ]));
+        var positionQuery = new Mock<IPositionQueryService>();
+        positionQuery.Setup(s => s.GetAllPositionSnapshotsAsync())
+            .ReturnsAsync(new Dictionary<Guid, PositionSnapshot>());
+
+        var settings = new Mock<IAppSettingsService>();
+        settings.SetupGet(s => s.Current).Returns(new AppSettings());
+        AppSettings? saved = null;
+        bool? raised = null;
+        settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
+            .Callback<AppSettings, bool>((s, r) => { saved = s; raised = r; })
+            .Returns(Task.CompletedTask);
+
+        var vm = CreateVm([], positionQuery.Object, catalog, settings.Object);
+
+        Assert.True(vm.IsOverviewExpanded);   // default expanded
+        vm.ToggleOverviewCommand.Execute(null);   // collapse
+
+        Assert.False(vm.IsOverviewExpanded);
+        Assert.NotNull(saved);
+        Assert.False(saved!.PortfolioOverviewExpanded);   // collapsed state persisted
+        Assert.False(raised!.Value);                       // raiseChanged: false — no flicker loop
     }
 
     [Fact]

@@ -93,6 +93,26 @@ public partial class PortfolioViewModel
         IsOverviewExpanded = !IsOverviewExpanded;
         if (!IsOverviewExpanded)
             ExpandedKpiPanel = null;
+        _ = PersistOverviewExpandedAsync();
+    }
+
+    /// <summary>
+    /// 持久化「概覽展開/收合」偏好。raiseChanged: false —— 這是純 UI 記帳，不該觸發
+    /// IAppSettingsService.Changed 的全 App reload（見 settings-changed 回饋迴圈）。
+    /// </summary>
+    private async Task PersistOverviewExpandedAsync()
+    {
+        if (_settingsService is null)
+            return;
+        try
+        {
+            var updated = _settingsService.Current with { PortfolioOverviewExpanded = IsOverviewExpanded };
+            await _settingsService.SaveAsync(updated, raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Portfolio] 持久化概覽展開偏好失敗");
+        }
     }
 
     // ── Recompute ────────────────────────────────────────────────────────────────────
