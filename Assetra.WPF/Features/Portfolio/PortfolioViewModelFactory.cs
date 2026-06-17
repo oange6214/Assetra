@@ -27,7 +27,10 @@ internal sealed class PortfolioViewModelFactory
     public PortfolioViewModel Create() =>
         new(BuildPortfolioServices(_sp), BuildPortfolioUiServices(_sp));
 
-    private static PortfolioServices BuildPortfolioServices(IServiceProvider sp) =>
+    // internal (not private) so a regression test can assert every workflow service the
+    // production ctor needs is wired — a missing one (e.g. PositionMetadata) silently
+    // falls back to a Null no-op service and drops writes.
+    internal static PortfolioServices BuildPortfolioServices(IServiceProvider sp) =>
         new PortfolioServices(
             Stock: sp.GetRequiredService<IStockService>(),
             Search: sp.GetRequiredService<IStockSearchService>(),
@@ -57,6 +60,9 @@ internal sealed class PortfolioViewModelFactory
             TransactionWorkflow: sp.GetRequiredService<ITransactionWorkflowService>(),
             AccountUpsert: sp.GetRequiredService<IAccountUpsertWorkflowService>(),
             AccountMutation: sp.GetRequiredService<IAccountMutationWorkflowService>(),
+            // 必須注入：缺了它時 2-arg ctor 會 fallback 到 NullPositionMetadataWorkflowService，
+            // 導致「移至投資組合」靜默不寫 DB（in-session 看似成功、重啟即失）。
+            PositionMetadata: sp.GetRequiredService<IPositionMetadataWorkflowService>(),
             LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
             CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
             CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
