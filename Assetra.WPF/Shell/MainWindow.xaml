@@ -10,6 +10,7 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:goals="clr-namespace:Assetra.WPF.Features.Goals"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:groups="clr-namespace:Assetra.WPF.Features.PortfolioGroups"
     xmlns:pcontrols="clr-namespace:Assetra.WPF.Features.Portfolio.Controls"
     xmlns:recurring="clr-namespace:Assetra.WPF.Features.Recurring"
     xmlns:settingsCtrls="clr-namespace:Assetra.WPF.Features.Settings.Controls"
@@ -1666,6 +1667,60 @@
             - DataContext = the page's VM (exposed on MainViewModel)
             - Visibility bound to that VM's IsFormOpen / IsDeleteConfirmOpen flag
         -->
+
+        <!--  投資組合管理 (PortfolioGroups) — shell 模態對話框（取代舊的整頁導覽，按 X / Esc 回原頁）  -->
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="185"
+            DataContext="{Binding PortfolioGroups}"
+            Style="{StaticResource AppDialogOverlay}"
+            Visibility="{Binding IsDialogOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border
+                Width="720"
+                MaxHeight="640"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                beh:EscapeKeyCommandBehavior.Command="{Binding CloseDialogCommand}"
+                Style="{StaticResource AppDialogShell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Header：標題 + 副標 + X 關閉  -->
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <StackPanel Margin="0,0,40,0">
+                            <TextBlock
+                                Style="{StaticResource FormSectionTitle}"
+                                Text="{DynamicResource PortfolioGroups.Heading}" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextMuted}"
+                                Text="{DynamicResource PortfolioGroups.Subheading}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button
+                            Width="32"
+                            Height="32"
+                            Margin="0,-4,-4,0"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Command="{Binding CloseDialogCommand}"
+                            Style="{StaticResource AppIconButton}"
+                            ToolTip="{DynamicResource Common.Close}">
+                            <ds:AppIcon FontSize="13" Symbol="Dismiss24" />
+                        </Button>
+                    </Grid>
+
+                    <!--  Body：既有 PortfolioGroupsView（清單 + 新增 + add/edit 表單），繼承 PortfolioGroups DataContext  -->
+                    <groups:PortfolioGroupsView Grid.Row="1" />
+                </Grid>
+            </Border>
+        </Grid>
 
         <!--  不動產 (RealEstate) — 新增 / 編輯表單  -->
         <Grid

@@ -55,4 +55,13 @@ public static class ShellNavigationEvents
         TransactionDateFilterRequested?.Invoke(date);
         RequestNavigateTo("TransactionLog");
     }
+
+    /// <summary>
+    /// 要求開啟「投資組合管理」模態對話框（取代舊的整頁導覽）。
+    /// PortfolioGroupsViewModel 訂閱後設 IsDialogOpen = true，由 MainWindow 的
+    /// AppDialogOverlay 覆蓋顯示，關閉即回到原本頁面（不離開情境）。
+    /// </summary>
+    public static event Action? OpenPortfolioGroupsRequested;
+
+    public static void RequestOpenPortfolioGroups() => OpenPortfolioGroupsRequested?.Invoke();
 }

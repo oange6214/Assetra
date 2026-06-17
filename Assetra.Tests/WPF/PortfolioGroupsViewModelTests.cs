@@ -36,6 +36,30 @@ public sealed class PortfolioGroupsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void CloseDialog_ResetsDialogAndForm()
+    {
+        // The management page is now a shell modal: closing it must also collapse any open
+        // add/edit sub-form so re-opening starts clean.
+        _vm.IsDialogOpen = true;
+        _vm.StartAddCommand.Execute(null);
+        Assert.True(_vm.IsFormOpen);
+
+        _vm.CloseDialogCommand.Execute(null);
+
+        Assert.False(_vm.IsDialogOpen);
+        Assert.False(_vm.IsFormOpen);
+    }
+
+    [Fact]
+    public void OpenRequestEvent_OpensDialog()
+    {
+        // 取代整頁導覽：RequestOpenPortfolioGroups 觸發 → VM 設 IsDialogOpen=true（MainWindow 覆蓋顯示）。
+        Assert.False(_vm.IsDialogOpen);
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestOpenPortfolioGroups();
+        Assert.True(_vm.IsDialogOpen);
+    }
+
+    [Fact]
     public async Task LoadAsync_PopulatesSeededDefaultGroup()
     {
         await _vm.LoadAsync();

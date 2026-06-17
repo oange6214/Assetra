@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -54,6 +55,9 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
 
     public bool HasGroups => Groups.Count > 0;
 
+    /// <summary>整個「投資組合管理」對話框的開關（shell 模態，取代舊的整頁導覽）。</summary>
+    [ObservableProperty] private bool _isDialogOpen;
+
     // ── In-app confirm dialog (mirror Goals pattern) ──
     [ObservableProperty] private bool _isConfirmDialogOpen;
     [ObservableProperty] private string _confirmDialogMessage = string.Empty;
@@ -82,6 +86,8 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
         _catalog = catalog;
         Groups = new ReadOnlyObservableCollection<PortfolioGroupRowViewModel>(_groups);
         _groups.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasGroups));
+        // 開啟「投資組合管理」對話框（取代整頁導覽）。此 VM 為 app-lifetime singleton，訂閱隨 app 存活。
+        ShellNavigationEvents.OpenPortfolioGroupsRequested += () => IsDialogOpen = true;
     }
 
     private Task RefreshCatalogAsync() =>
@@ -133,6 +139,15 @@ public sealed partial class PortfolioGroupsViewModel : ObservableObject
 
     [RelayCommand]
     private void Cancel() => ResetForm();
+
+    /// <summary>關閉整個「投資組合管理」對話框（連同任何開啟的 add/edit 與確認子對話框），回到原頁。</summary>
+    [RelayCommand]
+    private void CloseDialog()
+    {
+        ResetForm();
+        IsConfirmDialogOpen = false;
+        IsDialogOpen = false;
+    }
 
     [RelayCommand]
     private async Task SaveAsync()

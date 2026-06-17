@@ -18,7 +18,7 @@
         右：可選的 add/edit 表單（IsFormOpen 控制 visibility）
         系統預設群組顯示「系統」badge 且 Delete 按鈕停用。
     -->
-    <Grid Style="{StaticResource PageRootGrid}">
+    <Grid>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -48,17 +48,6 @@
                                    Text="{DynamicResource PortfolioGroups.Add}" />
                     </StackPanel>
                 </Button>
-                <StackPanel>
-                    <TextBlock FontSize="{StaticResource Font.Size.Lg}"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource AppTextPrimary}"
-                               Text="{DynamicResource PortfolioGroups.Heading}" />
-                    <TextBlock Margin="0,4,0,0"
-                               FontSize="{StaticResource Font.Size.Xs}"
-                               Foreground="{DynamicResource AppTextMuted}"
-                               Text="{DynamicResource PortfolioGroups.Subheading}"
-                               TextWrapping="Wrap" />
-                </StackPanel>
             </DockPanel>
 
             <Grid Grid.Row="1">

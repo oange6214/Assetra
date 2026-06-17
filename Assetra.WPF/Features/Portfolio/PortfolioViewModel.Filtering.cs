@@ -58,11 +58,11 @@ public partial class PortfolioViewModel
 
     [RelayCommand]
     private void OpenPortfolioGroups() =>
-        ShellNavigationEvents.RequestNavigateTo("PortfolioGroups");
+        ShellNavigationEvents.RequestOpenPortfolioGroups();
 
     [RelayCommand]
     private void AddPortfolioGroup() =>
-        ShellNavigationEvents.RequestNavigateTo("PortfolioGroups");
+        ShellNavigationEvents.RequestOpenPortfolioGroups();
 
     /// <summary>
     /// Syncs the Google-style tab strip with the current group catalog.
