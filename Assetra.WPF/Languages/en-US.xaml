@@ -250,7 +250,7 @@
     <sys:String x:Key="Portfolio.Tab.Liability">Liabilities</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">Allocation Analysis</sys:String>
     <sys:String x:Key="Portfolio.Tab.Trades">Trade History</sys:String>
-    <sys:String x:Key="Portfolio.AddPortfolio">＋ New portfolio</sys:String>
+    <sys:String x:Key="Portfolio.AddPortfolio">Manage portfolios</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalRemaining">Remaining</sys:String>
     <sys:String x:Key="Portfolio.Liability.PaidPercent">Paid</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalLoan">Total Loan</sys:String>
@@ -323,7 +323,7 @@
     <sys:String x:Key="Portfolio.Header.MarketValue">Market Value</sys:String>
     <sys:String x:Key="Portfolio.Header.Cash">Cash</sys:String>
     <sys:String x:Key="Portfolio.Header.Liabilities">Liabilities</sys:String>
-    <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">+ Invest</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">+ New trade</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">Today</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">P&amp;L</sys:String>
@@ -409,9 +409,9 @@
     <sys:String x:Key="Portfolio.Kpi.Chip.Pnl">Win/Loss</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Chip.Daily">Daily P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Sparkline">30d trend</sys:String>
-    <sys:String x:Key="Portfolio.Watchlist.AddTitle">Add investment</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddTitle">Add instrument</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddHint">Add the symbol to your investments (quantity 0). Record actual buys later via the Buy dialog.</sys:String>
-    <sys:String x:Key="Portfolio.Watchlist.AddCommand">Invest</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand">Add instrument</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddCommand.Hint">Add a symbol to your investments now; record buys later.</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddSuccess">Added to investments</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AssetType">Type</sys:String>

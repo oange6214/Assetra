@@ -246,7 +246,7 @@
     <sys:String x:Key="Portfolio.Tab.Liability">負債</sys:String>
     <sys:String x:Key="Portfolio.Tab.Allocation">配置分析</sys:String>
     <sys:String x:Key="Portfolio.Tab.Trades">交易記錄</sys:String>
-    <sys:String x:Key="Portfolio.AddPortfolio">＋ 新增投資組合</sys:String>
+    <sys:String x:Key="Portfolio.AddPortfolio">管理組合</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalRemaining">剩餘待還</sys:String>
     <sys:String x:Key="Portfolio.Liability.PaidPercent">已繳</sys:String>
     <sys:String x:Key="Portfolio.Liability.TotalLoan">總借款</sys:String>
@@ -321,7 +321,7 @@
     <sys:String x:Key="Portfolio.Header.MarketValue">總市值</sys:String>
     <sys:String x:Key="Portfolio.Header.Cash">現金</sys:String>
     <sys:String x:Key="Portfolio.Header.Liabilities">負債</sys:String>
-    <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">＋ 投資</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">＋ 新增交易</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">損益</sys:String>
@@ -407,9 +407,9 @@
     <sys:String x:Key="Portfolio.Kpi.Chip.Pnl">盈虧檔數</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Chip.Daily">每日損益</sys:String>
     <sys:String x:Key="Portfolio.Sparkline">30 天走勢</sys:String>
-    <sys:String x:Key="Portfolio.Watchlist.AddTitle">新增投資</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddTitle">新增標的</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddHint">先把標的加入投資資產列表（數量 0），之後再透過買入交易補上交易紀錄。</sys:String>
-    <sys:String x:Key="Portfolio.Watchlist.AddCommand">投資</sys:String>
+    <sys:String x:Key="Portfolio.Watchlist.AddCommand">新增標的</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddCommand.Hint">先把標的加進投資資產，之後再透過買入交易補上紀錄</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AddSuccess">已加入投資資產</sys:String>
     <sys:String x:Key="Portfolio.Watchlist.AssetType">類型</sys:String>
