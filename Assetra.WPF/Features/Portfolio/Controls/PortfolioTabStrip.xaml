@@ -137,8 +137,8 @@
         Fix 3: AddPortfolioGroup button docked at the end of the strip.
     -->
     <Border
-        Height="40"
-        Padding="12,4,12,4"
+        Height="44"
+        Padding="12,5,12,5"
         Margin="0,0,0,6"
         BorderBrush="{DynamicResource AppBorder}"
         BorderThickness="0,0,0,0">
@@ -158,6 +158,8 @@
                 PreviewMouseWheel="OnPreviewMouseWheel">
 
                 <ListBox
+                    Padding="0"
+                    VerticalAlignment="Center"
                     Background="Transparent"
                     BorderThickness="0"
                     ItemContainerStyle="{StaticResource PortfolioTabPill}"
