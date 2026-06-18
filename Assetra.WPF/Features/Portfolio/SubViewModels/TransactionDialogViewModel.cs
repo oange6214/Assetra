@@ -1285,6 +1285,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsCashDiv => TxType == "cashDiv";
     public bool TxTypeIsStockDiv => TxType == "stockDiv";
     public bool TxTypeIsCashFlow => TxType is "deposit" or "withdrawal";
+    /// <summary>True 僅當「提款」（支出）。分類欄只在提款顯示；「存入」是把外部資金搬入、非收支，不分類。</summary>
+    public bool TxTypeIsWithdrawal => TxType == "withdrawal";
     public bool TxTypeIsLoan => TxType is "loanBorrow" or "loanRepay";
     public bool TxTypeIsLoanBorrow => TxType == "loanBorrow";
     public bool TxTypeIsLoanRepay => TxType == "loanRepay";
@@ -1642,6 +1644,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypeIsCashDiv));
         OnPropertyChanged(nameof(TxTypeIsStockDiv));
         OnPropertyChanged(nameof(TxTypeIsCashFlow));
+        OnPropertyChanged(nameof(TxTypeIsWithdrawal));
         OnPropertyChanged(nameof(TxTypeIsLoan));
         OnPropertyChanged(nameof(TxTypeIsLoanBorrow));
         OnPropertyChanged(nameof(TxTypeIsLoanRepay));

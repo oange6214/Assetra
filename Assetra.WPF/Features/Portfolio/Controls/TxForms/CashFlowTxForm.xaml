@@ -52,20 +52,21 @@
             single source)，per-type 不再重複出現。
         -->
 
-        <!--  分類（P1 收支管理）— 依方向自動切換：提款=支出分類、存入=收入分類。
-              綁 CashFlowCategories（VM 依 TxType 切 Income/Expense）；之前誤綁 ExpenseCategories
-              → 「存入」時也跳出「其他支出」等支出分類，與類型矛盾。  -->
-        <TextBlock
-            Margin="0,12,0,4"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Categories.Rule.CategoryHint}" />
-        <ComboBox
-            DisplayMemberPath="Name"
-            ItemsSource="{Binding CashFlowCategories}"
-            SelectedValue="{Binding TxCategoryId, Mode=TwoWay}"
-            SelectedValuePath="Id"
-            Style="{StaticResource FormComboBox}" />
+        <!--  分類（P1 收支管理）— 只在「提款」（支出）顯示支出分類；「存入」是把外部資金搬入、
+              非收入非支出，不分類（與轉帳同性質）。故整塊綁 TxTypeIsWithdrawal 控制顯隱。  -->
+        <StackPanel Visibility="{Binding TxTypeIsWithdrawal, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock
+                Margin="0,12,0,4"
+                FontSize="{StaticResource Font.Size.Xs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{DynamicResource Categories.Rule.CategoryHint}" />
+            <ComboBox
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding ExpenseCategories}"
+                SelectedValue="{Binding TxCategoryId, Mode=TwoWay}"
+                SelectedValuePath="Id"
+                Style="{StaticResource FormComboBox}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -830,6 +830,20 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public void TxTypeIsWithdrawal_TrueOnlyForWithdrawal_GatesCategoryVisibility()
+    {
+        // WHY: CashFlowTxForm 的分類欄綁 TxTypeIsWithdrawal 控制顯隱 —— 只有「提款」（支出）顯示
+        // 支出分類；「存入」是把外部資金搬入、非收入非支出（與轉帳同性質），不顯示分類。
+        var vm = CreateVm();
+        vm.TxType = "withdrawal";
+        Assert.True(vm.TxTypeIsWithdrawal);
+        vm.TxType = "deposit";
+        Assert.False(vm.TxTypeIsWithdrawal);
+        vm.TxType = "income";
+        Assert.False(vm.TxTypeIsWithdrawal);
+    }
+
+    [Fact]
     public void TxType_CreditCardChargeAndPayment_BothMapToTxTypeIsCreditCard()
     {
         var vm = CreateVm();

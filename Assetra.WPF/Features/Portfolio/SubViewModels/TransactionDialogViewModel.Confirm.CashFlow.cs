@@ -68,7 +68,8 @@ public partial class TransactionDialogViewModel
             accountName,
             cleanNote,
             fee,
-            TxCategoryId));
+            // 「存入」不分類（外部資金搬入、非收支）；只有「提款」帶支出分類。
+            type == TradeType.Deposit ? null : TxCategoryId));
 
         await AfterTxSuccessAsync();
     }
