@@ -169,7 +169,6 @@
     <sys:String x:Key="Portfolio.History.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.Shares">數量</sys:String>
-    <sys:String x:Key="Portfolio.PositionCol">部位</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">成本均價</sys:String>
     <!--  P5.11 — 「.Native」keys 不再加（原幣）尾綴：col 內已有 NT$/US$ 等資料符號 + 獨立「幣別」欄表達幣別，header 重複標示反而冗餘。  -->
     <sys:String x:Key="Portfolio.CostPerShare.Native">成本均價</sys:String>

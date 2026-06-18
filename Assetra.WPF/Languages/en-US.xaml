@@ -173,7 +173,6 @@
     <sys:String x:Key="Portfolio.History.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.Symbol">Symbol</sys:String>
     <sys:String x:Key="Portfolio.Shares">Qty</sys:String>
-    <sys:String x:Key="Portfolio.PositionCol">Position</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">Avg Cost</sys:String>
     <!--  P5.11 — .Native keys no longer carry "(native)" suffix; the cell already shows the currency symbol and there is a dedicated Currency column.  -->
     <sys:String x:Key="Portfolio.CostPerShare.Native">Avg Cost</sys:String>
