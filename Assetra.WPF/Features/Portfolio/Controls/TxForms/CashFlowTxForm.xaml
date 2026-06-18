@@ -52,7 +52,9 @@
             single source)，per-type 不再重複出現。
         -->
 
-        <!--  分類（P1 收支管理）— 提款 / 信用卡消費等支出時可分類  -->
+        <!--  分類（P1 收支管理）— 依方向自動切換：提款=支出分類、存入=收入分類。
+              綁 CashFlowCategories（VM 依 TxType 切 Income/Expense）；之前誤綁 ExpenseCategories
+              → 「存入」時也跳出「其他支出」等支出分類，與類型矛盾。  -->
         <TextBlock
             Margin="0,12,0,4"
             FontSize="{StaticResource Font.Size.Xs}"
@@ -61,7 +63,7 @@
             Text="{DynamicResource Categories.Rule.CategoryHint}" />
         <ComboBox
             DisplayMemberPath="Name"
-            ItemsSource="{Binding ExpenseCategories}"
+            ItemsSource="{Binding CashFlowCategories}"
             SelectedValue="{Binding TxCategoryId, Mode=TwoWay}"
             SelectedValuePath="Id"
             Style="{StaticResource FormComboBox}" />
