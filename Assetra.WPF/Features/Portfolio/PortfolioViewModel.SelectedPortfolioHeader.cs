@@ -42,7 +42,9 @@ public partial class PortfolioViewModel
     /// 上方概覽（走勢圖＋投資組合焦點卡＋insights chip）展開狀態。預設展開；
     /// 收合後只留頭條（市值／損益・成本／今日漲跌），讓下方持股表格成為主角。
     /// </summary>
-    [ObservableProperty] private bool _isOverviewExpanded = true;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsHeaderSparklineVisible))]
+    private bool _isOverviewExpanded = true;
 
     // ── Trend: portfolio tab — fixed-window sparkline-based trend ────────────────────
     // Null when there is no data (fewer than 2 points across all holdings in the group).
@@ -50,6 +52,19 @@ public partial class PortfolioViewModel
     [ObservableProperty] private ISeries[]? _selectedPortfolioTrendSeries;
     [ObservableProperty] private ICartesianAxis[]? _selectedPortfolioTrendXAxes;
     [ObservableProperty] private ICartesianAxis[]? _selectedPortfolioTrendYAxes;
+
+    // ── Header mini sparkline — always-available short-window trend for the top card ──
+    // 用獨立 series 實例（不與 SelectedPortfolioTrendSeries / History 共用），避免 LiveCharts
+    // 同一 series 被兩個 chart 綁定的狀態衝突。只在「概覽」收合時顯示（展開時下方已有大圖）。
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsHeaderSparklineVisible))]
+    private ISeries[]? _headerSparklineSeries;
+    [ObservableProperty] private ICartesianAxis[]? _headerSparklineXAxes;
+    [ObservableProperty] private ICartesianAxis[]? _headerSparklineYAxes;
+
+    /// <summary>頂部卡片 mini 走勢線：有資料（≥2 點）且「概覽」收合時才顯示。</summary>
+    public bool IsHeaderSparklineVisible =>
+        _headerSparklineSeries is { Length: > 0 } && !IsOverviewExpanded;
 
     /// <summary>
     /// True only when a specific portfolio tab is selected AND the trend has ≥ 2 points.
@@ -141,6 +156,9 @@ public partial class PortfolioViewModel
             SelectedPortfolioTrendXAxes = null;
             SelectedPortfolioTrendYAxes = null;
 
+            // 全部 tab: header mini sparkline = whole-portfolio short-window trend.
+            SetHeaderSparkline(PortfolioGroupDetailViewModel.BuildMarketValueTrendPublic(Positions.ToList()));
+
             // 全部 tab: composition over every position.
             Composition.Apply(Positions
                 .Select(row => (row.AssetType == AssetType.Etf || row.IsEtf, row.MarketValueBase))
@@ -182,6 +200,9 @@ public partial class PortfolioViewModel
             SelectedPortfolioTrendXAxes = xAxes.Length > 0 ? xAxes : null;
             SelectedPortfolioTrendYAxes = yAxes.Length > 0 ? yAxes : null;
 
+            // Header mini sparkline = same trend values, separate series instance.
+            SetHeaderSparkline(trendValues);
+
             // Portfolio tab: composition over the same filtered rows.
             // Effective ETF flag: row.AssetType == AssetType.Etf || row.IsEtf
             // (TW ETFs are stored as AssetType.Stock + IsEtf=true by the buy flow).
@@ -198,4 +219,23 @@ public partial class PortfolioViewModel
 
     private static decimal DisplayAmount(decimal nativeAmount, decimal baseAmount) =>
         baseAmount != 0m ? baseAmount : nativeAmount;
+
+    /// <summary>建頂部 mini 走勢線的獨立 series（&lt;2 點時清空）。漲跌色沿用既有 builder。</summary>
+    private void SetHeaderSparkline(IReadOnlyList<double> values)
+    {
+        if (values.Count < 2)
+        {
+            HeaderSparklineSeries = null;
+            HeaderSparklineXAxes = null;
+            HeaderSparklineYAxes = null;
+            return;
+        }
+
+        var isPositive = values[^1] >= values[0];
+        var (series, xAxes, yAxes) =
+            PortfolioGroupDetailViewModel.BuildMarketValueTrendChartPublic(values, isPositive);
+        HeaderSparklineSeries = series.Length > 0 ? series : null;
+        HeaderSparklineXAxes = xAxes.Length > 0 ? xAxes : null;
+        HeaderSparklineYAxes = yAxes.Length > 0 ? yAxes : null;
+    }
 }

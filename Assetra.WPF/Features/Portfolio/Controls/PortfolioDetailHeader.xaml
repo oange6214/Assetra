@@ -171,6 +171,17 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
+                    <!--  v4 頂部 mini 走勢線：概覽收合時顯示短期走勢（展開時下方已有大圖，故不重複）。  -->
+                    <lvc:CartesianChart
+                        Width="150"
+                        Height="34"
+                        Margin="0,8,0,0"
+                        Background="Transparent"
+                        Series="{Binding HeaderSparklineSeries}"
+                        TooltipPosition="Hidden"
+                        Visibility="{Binding IsHeaderSparklineVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        XAxes="{Binding HeaderSparklineXAxes}"
+                        YAxes="{Binding HeaderSparklineYAxes}" />
                 </StackPanel>
             </Grid>
 
