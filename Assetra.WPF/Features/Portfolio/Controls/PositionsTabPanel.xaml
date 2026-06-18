@@ -1122,11 +1122,13 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
+                                <!--  v4 視覺層級：數量為「參考」欄 → 轉淡（AppTextMuted），讓現價/損益/市值的決策數字突出。  -->
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource Font.Family.Base}"
                                     FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextMuted}"
                                     Text="{Binding QuantityDisplay}"
                                     Typography.NumeralAlignment="Tabular" />
                             </DataTemplate>
@@ -1146,10 +1148,12 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <!--  v4 視覺層級：成本均價為「參考」欄 → 轉淡。  -->
                                     <TextBlock
                                         HorizontalAlignment="Right"
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextMuted}"
                                         Text="{Binding BuyPriceAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=price}"
                                         Typography.NumeralAlignment="Tabular" />
                                     <TextBlock
@@ -1178,11 +1182,12 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <!--  v4 視覺層級：付出成本為「參考」欄 → 轉淡。  -->
                                     <TextBlock
                                         HorizontalAlignment="Right"
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Sm}"
-                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Foreground="{DynamicResource AppTextMuted}"
                                         Text="{Binding CostAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=amount}"
                                         Typography.NumeralAlignment="Tabular" />
                                     <TextBlock
@@ -1304,10 +1309,11 @@
                             <DataTemplate>
                                 <Grid ToolTip="{DynamicResource Portfolio.PnL.NetTooltip}" ToolTipService.InitialShowDelay="500">
                                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <!--  v4 視覺層級：淨損益＝整列主角 → 字級放大（Md）、加粗、依漲跌上色。  -->
                                         <TextBlock
                                             HorizontalAlignment="Right"
                                             FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontSize="{StaticResource Font.Size.Md}"
                                             FontWeight="SemiBold"
                                             Text="{Binding PnlAsMoney, Converter={StaticResource CurrencyConverter}, ConverterParameter=signed}"
                                             Typography.NumeralAlignment="Tabular">
