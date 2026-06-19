@@ -11,6 +11,13 @@
     <PackageVersion Include="System.Reactive" Version="6.1.0" />
     <!-- Assetra.Infrastructure -->
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+    <!--
+      SQLitePCLRaw: Microsoft.Data.Sqlite 10.0.x still transitively pulls the native
+      bundle 2.1.11, flagged by NuGet audit (NU1903 / GHSA-2m69-gcr7-jv3q — SQLite high-
+      severity advisory). Explicitly pin the patched 3.x line (bundles SQLite 3.50.3).
+      Remove this pin once Microsoft.Data.Sqlite ships a transitive ref to SQLitePCLRaw 3.x.
+    -->
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.6" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
