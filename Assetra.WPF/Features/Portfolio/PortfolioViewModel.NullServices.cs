@@ -284,8 +284,8 @@ public partial class PortfolioViewModel
 
     private sealed class NullTradeMetadataWorkflowService : ITradeMetadataWorkflowService
     {
-        public Task<bool> UpdateAsync(TradeMetadataUpdateRequest request, CancellationToken ct = default) =>
-            Task.FromResult(false);
+        public Task<TradeMetadataUpdateResult> UpdateAsync(TradeMetadataUpdateRequest request, CancellationToken ct = default) =>
+            Task.FromResult(TradeMetadataUpdateResult.NotFound);
     }
 
     private sealed class NullPositionMetadataWorkflowService : IPositionMetadataWorkflowService

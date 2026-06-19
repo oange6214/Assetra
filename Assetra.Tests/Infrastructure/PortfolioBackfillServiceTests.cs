@@ -174,6 +174,9 @@ public sealed class PortfolioBackfillServiceTests
         public Task<IReadOnlyList<PortfolioPositionLog>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult(_logs);
 
+        public Task UpdateLogDateAsync(Guid logId, DateOnly newDate, CancellationToken ct = default) =>
+            Task.CompletedTask;
+
         public Task<bool> HasAnyAsync(CancellationToken ct = default) =>
             Task.FromResult(_logs.Count > 0);
 

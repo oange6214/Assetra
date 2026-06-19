@@ -4,7 +4,7 @@ namespace Assetra.Application.Portfolio.Contracts;
 
 public interface ITradeMetadataWorkflowService
 {
-    Task<bool> UpdateAsync(
+    Task<TradeMetadataUpdateResult> UpdateAsync(
         TradeMetadataUpdateRequest request,
         CancellationToken ct = default);
 }

@@ -87,6 +87,21 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
         return results;
     }
 
+    public async Task UpdateLogDateAsync(Guid logId, DateOnly newDate, CancellationToken ct = default)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE portfolio_position_log
+            SET    log_date = $ld
+            WHERE  log_id = $lid;
+            """;
+        cmd.Parameters.AddWithValue("$ld", newDate.ToString("yyyy-MM-dd"));
+        cmd.Parameters.AddWithValue("$lid", logId.ToString());
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+
     public async Task<bool> HasAnyAsync(CancellationToken ct = default)
     {
         await using var conn = new SqliteConnection(_connectionString);

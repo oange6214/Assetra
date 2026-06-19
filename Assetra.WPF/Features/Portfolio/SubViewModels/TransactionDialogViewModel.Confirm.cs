@@ -273,12 +273,21 @@ public partial class TransactionDialogViewModel
     {
         try
         {
-            var updated = await _tradeMetadataWorkflowService.UpdateAsync(new TradeMetadataUpdateRequest(
+            var result = await _tradeMetadataWorkflowService.UpdateAsync(new TradeMetadataUpdateRequest(
                     oldRow.Id,
                     DateTime.SpecifyKind(TxDate, DateTimeKind.Local).ToUniversalTime(),
                     string.IsNullOrWhiteSpace(TxNote) ? null : TxNote))
                 .ConfigureAwait(true);
-            if (!updated)
+            if (result == TradeMetadataUpdateResult.BlockedByPositionLog)
+            {
+                // Editing the date would desync this position's quantity history (same-day
+                // duplicate rows, or the move crosses another buy/sell). Refuse loudly and
+                // point the user at delete-then-re-enter rather than corrupting history.
+                TxError = L("Portfolio.Trade.MetaUpdateBlockedLog",
+                    "此筆是持倉交易，改日期會讓持倉歷史對不上（可能同日多筆，或跨越了其他買賣）。請改用「刪除後以正確日期重新輸入」。");
+                return;
+            }
+            if (result != TradeMetadataUpdateResult.Updated)
             {
                 // L2: previously returned silently — dialog stayed open with no
                 // visible feedback. Surface a localized "update failed" hint so

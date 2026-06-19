@@ -746,7 +746,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 : null),
             PositionMetadata = services.PositionMetadata ?? new PositionMetadataWorkflowService(repositories.Portfolio),
             TradeMetadata = services.TradeMetadata ?? (repositories.Trade is not null
-                ? new TradeMetadataWorkflowService(repositories.Trade)
+                ? new TradeMetadataWorkflowService(repositories.Trade, repositories.Log)
                 : null),
         };
     }

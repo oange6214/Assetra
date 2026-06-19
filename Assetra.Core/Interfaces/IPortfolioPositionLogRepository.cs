@@ -13,6 +13,13 @@ public interface IPortfolioPositionLogRepository
     /// <summary>Returns all log entries ordered by <see cref="PortfolioPositionLog.LogDate"/> ascending.</summary>
     Task<IReadOnlyList<PortfolioPositionLog>> GetAllAsync(CancellationToken ct = default);
 
+    /// <summary>
+    /// Moves a single existing entry (matched by <see cref="PortfolioPositionLog.LogId"/>) to
+    /// <paramref name="newDate"/>. Used to keep the position log in sync when a trade's date is
+    /// edited. No-op if the id doesn't exist.
+    /// </summary>
+    Task UpdateLogDateAsync(Guid logId, DateOnly newDate, CancellationToken ct = default);
+
     /// <summary>True when at least one log entry exists (used for migration detection).</summary>
     Task<bool> HasAnyAsync(CancellationToken ct = default);
 }

@@ -125,7 +125,8 @@ internal static class PortfolioServiceCollectionExtensions
                 sp.GetRequiredService<ILoanScheduleRepository>()));
         services.AddSingleton<ITradeMetadataWorkflowService>(sp =>
             new TradeMetadataWorkflowService(
-                sp.GetRequiredService<ITradeRepository>()));
+                sp.GetRequiredService<ITradeRepository>(),
+                sp.GetRequiredService<IPortfolioPositionLogRepository>()));
         services.AddSingleton<ISellWorkflowService>(sp =>
             new SellWorkflowService(
                 sp.GetRequiredService<ITradeRepository>(),

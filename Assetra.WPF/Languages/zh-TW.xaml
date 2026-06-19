@@ -1001,6 +1001,7 @@
     <sys:String x:Key="Portfolio.Trade.OldDeleteFailed">舊交易記錄刪除失敗，資料庫可能存在重複筆數，建議重新整理或重啟應用程式</sys:String>
     <sys:String x:Key="Portfolio.Trade.DeleteBlockedBySell">請先刪除此股票的賣出記錄，再刪除（或修改）此買入記錄。</sys:String>
     <sys:String x:Key="Portfolio.Trade.MetaUpdateFailed">更新失敗，找不到此筆記錄或記錄已被修改。請關閉後重試。</sys:String>
+    <sys:String x:Key="Portfolio.Trade.MetaUpdateBlockedLog">此筆是持倉交易，改日期會讓持倉歷史對不上（可能同日多筆，或跨越了其他買賣）。請改用「刪除後以正確日期重新輸入」。</sys:String>
     <sys:String x:Key="Portfolio.Trade.MetaUpdateError">更新失敗：{0}</sys:String>
     <sys:String x:Key="AddAsset.ClosePrice.FetchFailed">收盤價查詢失敗，請手動輸入</sys:String>
 

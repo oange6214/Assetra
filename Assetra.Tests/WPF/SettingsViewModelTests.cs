@@ -439,6 +439,8 @@ public class SettingsViewModelTests
 
         public Task<IReadOnlyList<PortfolioPositionLog>> GetAllAsync(CancellationToken ct = default) =>
             Task.FromResult(_logs);
+        public Task UpdateLogDateAsync(Guid logId, DateOnly newDate, CancellationToken ct = default) =>
+            Task.CompletedTask;
         public Task<bool> HasAnyAsync(CancellationToken ct = default) => Task.FromResult(_logs.Count > 0);
         public Task LogAsync(PortfolioPositionLog entry, CancellationToken ct = default) => Task.CompletedTask;
         public Task LogBatchAsync(IEnumerable<PortfolioPositionLog> entries, CancellationToken ct = default) =>
