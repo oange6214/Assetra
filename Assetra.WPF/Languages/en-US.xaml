@@ -1192,8 +1192,8 @@
     <!-- P4.1d — FX history refresh -->
     <sys:String x:Key="Settings.FxHistory.SectionTitle">FX History</sys:String>
     <sys:String x:Key="Settings.FxHistory.SectionHint">Historical FX rates are pulled automatically at startup. Trigger a refresh manually when reports show "missing FX data".</sys:String>
-    <sys:String x:Key="Settings.FxHistory.RefreshNow">Refresh (7 days)</sys:String>
-    <sys:String x:Key="Settings.FxHistory.DeepBackfill">Deep backfill (1 year)</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshNow">FX: Refresh (7 days)</sys:String>
+    <sys:String x:Key="Settings.FxHistory.DeepBackfill">FX: Deep backfill (1 year)</sys:String>
     <sys:String x:Key="Settings.FxHistory.DeepBackfillHint">Pulls 365 days of historical FX in one go. Useful for long-horizon reports. First run may take 30-60 seconds.</sys:String>
     <sys:String x:Key="Settings.FxHistory.NeverRefreshed">Never refreshed</sys:String>
     <sys:String x:Key="Settings.FxHistory.LastRefreshedFormat">Last refreshed: {0:yyyy-MM-dd HH:mm}</sys:String>

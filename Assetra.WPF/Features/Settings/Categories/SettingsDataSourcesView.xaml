@@ -65,39 +65,6 @@
                         Style="{StaticResource AppSecondaryButton}" />
                 </StackPanel>
 
-                <!--  P4.1d — FX History (historical FX backfill — distinct from the live FX rate refresh above)  -->
-                <StackPanel Margin="0,16,0,0">
-                    <TextBlock
-                        Foreground="{DynamicResource AppTextPrimary}"
-                        FontWeight="SemiBold"
-                        Text="{DynamicResource Settings.FxHistory.SectionTitle}" />
-                    <TextBlock
-                        Margin="0,4,0,8"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Settings.FxHistory.SectionHint}"
-                        TextWrapping="Wrap" />
-                    <TextBlock
-                        Margin="0,0,0,8"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{Binding LastFxHistoryRefreshDisplay}" />
-                    <StackPanel Orientation="Horizontal">
-                        <Button
-                            Margin="0,0,8,0"
-                            Command="{Binding RefreshFxHistoryCommand}"
-                            Content="{DynamicResource Settings.FxHistory.RefreshNow}"
-                            IsEnabled="{Binding CanRefreshFxHistory}"
-                            Style="{StaticResource AppSecondaryButton}" />
-                        <Button
-                            Command="{Binding RefreshFxHistoryDeepCommand}"
-                            Content="{DynamicResource Settings.FxHistory.DeepBackfill}"
-                            IsEnabled="{Binding CanRefreshFxHistory}"
-                            Style="{StaticResource AppSecondaryButton}"
-                            ToolTip="{DynamicResource Settings.FxHistory.DeepBackfillHint}" />
-                    </StackPanel>
-                </StackPanel>
-
                 <StackPanel Margin="0,16,0,0">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock

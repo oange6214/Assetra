@@ -1196,8 +1196,8 @@
     <!--  P4.1d — FX history refresh (historical FX backfill, distinct from live FX)  -->
     <sys:String x:Key="Settings.FxHistory.SectionTitle">匯率歷史</sys:String>
     <sys:String x:Key="Settings.FxHistory.SectionHint">每次啟動自動拉過去 7 天的歷史匯率到本機；當報表顯示「匯率資料缺失」時可手動觸發更新。</sys:String>
-    <sys:String x:Key="Settings.FxHistory.RefreshNow">立即更新 (7 天)</sys:String>
-    <sys:String x:Key="Settings.FxHistory.DeepBackfill">深度回填 (1 年)</sys:String>
+    <sys:String x:Key="Settings.FxHistory.RefreshNow">匯率：立即更新 (7 天)</sys:String>
+    <sys:String x:Key="Settings.FxHistory.DeepBackfill">匯率：深度回填 (1 年)</sys:String>
     <sys:String x:Key="Settings.FxHistory.DeepBackfillHint">一次拉過去 365 天的歷史匯率，適合需要長期趨勢報表的使用者。第一次跑可能需要 30-60 秒。</sys:String>
     <sys:String x:Key="Settings.FxHistory.NeverRefreshed">尚未更新過</sys:String>
     <sys:String x:Key="Settings.FxHistory.LastRefreshedFormat">上次更新：{0:yyyy-MM-dd HH:mm}</sys:String>

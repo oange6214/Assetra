@@ -45,6 +45,39 @@
                         Text="{Binding AppVersion}" />
                 </StackPanel>
 
+                <!--  匯率歷史回填——由「資料來源」搬到此，與快照重建同屬「對本機歷史資料的回填/重建動作」。  -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        FontWeight="SemiBold"
+                        Text="{DynamicResource Settings.FxHistory.SectionTitle}" />
+                    <TextBlock
+                        Margin="0,4,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.FxHistory.SectionHint}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{Binding LastFxHistoryRefreshDisplay}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,8,0"
+                            Command="{Binding RefreshFxHistoryCommand}"
+                            Content="{DynamicResource Settings.FxHistory.RefreshNow}"
+                            IsEnabled="{Binding CanRefreshFxHistory}"
+                            Style="{StaticResource AppSecondaryButton}" />
+                        <Button
+                            Command="{Binding RefreshFxHistoryDeepCommand}"
+                            Content="{DynamicResource Settings.FxHistory.DeepBackfill}"
+                            IsEnabled="{Binding CanRefreshFxHistory}"
+                            Style="{StaticResource AppSecondaryButton}"
+                            ToolTip="{DynamicResource Settings.FxHistory.DeepBackfillHint}" />
+                    </StackPanel>
+                </StackPanel>
+
                 <!--  B Stage 2 — 重建快照歷史（dry-run 預覽 → 確認後自動備份再寫入）  -->
                 <StackPanel>
                     <TextBlock
