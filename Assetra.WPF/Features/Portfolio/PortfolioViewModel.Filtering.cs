@@ -84,10 +84,14 @@ public partial class PortfolioViewModel
             dispatcher.Invoke(SyncPortfolioTabs);
             return;
         }
+        // 「未指定組合」分頁只在真的有未分組持股時才顯示（空桶不常駐成雜訊）。
+        var hasUngrouped = Positions.Any(p =>
+            (p.PortfolioGroupId ?? PortfolioGroup.DefaultId) == PortfolioGroup.DefaultId);
         PortfolioTabs.Sync(
             GroupCatalog?.Groups ?? Enumerable.Empty<PortfolioGroup>(),
             L("Common.All", "全部"),
-            L("Portfolio.Group.Ungrouped", "未指定組合"));
+            L("Portfolio.Group.Ungrouped", "未指定組合"),
+            hasUngrouped);
     }
 
     /// <summary>

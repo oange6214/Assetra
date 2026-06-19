@@ -350,14 +350,35 @@ public class PortfolioViewModelTests
 
         await vm.LoadAsync();
 
-        // Tab strip: 全部 + 未指定組合 + 長期投資 + 現金流
-        Assert.Equal(4, vm.PortfolioTabs.Tabs.Count);
+        // Tab strip: 全部 + 長期投資 + 現金流。唯一持股已分組（longTermId）→「未指定組合」空桶
+        // 不顯示（conditional ungrouped tab）。
+        Assert.Equal(3, vm.PortfolioTabs.Tabs.Count);
         Assert.Contains(vm.PortfolioTabs.Tabs, t => t.IsAll);
-        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == PortfolioGroup.DefaultId);
+        Assert.DoesNotContain(vm.PortfolioTabs.Tabs, t => t.GroupId == PortfolioGroup.DefaultId);
         Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == longTermId);
         Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == incomeId);
         // SelectedTab defaults to 全部
         Assert.True(vm.PortfolioTabs.SelectedTab?.IsAll ?? false);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithUngroupedPosition_ShowsUngroupedTab()
+    {
+        // WHY: the「未指定組合」tab must appear exactly when an ungrouped position exists —
+        // exercises ApplyPositions → SyncPortfolioTabs computing hasUngrouped from positions.
+        var longTermId = Guid.NewGuid();
+        var catalog = new PortfolioGroupCatalog(new FakePortfolioGroupRepo([
+            new PortfolioGroup(PortfolioGroup.DefaultId, "預設", IsSystem: true),
+            new PortfolioGroup(longTermId, "長期投資"),
+        ]));
+        var grouped = new PortfolioEntry(Guid.NewGuid(), "0056", "TWSE", PortfolioGroupId: longTermId);
+        var ungrouped = new PortfolioEntry(Guid.NewGuid(), "2330", "TWSE"); // PortfolioGroupId 省略 → 未分組
+        var snapshots = SnapshotsFor([(grouped, 35m, 1000), (ungrouped, 600m, 100)]);
+        var (vm, _) = CreateVm([grouped, ungrouped], PositionQueryMock(snapshots).Object, catalog);
+
+        await vm.LoadAsync();
+
+        Assert.Contains(vm.PortfolioTabs.Tabs, t => t.GroupId == PortfolioGroup.DefaultId);
     }
 
     [Fact]

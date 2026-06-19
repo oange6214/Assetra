@@ -22,23 +22,30 @@ public sealed partial class PortfolioTabsViewModel : ObservableObject
     public Guid? SelectedGroupId => SelectedTab?.GroupId;
 
     public PortfolioTabsViewModel(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel)
-        => Rebuild(groups, allLabel, ungroupedLabel, keepSelection: null);
+        => Rebuild(groups, allLabel, ungroupedLabel, showUngrouped: false, keepSelection: null);
 
     partial void OnSelectedTabChanged(PortfolioTabViewModel? value) =>
         OnPropertyChanged(nameof(SelectedGroupId));
 
-    /// <summary>Rebuilds from the latest catalog, preserving the selection by GroupId.</summary>
-    public void Sync(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel)
-        => Rebuild(groups, allLabel, ungroupedLabel, keepSelection: SelectedGroupId);
+    /// <summary>
+    /// Rebuilds from the latest catalog, preserving the selection by GroupId.
+    /// <paramref name="showUngrouped"/> controls whether the「未指定組合」tab is offered — it
+    /// should appear only when ungrouped positions actually exist, otherwise it is an empty
+    /// bucket cluttering the strip.
+    /// </summary>
+    public void Sync(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel, bool showUngrouped)
+        => Rebuild(groups, allLabel, ungroupedLabel, showUngrouped, keepSelection: SelectedGroupId);
 
-    private void Rebuild(IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel, Guid? keepSelection)
+    private void Rebuild(
+        IEnumerable<PortfolioGroup> groups, string allLabel, string ungroupedLabel, bool showUngrouped, Guid? keepSelection)
     {
         var users = groups.Where(g => !g.IsSystem).ToList();
         Tabs.Clear();
         Tabs.Add(new PortfolioTabViewModel { IsAll = true, Name = allLabel });
         if (users.Count > 0)
         {
-            Tabs.Add(new PortfolioTabViewModel { GroupId = PortfolioGroup.DefaultId, Name = ungroupedLabel });
+            if (showUngrouped)
+                Tabs.Add(new PortfolioTabViewModel { GroupId = PortfolioGroup.DefaultId, Name = ungroupedLabel });
             foreach (var g in users)
                 Tabs.Add(new PortfolioTabViewModel { GroupId = g.Id, Name = g.Name, ColorHex = g.ColorHex });
         }

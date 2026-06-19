@@ -919,6 +919,9 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                        .Select(e => new SubViewModels.TransactionDialogViewModel.PositionSuggestion(
                            e.Id, e.Symbol, e.Exchange, e.DisplayName)));
         }
+
+        // 持股載入完成 → 重算分頁：「未指定組合」是否顯示取決於是否有未分組持股。
+        SyncPortfolioTabs();
     }
 
     private string ResolvePositionGroupDisplay(Guid? groupId, bool hasGroupConflict)
