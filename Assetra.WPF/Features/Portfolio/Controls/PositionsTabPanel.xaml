@@ -126,12 +126,7 @@
         <!--  ═══ Row 1: Per-portfolio detail header (Task 1.4) ═══  -->
         <portfolio:PortfolioDetailHeader Grid.Row="1" />
 
-        <!--  ═══ Row 2: Stock vs ETF composition focus card (Task 1.5 — placed here in Task 1.6) ═══  -->
-        <portfolio:PortfolioCompositionCard
-            Grid.Row="2"
-            Margin="12,10,12,0"
-            DataContext="{Binding Composition}"
-            Visibility="{Binding ElementName=Root, Path=DataContext.IsOverviewExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <!--  ═══ Row 2: (移除) 投資組合焦點卡 — 與「持股佔比」重複，UX 精簡時拿掉；保留空 row 不重編號 ═══  -->
 
         <!--
             ═══ Row 3: Investment Summary ═══
@@ -178,24 +173,6 @@
                     <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsKpiCostExpanded}" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
-                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <!--  盈虧檔數  -->
-            <Button
-                Command="{Binding ToggleKpiPanelCommand}"
-                CommandParameter="pnl"
-                Content="{DynamicResource Portfolio.Kpi.Chip.Pnl}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsKpiPnlExpanded}" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource AppAccent}" />
                                 <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
                                 <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
@@ -435,101 +412,7 @@
                     </Grid>
                 </Grid>
 
-                <!--  盈虧檔數 pie（賺 / 賠 / 平 三色）  -->
-                <Grid Visibility="{Binding IsKpiPnlExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <DockPanel
-                        Grid.Row="0"
-                        Margin="0,0,0,8"
-                        LastChildFill="False">
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Sm}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Portfolio.Kpi.PnlBreakdownTitle}" />
-                        <Button
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="pnl"
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource PanelCloseButton}"
-                            ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon
-                                FontSize="11"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Symbol="Dismiss24" />
-                        </Button>
-                    </DockPanel>
-                    <Grid Grid.Row="1" Height="160">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <lvc:PieChart
-                            Grid.Column="0"
-                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                            Background="Transparent"
-                            InitialRotation="-90"
-                            LegendPosition="Hidden"
-                            Series="{Binding PnlBreakdownSeries}"
-                            TooltipPosition="Center"
-                            TooltipTextSize="11" />
-                        <ItemsControl
-                            Grid.Column="1"
-                            Margin="16,4,0,0"
-                            VerticalAlignment="Center"
-                            ItemsSource="{Binding PnlBreakdownSlices}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="10" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse
-                                            Grid.Column="0"
-                                            Width="10"
-                                            Height="10"
-                                            VerticalAlignment="Center">
-                                            <Ellipse.Fill>
-                                                <SolidColorBrush Color="{Binding ColorHex}" />
-                                            </Ellipse.Fill>
-                                        </Ellipse>
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="8,0,12,0"
-                                            VerticalAlignment="Center"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{Binding Label}" />
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            Margin="0,0,8,0"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Percent, StringFormat={}{0:F1}%}"
-                                            Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock
-                                            Grid.Column="3"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Value, StringFormat='NT\${0:N0}'}"
-                                            Typography.NumeralAlignment="Tabular" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Grid>
-                </Grid>
+                <!--  (移除) 盈虧檔數 pie — UX 精簡；資訊改由 footer「獲利/虧損」呈現  -->
 
                 <!--  每日 PnL 柱狀圖（7/30/90 天可切換）  -->
                 <Grid Visibility="{Binding IsKpiDayChangeExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -806,6 +689,30 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel>
+                                <DockPanel>
+                                    <Grid
+                                        Width="30"
+                                        Height="30"
+                                        Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        DockPanel.Dock="Left">
+                                        <Ellipse Opacity="0.18">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding AssetAccentColor}" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Sm}"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding AssetInitial}">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{Binding AssetAccentColor}" />
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Grid>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -862,6 +769,7 @@
                                         Text="{Binding Name}"
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
+                                </DockPanel>
 
                                 <Border
                                     Margin="0,10,0,0"
@@ -1064,13 +972,38 @@
                             <DataTemplate>
                                 <Grid VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="34" />
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock
+                                    <!--  資產 logo 圓點：色點＋首字（色由 Symbol hash 決定，深淺主題自動套色）  -->
+                                    <Grid
                                         Grid.Column="0"
+                                        Width="28"
+                                        Height="28"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center">
+                                        <Ellipse Opacity="0.18">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding AssetAccentColor}" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{StaticResource Font.Family.Base}"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding AssetInitial}">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{Binding AssetAccentColor}" />
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Grid>
+                                    <TextBlock
+                                        Grid.Column="1"
                                         Margin="0,0,10,0"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource Font.Family.Base}"
@@ -1080,14 +1013,14 @@
                                         Text="{Binding Symbol}"
                                         Typography.NumeralAlignment="Tabular" />
                                     <Border
-                                        Grid.Column="1"
+                                        Grid.Column="2"
                                         Margin="0,0,10,0"
                                         HorizontalAlignment="Center"
                                         Style="{StaticResource PortfolioAssetTypeBadge}">
                                         <TextBlock Style="{StaticResource PortfolioBadgeText}" Text="{Binding AssetTypeBadgeLabel}" />
                                     </Border>
                                     <TextBlock
-                                        Grid.Column="2"
+                                        Grid.Column="3"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource Font.Family.Base}"
                                         FontSize="{StaticResource Font.Size.Sm}"
@@ -1096,7 +1029,7 @@
                                         TextTrimming="CharacterEllipsis" />
                                     <!--  幣別：折回資產欄，僅外幣（cross-currency）顯示；base(TWD) 隱含不顯示  -->
                                     <TextBlock
-                                        Grid.Column="3"
+                                        Grid.Column="4"
                                         Margin="8,0,0,0"
                                         VerticalAlignment="Center"
                                         FontFamily="{StaticResource Font.Family.Base}"

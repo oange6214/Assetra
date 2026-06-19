@@ -1,6 +1,7 @@
 using Assetra.Core.Models;
 using Assetra.Core.Trading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Windows.Media;
 
 namespace Assetra.WPF.Features.Portfolio;
 
@@ -84,6 +85,46 @@ public partial class PortfolioRowViewModel : ObservableObject
         _ => "股",
     };
 
+    // ── Asset avatar (logo dot) ──────────────────────────────────────────────
+    // A coloured initial circle that anchors each row visually (broker-app style).
+    // Colour is a stable hash of Symbol → fixed palette → deterministic per instrument
+    // and theme-agnostic. The initial prefers an alpha ticker (D / E), falling back to
+    // the (localized) name for numeric tickers like Taiwan ETF 00918 → 大.
+    private static readonly Color[] AssetAccentPalette =
+    {
+        Color.FromRgb(0x0E, 0xA5, 0xA4), // teal
+        Color.FromRgb(0x3B, 0x82, 0xF6), // blue
+        Color.FromRgb(0xF5, 0x9E, 0x0B), // amber
+        Color.FromRgb(0x8B, 0x5C, 0xF6), // purple
+        Color.FromRgb(0xEC, 0x48, 0x99), // pink
+        Color.FromRgb(0x10, 0xB9, 0x81), // green
+    };
+
+    public string AssetInitial
+    {
+        get
+        {
+            var src = !string.IsNullOrEmpty(Symbol) && char.IsLetter(Symbol[0])
+                ? Symbol
+                : !string.IsNullOrWhiteSpace(Name) ? Name : Symbol;
+            return string.IsNullOrWhiteSpace(src) ? "•" : src.Trim()[..1].ToUpperInvariant();
+        }
+    }
+
+    public Color AssetAccentColor
+    {
+        get
+        {
+            unchecked
+            {
+                uint h = 2166136261; // FNV-1a — stable across runs, unlike string.GetHashCode
+                foreach (var ch in Symbol)
+                    h = (h ^ ch) * 16777619;
+                return AssetAccentPalette[h % (uint)AssetAccentPalette.Length];
+            }
+        }
+    }
+
     // Mutable so an in-place save can update them without recreating the row
     [ObservableProperty] private decimal _quantity;
     [ObservableProperty]
@@ -91,7 +132,9 @@ public partial class PortfolioRowViewModel : ObservableObject
     private decimal _buyPrice;
     [ObservableProperty] private bool _isActive = true;
 
-    [ObservableProperty] private string _name = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AssetInitial))]
+    private string _name = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCrossCurrency))]
