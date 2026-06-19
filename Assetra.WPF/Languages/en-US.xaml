@@ -393,6 +393,8 @@
     <sys:String x:Key="Portfolio.Kpi.ShowAllocation">Show allocation</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">Show daily P&amp;L</sys:String>
     <sys:String x:Key="Portfolio.Kpi.AllocationTitle">Holdings allocation</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Alloc.ByValue">Value</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Alloc.ByCost">Cost</sys:String>
     <sys:String x:Key="Portfolio.Kpi.DailyPnlTitle">Daily P&amp;L (last 30 days)</sys:String>
     <sys:String x:Key="Portfolio.Filter.Summary.Count">Count</sys:String>
     <sys:String x:Key="Portfolio.Filter.Summary.MarketValue">Market value</sys:String>

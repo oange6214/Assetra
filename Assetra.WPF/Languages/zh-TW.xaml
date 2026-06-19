@@ -391,6 +391,8 @@
     <sys:String x:Key="Portfolio.Kpi.ShowAllocation">展開持股佔比</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">展開每日損益</sys:String>
     <sys:String x:Key="Portfolio.Kpi.AllocationTitle">持股佔比</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Alloc.ByValue">市值</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.Alloc.ByCost">成本</sys:String>
     <sys:String x:Key="Portfolio.Kpi.DailyPnlTitle">過去 30 天每日損益</sys:String>
     <sys:String x:Key="Portfolio.Filter.Summary.Count">筆數</sys:String>
     <sys:String x:Key="Portfolio.Filter.Summary.MarketValue">市值</sys:String>

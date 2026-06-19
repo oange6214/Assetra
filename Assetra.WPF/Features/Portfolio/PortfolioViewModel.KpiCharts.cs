@@ -43,11 +43,36 @@ public partial class PortfolioViewModel
 
     /// <summary>持股佔比 — 每檔市值佔總市值的 slice 集合，給 legend 用。</summary>
     public System.Collections.ObjectModel.ObservableCollection<KpiSlice> PositionAllocationSlices { get; } = [];
-    [ObservableProperty] private ISeries[] _positionAllocationSeries = [];
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActiveAllocationSeries))]
+    private ISeries[] _positionAllocationSeries = [];
 
     /// <summary>付出成本分布 — 每檔成本佔總成本的 slice 集合。</summary>
     public System.Collections.ObjectModel.ObservableCollection<KpiSlice> PositionCostSlices { get; } = [];
-    [ObservableProperty] private ISeries[] _positionCostSeries = [];
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActiveAllocationSeries))]
+    private ISeries[] _positionCostSeries = [];
+
+    // ── 持股佔比面板的「市值 / 成本」切換（合併原本兩張獨立 chip）──────────────
+    // 持股佔比 chip 開啟同一個面板，內部用此 toggle 在「依市值」與「依付出成本」間切換。
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAllocationByMarketValue))]
+    [NotifyPropertyChangedFor(nameof(ActiveAllocationSeries))]
+    [NotifyPropertyChangedFor(nameof(ActiveAllocationSlices))]
+    private bool _isAllocationByCost;
+
+    public bool IsAllocationByMarketValue => !IsAllocationByCost;
+
+    /// <summary>面板目前顯示的 donut series（依 <see cref="IsAllocationByCost"/> 切換）。</summary>
+    public ISeries[] ActiveAllocationSeries =>
+        IsAllocationByCost ? PositionCostSeries : PositionAllocationSeries;
+
+    /// <summary>面板目前顯示的 legend slices（依 <see cref="IsAllocationByCost"/> 切換）。</summary>
+    public System.Collections.ObjectModel.ObservableCollection<KpiSlice> ActiveAllocationSlices =>
+        IsAllocationByCost ? PositionCostSlices : PositionAllocationSlices;
+
+    [RelayCommand]
+    private void SetAllocationMode(string mode) => IsAllocationByCost = mode == "cost";
 
     /// <summary>盈虧檔數分布 — 賺 / 賠 / 平 三 slice。Value 用市值加總。</summary>
     public System.Collections.ObjectModel.ObservableCollection<KpiSlice> PnlBreakdownSlices { get; } = [];

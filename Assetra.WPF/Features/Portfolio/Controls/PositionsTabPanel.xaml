@@ -164,23 +164,7 @@
                 </Button.Style>
             </Button>
 
-            <!--  成本分布  -->
-            <Button
-                Command="{Binding ToggleKpiPanelCommand}"
-                CommandParameter="cost"
-                Content="{DynamicResource Portfolio.Kpi.Chip.Cost}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsKpiCostExpanded}" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
-                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <!--  （成本分布 chip 已併入「持股佔比」面板的 市值/成本 切換）  -->
 
             <!--  每日損益  -->
             <Button
@@ -245,6 +229,49 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="Dismiss24" />
                         </Button>
+                        <!--  市值 / 成本 切換（合併原「成本分布」chip）  -->
+                        <StackPanel
+                            Margin="0,0,8,0"
+                            DockPanel.Dock="Right"
+                            Orientation="Horizontal">
+                            <Button
+                                MinHeight="24"
+                                Margin="0,0,6,0"
+                                Padding="10,3"
+                                Command="{Binding SetAllocationModeCommand}"
+                                CommandParameter="mv"
+                                Content="{DynamicResource Portfolio.Kpi.Alloc.ByValue}">
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAllocationByMarketValue}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button
+                                MinHeight="24"
+                                Padding="10,3"
+                                Command="{Binding SetAllocationModeCommand}"
+                                CommandParameter="cost"
+                                Content="{DynamicResource Portfolio.Kpi.Alloc.ByCost}">
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAllocationByCost}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
                     </DockPanel>
                     <Grid Grid.Row="1" Height="160">
                         <Grid.ColumnDefinitions>
@@ -257,14 +284,14 @@
                             Background="Transparent"
                             InitialRotation="-90"
                             LegendPosition="Hidden"
-                            Series="{Binding PositionAllocationSeries}"
+                            Series="{Binding ActiveAllocationSeries}"
                             TooltipPosition="Center"
                             TooltipTextSize="11" />
                         <ItemsControl
                             Grid.Column="1"
                             Margin="16,4,0,0"
                             VerticalAlignment="Center"
-                            ItemsSource="{Binding PositionAllocationSlices}">
+                            ItemsSource="{Binding ActiveAllocationSlices}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,2">
@@ -315,102 +342,7 @@
                     </Grid>
                 </Grid>
 
-                <!--  付出成本分布 donut（per-position by Cost）  -->
-                <Grid Visibility="{Binding IsKpiCostExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <DockPanel
-                        Grid.Row="0"
-                        Margin="0,0,0,8"
-                        LastChildFill="False">
-                        <TextBlock
-                            FontSize="{StaticResource Font.Size.Sm}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextPrimary}"
-                            Text="{DynamicResource Portfolio.Kpi.CostTitle}" />
-                        <Button
-                            Command="{Binding ToggleKpiPanelCommand}"
-                            CommandParameter="cost"
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource PanelCloseButton}"
-                            ToolTip="{DynamicResource Common.Close}">
-                            <ds:AppIcon
-                                FontSize="11"
-                                Foreground="{DynamicResource AppTextMuted}"
-                                Symbol="Dismiss24" />
-                        </Button>
-                    </DockPanel>
-                    <Grid Grid.Row="1" Height="160">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <lvc:PieChart
-                            Grid.Column="0"
-                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                            Background="Transparent"
-                            InitialRotation="-90"
-                            LegendPosition="Hidden"
-                            Series="{Binding PositionCostSeries}"
-                            TooltipPosition="Center"
-                            TooltipTextSize="11" />
-                        <ItemsControl
-                            Grid.Column="1"
-                            Margin="16,4,0,0"
-                            VerticalAlignment="Center"
-                            ItemsSource="{Binding PositionCostSlices}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="10" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse
-                                            Grid.Column="0"
-                                            Width="10"
-                                            Height="10"
-                                            VerticalAlignment="Center">
-                                            <Ellipse.Fill>
-                                                <SolidColorBrush Color="{Binding ColorHex}" />
-                                            </Ellipse.Fill>
-                                        </Ellipse>
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="8,0,12,0"
-                                            VerticalAlignment="Center"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{Binding Label}"
-                                            TextTrimming="CharacterEllipsis" />
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            Margin="0,0,8,0"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Sm}"
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding Percent, StringFormat={}{0:F1}%}"
-                                            Typography.NumeralAlignment="Tabular" />
-                                        <TextBlock
-                                            Grid.Column="3"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource Font.Family.Base}"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{Binding Value, StringFormat='NT\${0:N0}'}"
-                                            Typography.NumeralAlignment="Tabular" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Grid>
-                </Grid>
+                <!--  (移除) 付出成本分布獨立面板 — 已併入上方「持股佔比」面板的 市值/成本 切換  -->
 
                 <!--  (移除) 盈虧檔數 pie — UX 精簡；資訊改由 footer「獲利/虧損」呈現  -->
 
@@ -972,7 +904,7 @@
                             <DataTemplate>
                                 <Grid VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="34" />
+                                        <ColumnDefinition Width="40" />
                                         <ColumnDefinition Width="72" />
                                         <ColumnDefinition Width="42" />
                                         <ColumnDefinition Width="*" />
@@ -983,7 +915,8 @@
                                         Grid.Column="0"
                                         Width="28"
                                         Height="28"
-                                        Margin="0,0,8,0"
+                                        Margin="2,0,10,0"
+                                        HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
                                         <Ellipse Opacity="0.18">
                                             <Ellipse.Fill>
