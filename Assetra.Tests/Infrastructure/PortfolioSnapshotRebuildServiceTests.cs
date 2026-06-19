@@ -189,6 +189,37 @@ public sealed class PortfolioSnapshotRebuildServiceTests
         Assert.Equal(6_000m, day.OldMarketValue);
     }
 
+    [Fact]
+    public async Task Rebuild_OverwriteLive_RecomputesExistingLiveRowInsteadOfPreserving()
+    {
+        // WHY: the manual「重建快照」must actually overwrite existing live rows (overwriteLive:true).
+        // Otherwise — when every recent day already has a live breakdown snapshot — the rebuild
+        // reports "0 days" and silently does nothing (the user's "按了沒反應"). With the flag set, a
+        // live row is recomputed from historical close, not preserved.
+        var logRepo = new FakeLogRepository(Log("2330", "TWSE", qty: 10, buyPrice: 500m));
+        var snapshots = new RecordingSnapshotRepository();
+        snapshots.Seed(new PortfolioDailySnapshot(
+            Day, TotalCost: 5_000m, MarketValue: 6_000m, Pnl: 1_000m, PositionCount: 1,
+            Currency: Base, CashValue: 1_000m, EquityValue: 6_000m, LiabilityValue: 0m));
+        var history = new FakeHistoryProvider();
+        history.Add("2330", Day, close: 999m); // recompute → equity 9,990, overwriting the stale 6,000
+
+        var fx = new FakeFx();
+        var portfolio = new FakePortfolioRepository(Entry("2330", "TWSE", "TWD"));
+        var balances = new FakeBalanceQueryService();
+
+        var service = new PortfolioSnapshotRebuildService(logRepo, snapshots, history, fx, balances, portfolio);
+
+        var report = await service.RebuildAsync(Day, Day, dryRun: false, overwriteLive: true);
+
+        var written = Assert.Single(snapshots.Writes); // overwritten, NOT preserved
+        var day = Assert.Single(report.Days);
+        Assert.Equal(RebuildDayStatus.Rebuilt, day.Status);
+        Assert.Equal(1, report.RebuiltCount);
+        Assert.Equal(0, report.PreservedCount);
+        Assert.Equal(999m * 10, written.EquityValue); // recomputed from close, not the stale 6,000
+    }
+
     // ─── 5. dry-run computes values but writes nothing ───────────────────────
 
     [Fact]

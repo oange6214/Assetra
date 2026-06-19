@@ -1029,7 +1029,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            var report = await _rebuild.RebuildAsync(from, to, dryRun: true).ConfigureAwait(true);
+            // 手動「重建快照」要真的覆寫既有快照（含 live 列），否則整批已是 live 時會 0 天可重建。
+            var report = await _rebuild.RebuildAsync(from, to, dryRun: true, overwriteLive: true).ConfigureAwait(true);
             _pendingRebuild = report;
 
             RebuildFrom = report.From;
@@ -1068,7 +1069,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
             // 先備份（WAL-safe 線上備份），再寫入。
             var backupPath = await _backup.BackupAsync().ConfigureAwait(true);
-            var report = await _rebuild.RebuildAsync(from, to, dryRun: false).ConfigureAwait(true);
+            var report = await _rebuild.RebuildAsync(from, to, dryRun: false, overwriteLive: true).ConfigureAwait(true);
 
             IsRebuildPreviewOpen = false;
             _pendingRebuild = null;

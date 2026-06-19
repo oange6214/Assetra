@@ -379,7 +379,7 @@ public class SettingsViewModelTests
         public int WriteCalls { get; private set; }
 
         public Task<SnapshotRebuildReport> RebuildAsync(
-            DateOnly from, DateOnly to, bool dryRun, CancellationToken ct = default)
+            DateOnly from, DateOnly to, bool dryRun, bool overwriteLive = false, CancellationToken ct = default)
         {
             if (dryRun)
                 DryRunCalls++;
@@ -400,7 +400,7 @@ public class SettingsViewModelTests
         public int WriteCalls { get; private set; }
 
         public Task<SnapshotRebuildReport> RebuildAsync(
-            DateOnly f, DateOnly t, bool dryRun, CancellationToken ct = default)
+            DateOnly f, DateOnly t, bool dryRun, bool overwriteLive = false, CancellationToken ct = default)
         {
             if (!dryRun)
             {

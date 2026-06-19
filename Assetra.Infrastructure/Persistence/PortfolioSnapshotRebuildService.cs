@@ -73,7 +73,7 @@ public sealed class PortfolioSnapshotRebuildService : IPortfolioSnapshotRebuildS
     /// When <see langword="true"/>, computes and reports every day's would-be values but writes nothing.
     /// </param>
     public async Task<SnapshotRebuildReport> RebuildAsync(
-        DateOnly from, DateOnly to, bool dryRun, CancellationToken ct = default)
+        DateOnly from, DateOnly to, bool dryRun, bool overwriteLive = false, CancellationToken ct = default)
     {
         var days = new List<SnapshotRebuildDayResult>();
         if (from > to)
@@ -98,7 +98,7 @@ public sealed class PortfolioSnapshotRebuildService : IPortfolioSnapshotRebuildS
         {
             ct.ThrowIfCancellationRequested();
             var result = await RebuildDayAsync(
-                date, logs, existing, currencyResolver, priceCache, baseCcy, dryRun, ct)
+                date, logs, existing, currencyResolver, priceCache, baseCcy, dryRun, overwriteLive, ct)
                 .ConfigureAwait(false);
             days.Add(result);
         }
@@ -114,13 +114,14 @@ public sealed class PortfolioSnapshotRebuildService : IPortfolioSnapshotRebuildS
         IReadOnlyDictionary<string, IReadOnlyDictionary<DateOnly, decimal>> priceCache,
         string baseCcy,
         bool dryRun,
+        bool overwriteLive,
         CancellationToken ct)
     {
         existing.TryGetValue(date, out var existingRow);
         var oldMarketValue = existingRow?.MarketValue;
 
-        // 1. Preserve live rows: any snapshot already carrying a breakdown component is left untouched.
-        if (HasBreakdown(existingRow))
+        // 1. Preserve live rows — 除非 overwriteLive（手動「重建快照」要名副其實地重算覆寫）。
+        if (!overwriteLive && HasBreakdown(existingRow))
             return Skip(date, oldMarketValue, RebuildDayStatus.SkippedHasCompleteLiveRow);
 
         // 2. Reconstruct as-of-D positions.
