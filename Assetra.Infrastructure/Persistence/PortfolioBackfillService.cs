@@ -227,9 +227,13 @@ public sealed class PortfolioBackfillService
     private static IReadOnlyList<PortfolioPositionLog> ReconstructPositions(
         IReadOnlyList<PortfolioPositionLog> allLogs, DateOnly date) =>
         allLogs
+            // allLogs 由 repository 依 (log_date, rowid) 升冪排序；GroupBy 保留群組內來源順序，
+            // 故 g.Last() = 該部位「日期 ≤ date 的最後一筆」＝最終狀態。
+            // 修正：同日多筆（如同日分批賣出 20000→0）舊版 OrderByDescending(LogDate).First() 是穩定
+            // 排序、同日不分先後，會誤取較早一筆（20000）→ 已平倉部位被當成仍持有。
             .Where(l => l.LogDate <= date)
             .GroupBy(l => l.PositionId)
-            .Select(g => g.OrderByDescending(l => l.LogDate).First())
+            .Select(g => g.Last())
             .Where(l => l.Quantity > 0)
             .ToList();
 

@@ -253,9 +253,11 @@ public sealed class PortfolioSnapshotRebuildService : IPortfolioSnapshotRebuildS
     private static IReadOnlyList<PortfolioPositionLog> ReconstructPositions(
         IReadOnlyList<PortfolioPositionLog> allLogs, DateOnly date) =>
         allLogs
+            // 同 PortfolioBackfillService：allLogs 依 (log_date, rowid) 升冪，g.Last() 取該部位最終狀態。
+            // 修正同日多筆（同日分批賣出 20000→0）被舊版 OrderByDescending(LogDate).First() 誤取較早一筆。
             .Where(l => l.LogDate <= date)
             .GroupBy(l => l.PositionId)
-            .Select(g => g.OrderByDescending(l => l.LogDate).First())
+            .Select(g => g.Last())
             .Where(l => l.Quantity > 0)
             .ToList();
 

@@ -129,8 +129,41 @@ public sealed class PortfolioBackfillServiceTests
         Assert.Equal(2, snapshot.PositionCount);
     }
 
+    [Fact]
+    public async Task BackfillAsync_SameDayMultiLotSell_ExcludesClosedPosition()
+    {
+        // WHY: a position sold in two trades on the SAME day leaves two log entries for one
+        // PositionId: qty 20000 (first lot) then qty 0 (second lot). Reconstruction must take the
+        // FINAL (0) → position closed → excluded. The old OrderByDescending(LogDate).First() is a
+        // stable sort that does NOT tie-break same-day entries, so it picked the earlier 20000 →
+        // a sold-out position was reconstructed as still held, inflating market value and producing
+        // the calendar's phantom daily-return swing.
+        var soldId = Guid.NewGuid();
+        var logRepo = new FakeLogRepository(
+            Log("2330", "TWSE", 10, 500m),               // held position (priced)
+            Log(soldId, "3231", "TWSE", 20000, 100m),    // same day: after 1st lot → 20000 left
+            Log(soldId, "3231", "TWSE", 0, 100m));       // same day: after 2nd lot → 0 (closed)
+        var snapshotRepo = new RecordingSnapshotRepository();
+        var history = new FakeHistoryProvider();
+        history.Add("2330", TargetDate, close: 600m);
+        history.Add("3231", TargetDate, close: 160m);    // priced too — old code would ADD 20000×160
+
+        var service = new PortfolioBackfillService(logRepo, snapshotRepo, history);
+
+        var written = await service.BackfillAsync();
+
+        var snapshot = Assert.Single(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
+        Assert.Equal(1, written);
+        // Sold-out 3231 excluded → only the held 2330 counts (old code: 2 positions, MV +3.2M).
+        Assert.Equal(1, snapshot.PositionCount);
+        Assert.Equal(600m * 10, snapshot.MarketValue);
+    }
+
     private static PortfolioPositionLog Log(string symbol, string exchange, int qty, decimal buyPrice) =>
         new(Guid.NewGuid(), LogDate, Guid.NewGuid(), symbol, exchange, qty, buyPrice);
+
+    private static PortfolioPositionLog Log(Guid positionId, string symbol, string exchange, int qty, decimal buyPrice) =>
+        new(Guid.NewGuid(), LogDate, positionId, symbol, exchange, qty, buyPrice);
 
     private sealed class FakeLogRepository : IPortfolioPositionLogRepository
     {

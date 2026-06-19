@@ -71,7 +71,7 @@ public sealed class PortfolioPositionLogSqliteRepository : IPortfolioPositionLog
         cmd.CommandText = """
             SELECT log_id, log_date, position_id, symbol, exchange, quantity, buy_price
             FROM   portfolio_position_log
-            ORDER  BY log_date;
+            ORDER  BY log_date, rowid;
             """;
         var results = new List<PortfolioPositionLog>();
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
