@@ -392,6 +392,8 @@
     <sys:String x:Key="Portfolio.Composition.Title">Portfolio focus</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowAllocation">Show allocation</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">Show daily P&amp;L</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.MoreAddOptions">More add options</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.WinLoss">Win / Loss</sys:String>
     <sys:String x:Key="Portfolio.Kpi.AllocationTitle">Holdings allocation</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Alloc.ByValue">Value</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Alloc.ByCost">Cost</sys:String>

@@ -70,11 +70,30 @@
                     </Button>
                 </StackPanel>
 
-                <Button
-                    Grid.Column="1"
-                    Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
-                    Content="{DynamicResource Portfolio.DetailHeader.AddInvestment}"
-                    Style="{StaticResource AppPrimaryButton}" />
+                <!--  ＋新增交易 split button：主鈕＝新增交易；▾＝加入觀察（合併原獨立「新增標的」入口）  -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button
+                        Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
+                        Content="{DynamicResource Portfolio.DetailHeader.AddInvestment}"
+                        Style="{StaticResource AppPrimaryButton}" />
+                    <Button
+                        Margin="2,0,0,0"
+                        Padding="8,0"
+                        Click="OnAddMenuClick"
+                        FocusVisualStyle="{x:Null}"
+                        Style="{StaticResource AppPrimaryButton}"
+                        ToolTip="{DynamicResource Portfolio.DetailHeader.MoreAddOptions}">
+                        <ds:AppIcon
+                            FontSize="10"
+                            Foreground="{DynamicResource Brush.Text.OnAccent}"
+                            Symbol="ChevronDown24" />
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding OpenAddWatchlistDialogCommand}" Header="{DynamicResource Portfolio.Watchlist.AddCommand}" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                </StackPanel>
             </Grid>
 
             <!-- ── Row 1: Market value + day P&L ── -->

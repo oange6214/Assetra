@@ -390,6 +390,8 @@
     <sys:String x:Key="Portfolio.Composition.Title">投資組合焦點</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowAllocation">展開持股佔比</sys:String>
     <sys:String x:Key="Portfolio.Kpi.ShowDailyPnl">展開每日損益</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.MoreAddOptions">更多新增選項</sys:String>
+    <sys:String x:Key="Portfolio.Filter.Summary.WinLoss">獲利／虧損</sys:String>
     <sys:String x:Key="Portfolio.Kpi.AllocationTitle">持股佔比</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Alloc.ByValue">市值</sys:String>
     <sys:String x:Key="Portfolio.Kpi.Alloc.ByCost">成本</sys:String>

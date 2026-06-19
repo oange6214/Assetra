@@ -147,6 +147,11 @@ public partial class PortfolioViewModel
         || !string.IsNullOrEmpty(FilterText);
     public bool IsPositionsFilteredPnlPositive => PositionsFilteredPnl > 0m;
 
+    // 獲利／虧損檔數 — footer 用（補回原「盈虧檔數」chip 的核心資訊）。盈虧 sign 與幣別無關，
+    // 直接用原幣 Pnl 判斷即可，不必 DisplayAmount。
+    public int PositionsFilteredProfitCount => PositionsView?.Cast<PortfolioRowViewModel>().Count(p => p.Pnl > 0m) ?? 0;
+    public int PositionsFilteredLossCount => PositionsView?.Cast<PortfolioRowViewModel>().Count(p => p.Pnl < 0m) ?? 0;
+
     private void RaisePositionsFilterStatsChanged()
     {
         OnPropertyChanged(nameof(PositionsFilteredCount));
@@ -155,6 +160,8 @@ public partial class PortfolioViewModel
         OnPropertyChanged(nameof(PositionsFilteredPnl));
         OnPropertyChanged(nameof(IsPositionsFiltered));
         OnPropertyChanged(nameof(IsPositionsFilteredPnlPositive));
+        OnPropertyChanged(nameof(PositionsFilteredProfitCount));
+        OnPropertyChanged(nameof(PositionsFilteredLossCount));
     }
 
     private bool FilterPosition(object obj)

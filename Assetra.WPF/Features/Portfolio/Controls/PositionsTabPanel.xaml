@@ -491,26 +491,7 @@
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Position.ShowClosed}" />
                     </CheckBox>
-                    <!--
-                        +觀察：建立 PortfolioEntry 但不下單。對齊「先看一段時間再決定買」的
-                        使用情境，呼應 broker app 的自選股 / 觀察清單入口。
-                    -->
-                    <Button
-                        MinHeight="32"
-                        Margin="0,0,6,0"
-                        Padding="10,0"
-                        Command="{Binding OpenAddWatchlistDialogCommand}"
-                        Style="{StaticResource AppSecondaryButton}"
-                        ToolTip="{DynamicResource Portfolio.Watchlist.AddCommand.Hint}">
-                        <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon
-                                Margin="0,0,6,0"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Symbol="Add24" />
-                            <TextBlock VerticalAlignment="Center" Text="{DynamicResource Portfolio.Watchlist.AddCommand}" />
-                        </StackPanel>
-                    </Button>
+                    <!--  「加入觀察」入口已併入頂部「＋新增交易」的 ▾ 下拉，移除此處獨立按鈕避免兩顆相似入口混淆  -->
                 </StackPanel>
             </controls:SearchBox.RightContent>
         </controls:SearchBox>
@@ -1442,6 +1423,37 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+                    </StackPanel>
+                    <!--  獲利／虧損 檔數 — 補回原「盈虧檔數」chip 的核心資訊  -->
+                    <StackPanel Margin="24,0,0,0" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="{DynamicResource Portfolio.Filter.Summary.WinLoss}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppUp}"
+                            Text="{Binding PositionsFilteredProfitCount}"
+                            Typography.NumeralAlignment="Tabular" />
+                        <TextBlock
+                            Margin="4,0,4,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Text="/" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource Font.Family.Base}"
+                            FontSize="{StaticResource Font.Size.Sm}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppDown}"
+                            Text="{Binding PositionsFilteredLossCount}"
+                            Typography.NumeralAlignment="Tabular" />
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
