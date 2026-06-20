@@ -96,6 +96,38 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!--
+            Segmented toggle（iOS 風）— 持股佔比面板的「市值 / 成本」切換用。外層 Border 當 track，
+            內部按鈕本身無框；選中時由 inline DataTrigger 填 AppAccent 成圓角 pill，未選為透明（露出 track）。
+        -->
+        <Style x:Key="SegmentedToggleButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="Padding" Value="14,3" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextSecondary}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FontSize" Value="{StaticResource Font.Size.Xs}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="{TemplateBinding FontSize}"
+                                Foreground="{TemplateBinding Foreground}"
+                                Text="{TemplateBinding Content}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -229,49 +261,49 @@
                                 Foreground="{DynamicResource AppTextMuted}"
                                 Symbol="Dismiss24" />
                         </Button>
-                        <!--  市值 / 成本 切換（合併原「成本分布」chip）  -->
-                        <StackPanel
+                        <!--  市值 / 成本 切換（iOS 風 segmented control；合併原「成本分布」chip）  -->
+                        <Border
                             Margin="0,0,8,0"
-                            DockPanel.Dock="Right"
-                            Orientation="Horizontal">
-                            <Button
-                                MinHeight="24"
-                                Margin="0,0,6,0"
-                                Padding="10,3"
-                                Command="{Binding SetAllocationModeCommand}"
-                                CommandParameter="mv"
-                                Content="{DynamicResource Portfolio.Kpi.Alloc.ByValue}">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsAllocationByMarketValue}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Button
-                                MinHeight="24"
-                                Padding="10,3"
-                                Command="{Binding SetAllocationModeCommand}"
-                                CommandParameter="cost"
-                                Content="{DynamicResource Portfolio.Kpi.Alloc.ByCost}">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource AssetTypeFilterChipBase}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsAllocationByCost}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AppAccent}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccent}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AppBorder}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            DockPanel.Dock="Right">
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Command="{Binding SetAllocationModeCommand}"
+                                    CommandParameter="mv"
+                                    Content="{DynamicResource Portfolio.Kpi.Alloc.ByValue}">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SegmentedToggleButton}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAllocationByMarketValue}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button
+                                    Command="{Binding SetAllocationModeCommand}"
+                                    CommandParameter="cost"
+                                    Content="{DynamicResource Portfolio.Kpi.Alloc.ByCost}">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource SegmentedToggleButton}" TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAllocationByCost}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource AppAccent}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccent}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </Border>
                     </DockPanel>
                     <Grid Grid.Row="1" Height="160">
                         <Grid.ColumnDefinitions>
