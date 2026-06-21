@@ -173,6 +173,7 @@
     <sys:String x:Key="Portfolio.History.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.History.VsMarket">vs market</sys:String>
     <sys:String x:Key="Portfolio.History.AddComparison">Add comparison</sys:String>
+    <sys:String x:Key="Portfolio.History.Compare">+ Compare</sys:String>
     <sys:String x:Key="Portfolio.History.AddComparison.Hint">Symbol, e.g. 0050.TW, 2330.TW, ^GSPC (TAIEX ^TWII built in)</sys:String>
     <sys:String x:Key="Portfolio.History.RemoveComparison">Remove</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">My portfolio</sys:String>
