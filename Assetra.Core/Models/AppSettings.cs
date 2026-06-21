@@ -210,6 +210,12 @@ public sealed record AppSettings(
     List<string>? CustomBenchmarkSymbols = null,
 
     /// <summary>
+    /// 資產趨勢「比較」圖的項目清單（使用者自選、可空、最多 6）。token：「@me」＝我的投組（整體 TWR）、
+    /// 其餘為 symbol（如 ^TWII 大盤、0050.TW、3231.TW）。與 CustomBenchmarkSymbols（舊對標數字）獨立。
+    /// </summary>
+    List<string>? ComparisonItems = null,
+
+    /// <summary>
     /// MultiCurrency-Reporting P4.1d — 上次成功跑歷史匯率 backfill 的 UTC 時間戳。
     /// null = 尚未跑過（新使用者 / 安裝後第一次 startup 還沒到 5-sec delay）。
     /// 設定頁顯示給使用者看 + 提供「立即更新」按鈕。

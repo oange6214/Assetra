@@ -187,12 +187,13 @@
                     <Button
                         x:Name="CompareBtn"
                         Margin="2,0,0,0"
-                        Padding="8,2"
+                        Padding="10,2"
                         VerticalAlignment="Center"
                         Command="{Binding OpenComparisonPickerCommand}"
                         Content="{DynamicResource Portfolio.History.Compare}"
                         Cursor="Hand"
-                        FontSize="{StaticResource Font.Size.Xs}" />
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Style="{StaticResource AppSecondaryButton}" />
 
                     <Popup
                         AllowsTransparency="True"
@@ -208,7 +209,26 @@
                             BorderBrush="{DynamicResource AppBorderLight}"
                             BorderThickness="1"
                             CornerRadius="8">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="14" Direction="270" Opacity="0.18" ShadowDepth="3" />
+                            </Border.Effect>
                             <StackPanel>
+                                <!--  快速加入：我的投組 / 大盤（已加入時自動 disabled）  -->
+                                <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                                    <Button
+                                        Margin="0,0,6,0"
+                                        Padding="10,3"
+                                        Command="{Binding AddMyPortfolioCommand}"
+                                        Content="{DynamicResource Portfolio.History.MeLabel}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Style="{StaticResource AppSecondaryButton}" />
+                                    <Button
+                                        Padding="10,3"
+                                        Command="{Binding AddMarketCommand}"
+                                        Content="{DynamicResource Portfolio.History.BenchmarkTaiex}"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Style="{StaticResource AppSecondaryButton}" />
+                                </StackPanel>
                                 <DockPanel>
                                     <Button
                                         DockPanel.Dock="Right"
@@ -264,6 +284,15 @@
                             </StackPanel>
                         </Border>
                     </Popup>
+
+                    <!--  空清單提示（預設無比較項目時）  -->
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.History.ComparePrompt}"
+                        Visibility="{Binding HasComparisonItems, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </StackPanel>
 
                 <StackPanel
@@ -444,110 +473,7 @@
             </Border>
         </UniformGrid>
 
-        <!--
-            ── Stage 1: 對標比較區（4 個固定 benchmark TWR）──
-            P3.6 — migrated to AppCardSummary baseline (Radius.2Xl + Shadow.Card +
-            BorderLight) — 跟頁面上方 Hero / Chart cards 同 design language。
-        -->
-        <Border
-            Grid.Row="4"
-            Margin="0,8,0,0"
-            Padding="16"
-            Style="{StaticResource AppCardSummary}"
-            Visibility="{Binding HasBenchmark, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel>
-                <DockPanel Margin="0,0,0,6" LastChildFill="False">
-                    <TextBlock
-                        DockPanel.Dock="Left"
-                        FontSize="{DynamicResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Trends.Benchmark.Heading}" />
-                    <!--  期間 subtitle：讓使用者清楚對標數值對應的時間範圍  -->
-                    <TextBlock
-                        DockPanel.Dock="Right"
-                        FontSize="{DynamicResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{Binding BenchmarkPeriodDisplay}" />
-                </DockPanel>
-                <UniformGrid Columns="4">
-                    <StackPanel Margin="0,0,8,0">
-                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Trends.Benchmark.Taiex}" />
-                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding BenchmarkTaiexDisplay}" />
-                    </StackPanel>
-                    <StackPanel Margin="4,0,4,0">
-                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Trends.Benchmark.Tw0050}" />
-                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding BenchmarkTw0050Display}" />
-                    </StackPanel>
-                    <StackPanel Margin="4,0,4,0">
-                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Trends.Benchmark.Tw00981A}" />
-                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding BenchmarkTw00981ADisplay}" />
-                    </StackPanel>
-                    <StackPanel Margin="8,0,0,0">
-                        <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                   Foreground="{DynamicResource AppTextMuted}"
-                                   Text="{DynamicResource Trends.Benchmark.Deposit15}" />
-                        <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AppTextPrimary}"
-                                   Text="{Binding BenchmarkDeposit15Display}" />
-                    </StackPanel>
-                </UniformGrid>
-                <!--
-                    v2 對標自訂：使用者在 settings.json 加 CustomBenchmarkSymbols
-                    後，顯示一列自訂對標（最多 4 個並排）。CollectionEmpty 時自然
-                    不渲染（ItemsControl 無 items）。
-                -->
-                <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding CustomBenchmarks}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="4" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,0,8,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                               Foreground="{DynamicResource AppTextMuted}"
-                                               Text="{Binding Symbol}" />
-                                    <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource AppTextPrimary}"
-                                               Text="{Binding Display}" />
-                                </StackPanel>
-                                <!--  移除此對標（inline picker）  -->
-                                <Button Grid.Column="1"
-                                        Width="20" Height="20" Padding="0"
-                                        VerticalAlignment="Top"
-                                        Command="{Binding DataContext.RemoveComparisonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding Symbol}"
-                                        Style="{StaticResource AppIconButton}"
-                                        ToolTip="{DynamicResource Portfolio.History.RemoveComparison}">
-                                    <ds:AppIcon FontSize="10" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
-                                </Button>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!--  「＋ 比較」加對標已移到圖上方 chips 列的搜尋 popup（autocomplete）。  -->
-            </StackPanel>
-        </Border>
+        <!--  舊「同期對標報酬率」固定表已移除；比較改由圖上方 chips ＋「＋比較」彈性選擇（ComparisonItems）。  -->
 
         <!--  ── Footer hint — P5.1 修復可疑點工具列已移除（曲線改算真實淨值後 partial-price 假象問題不存在）  -->
         <TextBlock

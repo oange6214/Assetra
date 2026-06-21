@@ -69,16 +69,29 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>對標疊線用的「大盤」symbol — 加權指數（Yahoo ^TWII；router 已導向 Yahoo）。</summary>
     private const string BenchmarkOverlaySymbol = "^TWII";
 
-    // ── inline「新增比較對象」picker（資產趨勢圖直接加/移對標，免進設定）──────────────
+    // ── 「＋比較」picker：資產趨勢圖的比較項目（我的投組／大盤／股票，全部使用者自選、可移除、預設空）──
+    /// <summary>我的投組（整體 TWR）在比較清單中的特殊 token。</summary>
+    public const string PortfolioItemToken = "@me";
+
     [ObservableProperty] private string _comparisonInput = string.Empty;
 
-    private IReadOnlyList<string> CurrentCustomBenchmarks =>
-        _settings?.Current.CustomBenchmarkSymbols ?? [];
+    private IReadOnlyList<string> CurrentComparisonItems =>
+        _settings?.Current.ComparisonItems ?? [];
 
     public bool CanAddComparison =>
         !string.IsNullOrWhiteSpace(ComparisonInput)
-        && CurrentCustomBenchmarks.Count < 4
-        && !CurrentCustomBenchmarks.Any(s => string.Equals(s, ComparisonInput.Trim(), StringComparison.OrdinalIgnoreCase));
+        && CurrentComparisonItems.Count < 6
+        && !CurrentComparisonItems.Any(s => string.Equals(s, ComparisonInput.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>我的投組是否還沒在比較清單（控制 popup 內快速加入鈕）。</summary>
+    public bool CanAddMyPortfolio =>
+        CurrentComparisonItems.Count < 6
+        && !CurrentComparisonItems.Contains(PortfolioItemToken);
+
+    /// <summary>大盤（加權指數）是否還沒在比較清單。</summary>
+    public bool CanAddMarket =>
+        CurrentComparisonItems.Count < 6
+        && !CurrentComparisonItems.Any(s => string.Equals(s, BenchmarkOverlaySymbol, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>對比 picker 的 autocomplete 候選（邊打邊出，最多 8 筆）。</summary>
     [ObservableProperty] private IReadOnlyList<StockSearchResult> _comparisonSuggestions = [];
@@ -103,20 +116,33 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IsComparisonPickerOpen = true;
     }
 
+    /// <summary>加入一個比較 token（去重、上限 6）；持久化＋重畫。</summary>
+    private async Task AddComparisonTokenAsync(string token)
+    {
+        if (_settings is null || string.IsNullOrWhiteSpace(token))
+            return;
+        token = token.Trim();
+        if (CurrentComparisonItems.Count >= 6
+            || CurrentComparisonItems.Any(s => string.Equals(s, token, StringComparison.OrdinalIgnoreCase)))
+            return;
+        var list = CurrentComparisonItems.ToList();
+        list.Add(token);
+        await PersistComparisonItemsAsync(list).ConfigureAwait(true);
+        RefreshChart();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddMyPortfolio))]
+    private Task AddMyPortfolioAsync() => AddComparisonTokenAsync(PortfolioItemToken);
+
+    [RelayCommand(CanExecute = nameof(CanAddMarket))]
+    private Task AddMarketAsync() => AddComparisonTokenAsync(BenchmarkOverlaySymbol);
+
     [RelayCommand]
     private async Task SelectComparisonSuggestionAsync(StockSearchResult? r)
     {
-        if (_settings is null || r is null)
+        if (r is null)
             return;
-        var symbol = FormatBenchmarkSymbol(r);
-        if (CurrentCustomBenchmarks.Count < 4
-            && !CurrentCustomBenchmarks.Any(s => string.Equals(s, symbol, StringComparison.OrdinalIgnoreCase)))
-        {
-            var list = CurrentCustomBenchmarks.ToList();
-            list.Add(symbol);
-            await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
-            RefreshChart();
-        }
+        await AddComparisonTokenAsync(FormatBenchmarkSymbol(r)).ConfigureAwait(true);
         ComparisonInput = string.Empty;
         ComparisonSuggestions = [];
         IsComparisonPickerOpen = false;
@@ -133,48 +159,50 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAddComparison))]
     private async Task AddComparisonAsync()
     {
-        if (_settings is null || !CanAddComparison)
-            return;
-        var list = CurrentCustomBenchmarks.ToList();
-        list.Add(ComparisonInput.Trim());
-        await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
+        await AddComparisonTokenAsync(ComparisonInput.Trim()).ConfigureAwait(true);
         ComparisonInput = string.Empty;
-        RefreshChart(); // 重抓 overlay 疊線 + 下方對標數字
     }
 
     [RelayCommand]
-    private async Task RemoveComparisonAsync(string? symbol)
+    private async Task RemoveComparisonAsync(string? token)
     {
-        if (_settings is null || string.IsNullOrWhiteSpace(symbol))
+        if (_settings is null || string.IsNullOrWhiteSpace(token))
             return;
-        var list = CurrentCustomBenchmarks
-            .Where(s => !string.Equals(s, symbol, StringComparison.OrdinalIgnoreCase))
+        var list = CurrentComparisonItems
+            .Where(s => !string.Equals(s, token, StringComparison.OrdinalIgnoreCase))
             .ToList();
-        await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
+        await PersistComparisonItemsAsync(list).ConfigureAwait(true);
         RefreshChart();
     }
 
-    private async Task PersistCustomBenchmarksAsync(IReadOnlyList<string> symbols)
+    private async Task PersistComparisonItemsAsync(IReadOnlyList<string> items)
     {
         try
         {
-            // raiseChanged:false — 由本 VM 自己 RefreshChart 更新圖＋對標數字，避免觸發 app-wide reload。
+            // raiseChanged:false — 由本 VM 自己 RefreshChart 更新圖，避免觸發 app-wide reload。
             await _settings!
-                .SaveAsync(_settings.Current with { CustomBenchmarkSymbols = symbols.ToList() }, raiseChanged: false)
+                .SaveAsync(_settings.Current with { ComparisonItems = items.ToList() }, raiseChanged: false)
                 .ConfigureAwait(true);
         }
         catch (Exception ex)
         {
-            Serilog.Log.Warning(ex, "[Trends] 儲存自訂對標失敗");
+            Serilog.Log.Warning(ex, "[Trends] 儲存比較項目失敗");
         }
         OnPropertyChanged(nameof(CanAddComparison));
+        OnPropertyChanged(nameof(CanAddMyPortfolio));
+        OnPropertyChanged(nameof(CanAddMarket));
         AddComparisonCommand.NotifyCanExecuteChanged();
+        AddMyPortfolioCommand.NotifyCanExecuteChanged();
+        AddMarketCommand.NotifyCanExecuteChanged();
     }
 
-    /// <summary>「vs 大盤」% 對比模式的圖例（投組＋各對標線），每項 (label, 顏色 hex)；非 % 模式為空。</summary>
+    /// <summary>比較圖的圖例（chips；每項 label／顏色／移除 token）；空清單時為空。</summary>
     [ObservableProperty] private IReadOnlyList<ComparisonLegendItem> _comparisonLegend = [];
 
-    /// <summary>對比線配色：[0] 投組，[1..] 各對標（加權指數、自訂…）循環使用。固定色（兩主題皆可讀）。</summary>
+    /// <summary>是否有任何比較項目；false 時資產趨勢圖顯示「點 ＋比較 選擇要比較的項目」提示。</summary>
+    [ObservableProperty] private bool _hasComparisonItems;
+
+    /// <summary>對比線配色：我的投組固定取 [0] 藍；其餘對標從 [1] 開始循環。固定色（兩主題皆可讀）。</summary>
     private static readonly string[] ComparisonPalette =
     {
         "#2563EB", "#F59E0B", "#14B8A6", "#8B5CF6", "#EC4899", "#10B981",
@@ -453,24 +481,21 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
 
-        // 比較視圖（資產趨勢頁，常駐）：抓「大盤＋自訂對標」正規化 % 序列 ＋ 我的投組 TWR。
+        // 比較視圖（資產趨勢頁）：使用者自選的比較項目（我的投組 TWR ＋ 大盤 ＋ 股票），預設空。
         // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
-        IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
-        IReadOnlyList<DateTimePoint>? twrPoints = null;
+        IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> compareLines = [];
         if (filtered.Count >= 2 && points.Count >= 2)
-        {
-            twrPoints = await BuildPortfolioTwrPercentPointsAsync(filtered);
-            if (_benchmark is not null)
-                overlays = await BuildBenchmarkOverlaysAsync(filtered);
-        }
+            compareLines = await BuildComparisonLinesAsync(filtered);
 
-        BuildChart(points);                                    // 絕對淨值 → ValueSeries（概覽迷你圖）
-        BuildComparePercentChart(points, overlays, twrPoints); // % 比較 → CompareSeries（資產趨勢頁）
+        BuildChart(points);                     // 絕對淨值 → ValueSeries（概覽迷你圖）
+        BuildComparePercentChart(compareLines); // % 比較 → CompareSeries（資產趨勢頁）
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
         {
             await UpdateKpisAsync(filtered, points).ConfigureAwait(false);
+            // 註：舊「同期對標報酬率」固定表的 XAML 已移除，但其計算（UpdateBenchmarksAsync）＋顯示屬性
+            // 暫時保留（無人綁定），整組舊 benchmark 子系統的移除列為 M2 清理，避免本輪牽動其測試。
             await UpdateBenchmarksAsync(filtered).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -990,59 +1015,68 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 抓「大盤（加權指數）＋使用者自訂對標」的正規化 % 序列，各自轉成一條疊線（label, 顏色 hex, 點）。
-    /// 個別對標抓不到就略過該條；整段不丟例外（單條 try-catch）—— 主圖不受影響。
+    /// 依使用者選的比較項目（ComparisonItems）逐項建一條 % 線：「@me」＝我的投組 TWR、其餘＝
+    /// benchmark 正規化 % 序列。我的投組固定 palette[0]；個別抓不到就略過該條（主圖不受影響）。
     /// </summary>
-    private async Task<IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>>
-        BuildBenchmarkOverlaysAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
+    private async Task<IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)>>
+        BuildComparisonLinesAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
     {
+        var items = CurrentComparisonItems.Where(t => !string.IsNullOrWhiteSpace(t)).Take(6).ToList();
+        var lines = new List<(string, string, string, IReadOnlyList<DateTimePoint>)>();
+        if (items.Count == 0)
+            return lines;
+
         var period = new PerformancePeriod(filtered.Min(s => s.SnapshotDate), filtered.Max(s => s.SnapshotDate));
 
-        // 大盤（加權指數）固定第一條；其後接使用者自訂對標（最多 4，沿用既有 Settings 清單）。
-        var specs = new List<(string Symbol, string Label)>
-        {
-            (BenchmarkOverlaySymbol, GetString("Portfolio.History.BenchmarkTaiex", "加權指數")),
-        };
-        foreach (var s in (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).Take(4))
-            if (!string.IsNullOrWhiteSpace(s))
-                specs.Add((s, s));
+        // 我的投組 TWR 只在 @me 在清單時算一次。
+        IReadOnlyList<DateTimePoint>? mePts = null;
+        if (items.Any(t => string.Equals(t, PortfolioItemToken, StringComparison.OrdinalIgnoreCase)))
+            mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
 
-        var overlays = new List<(string, string, string?, IReadOnlyList<DateTimePoint>)>();
-        for (var i = 0; i < specs.Count; i++)
+        var colorIdx = 1; // palette[0] 保留給我的投組
+        foreach (var token in items)
         {
+            if (string.Equals(token, PortfolioItemToken, StringComparison.OrdinalIgnoreCase))
+            {
+                if (mePts is { Count: >= 2 })
+                    lines.Add((GetString("Portfolio.History.MeLabel", "我的投組"), ComparisonPalette[0], token, mePts));
+                continue;
+            }
+            if (_benchmark is null)
+                continue;
             try
             {
-                var series = await _benchmark!
-                    .ComputeBenchmarkSeriesAsync(specs[i].Symbol, period)
-                    .ConfigureAwait(false);
+                var series = await _benchmark.ComputeBenchmarkSeriesAsync(token, period).ConfigureAwait(false);
                 if (series is null || series.Count < 2)
                     continue;
                 var pts = series
                     .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
                     .ToList();
-                // palette[0] 留給投組；對標從 [1] 開始循環。i==0 是加權指數（大盤、固定不可移除）；
-                // 其餘是自訂對標（RemoveSymbol＝該 symbol，chip 顯示 ✕）。
-                overlays.Add((specs[i].Label, ComparisonPalette[(i + 1) % ComparisonPalette.Length],
-                    i == 0 ? null : specs[i].Symbol, pts));
+                lines.Add((LabelForToken(token), ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, pts));
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                // 單一對標抓取失敗 → 略過該條
+                // 單一項目抓取失敗 → 略過該條
             }
         }
-        return overlays;
+        return lines;
     }
 
+    /// <summary>比較項目的顯示標籤：^TWII → 加權指數；其餘原樣 symbol。</summary>
+    private string LabelForToken(string token) =>
+        string.Equals(token, BenchmarkOverlaySymbol, StringComparison.OrdinalIgnoreCase)
+            ? GetString("Portfolio.History.BenchmarkTaiex", "加權指數")
+            : token;
+
     /// <summary>
-    /// 「vs 大盤」模式的圖：投組（accent）與加權指數（muted）兩條線都從區間起點 0% 起算的累積
-    /// 報酬，Y 軸標 %。投組以第一點為基準正規化；benchmark 序列本身已正規化。
+    /// 比較圖：把使用者選的每個項目各畫一條 % 線（我的投組 TWR ＋ 大盤 ＋ 股票），全部可移除。
+    /// 空清單 → 清空 series ＋ HasComparisonItems=false（XAML 顯示提示）。
     /// </summary>
     private void BuildComparePercentChart(
-        IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>? overlays,
-        IReadOnlyList<DateTimePoint>? portfolioTwrPoints)
+        IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> lines)
     {
-        if (points.Count == 0)
+        HasComparisonItems = lines.Count > 0;
+        if (lines.Count == 0)
         {
             CompareSeries = [];
             ComparisonLegend = [];
@@ -1052,54 +1086,22 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
-        // 我的投組線：優先用 TWR 序列（與 benchmark 同基準、除現金流／建倉假尖峰）；
-        // 服務缺時 fallback 回「裸淨值正規化 %」（舊行為）。
-        IReadOnlyList<DateTimePoint> portfolioPct;
-        if (portfolioTwrPoints is { Count: >= 2 })
+        var series = new List<ISeries>();
+        var legend = new List<ComparisonLegendItem>();
+        foreach (var (label, colorHex, removeToken, pts) in lines)
         {
-            portfolioPct = portfolioTwrPoints;
-        }
-        else
-        {
-            var baseVal = points[0].Value ?? 0d;
-            portfolioPct = baseVal == 0d
-                ? points
-                : points.Select(p => new DateTimePoint(p.DateTime, ((p.Value ?? 0d) / baseVal) - 1d)).ToList();
-        }
-
-        var meLabel = GetString("Portfolio.History.MeLabel", "我的投組");
-        var meColorHex = ComparisonPalette[0];
-
-        var series = new List<ISeries>
-        {
-            new LineSeries<DateTimePoint>
+            series.Add(new LineSeries<DateTimePoint>
             {
-                Values          = portfolioPct,
-                Name            = meLabel,
-                Stroke          = new SolidColorPaint(SKColor.Parse(meColorHex), 2.5f),
+                Values          = pts,
+                Name            = label,
+                Stroke          = new SolidColorPaint(SKColor.Parse(colorHex), 2f),
                 Fill            = null,
                 GeometrySize    = 0,
                 LineSmoothness  = 0,
                 AnimationsSpeed = TimeSpan.Zero,
-            },
-        };
-        var legend = new List<ComparisonLegendItem> { new(meLabel, meColorHex) };
-
-        if (overlays is not null)
-            foreach (var (label, colorHex, removeSymbol, pts) in overlays)
-            {
-                series.Add(new LineSeries<DateTimePoint>
-                {
-                    Values          = pts,
-                    Name            = label,
-                    Stroke          = new SolidColorPaint(SKColor.Parse(colorHex), 1.5f),
-                    Fill            = null,
-                    GeometrySize    = 0,
-                    LineSmoothness  = 0,
-                    AnimationsSpeed = TimeSpan.Zero,
-                });
-                legend.Add(new ComparisonLegendItem(label, colorHex, removeSymbol));
-            }
+            });
+            legend.Add(new ComparisonLegendItem(label, colorHex, removeToken));
+        }
 
         CompareSeries = [.. series];
         ComparisonLegend = legend;
