@@ -288,6 +288,12 @@ public sealed class PortfolioHistoryViewModelTests
             Assetra.Core.Models.Analysis.PerformancePeriod period,
             CancellationToken ct = default) =>
             Task.FromResult(result);
+
+        public Task<IReadOnlyList<Assetra.Core.Models.Analysis.BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
+            string symbol,
+            Assetra.Core.Models.Analysis.PerformancePeriod period,
+            CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Assetra.Core.Models.Analysis.BenchmarkSeriesPoint>?>(null);
     }
 
     // ── New tests for risk metrics integration (Volatility / Sharpe / HHI) ──
@@ -471,6 +477,12 @@ public sealed class PortfolioHistoryViewModelTests
             // Deterministic non-null value so the custom row formats to a real percentage.
             return Task.FromResult<decimal?>(0.10m);
         }
+
+        public Task<IReadOnlyList<Assetra.Core.Models.Analysis.BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
+            string symbol,
+            Assetra.Core.Models.Analysis.PerformancePeriod period,
+            CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Assetra.Core.Models.Analysis.BenchmarkSeriesPoint>?>(null);
     }
 
     private sealed class StubFx(Dictionary<(string From, string To), decimal> rates)
