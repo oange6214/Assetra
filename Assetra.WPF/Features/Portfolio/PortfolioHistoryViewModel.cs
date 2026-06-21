@@ -236,8 +236,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
     private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
 
-    /// <summary>各比較項目的最新現值/現價（token → 值）：股票現價 / 我的投組現淨值 / 組合現市值。</summary>
-    private IReadOnlyDictionary<string, decimal> _comparisonLatestByToken = new Dictionary<string, decimal>();
+    /// <summary>各比較項目的「絕對現值序列」（token → 每日值點）：股票收盤 / 我的投組淨值 / 組合市值。
+    /// 下方清單依顯示日（hover 或期末）取值，故現值也會跟著 hover 變。</summary>
+    private IReadOnlyDictionary<string, IReadOnlyList<DateTimePoint>> _comparisonAbsByToken = new Dictionary<string, IReadOnlyList<DateTimePoint>>();
 
     partial void OnComparisonHoverDateChanged(DateTime? value) => UpdateComparisonRows();
 
@@ -261,10 +262,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 : pts[^1];
             usedDate = pt.DateTime;
             var pct = pt.Value ?? 0d;
+            // 現值/現價：同樣依顯示日（hover 或期末）從絕對價序列取值。
+            var absPts = _comparisonAbsByToken.GetValueOrDefault(token);
+            var value = 0m;
+            if (absPts is { Count: > 0 })
+            {
+                var ap = ComparisonHoverDate is { } hd
+                    ? absPts.LastOrDefault(p => p.DateTime <= hd) ?? absPts[0]
+                    : absPts[^1];
+                value = (decimal)(ap.Value ?? 0d);
+            }
             // 漲跌色：PnlColorPalette 已依 ColorSchemeService 處理台股「漲紅跌綠」慣例（pct 為比例 → ×100 成百分比）。
             rows.Add(new ComparisonRow(label, color, token, pct,
-                Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d),
-                _comparisonLatestByToken.GetValueOrDefault(token)));
+                Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d), value));
         }
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
@@ -1097,10 +1107,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         var items = CurrentComparisonItems.Where(t => !string.IsNullOrWhiteSpace(t)).Take(6).ToList();
         var lines = new List<(string, string, string, IReadOnlyList<DateTimePoint>)>();
-        var latest = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase); // token → 最新現值/現價
+        var abs = new Dictionary<string, IReadOnlyList<DateTimePoint>>(StringComparer.OrdinalIgnoreCase); // token → 現值序列
         if (items.Count == 0)
         {
-            _comparisonLatestByToken = latest;
+            _comparisonAbsByToken = abs;
             return lines;
         }
 
@@ -1108,11 +1118,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         // 我的投組 TWR 只在 @me 在清單時算一次。
         IReadOnlyList<DateTimePoint>? mePts = null;
-        var meLatest = 0m;
+        IReadOnlyList<DateTimePoint> meAbs = [];
         if (items.Any(t => string.Equals(t, PortfolioItemToken, StringComparison.OrdinalIgnoreCase)))
         {
-            var meVals = BuildCleanedValuations(filtered);
-            meLatest = meVals.Count > 0 ? meVals[^1].Value : 0m; // 我的投組現值 = 期末淨值
+            meAbs = BuildCleanedValuations(filtered)
+                .Select(v => new DateTimePoint(v.Date.ToDateTime(TimeOnly.MinValue), (double)v.Value))
+                .ToList(); // 我的投組現值 = 每日淨值序列
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
         }
 
@@ -1124,7 +1135,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 if (mePts is { Count: >= 2 })
                 {
                     lines.Add((GetString("Portfolio.History.MeLabel", "我的投組"), ComparisonPalette[0], token, mePts));
-                    latest[token] = meLatest;
+                    abs[token] = meAbs;
                 }
                 continue;
             }
@@ -1146,7 +1157,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     var glabel = _groupCatalog?.FindById(gid)?.Name
                         ?? GetString("Portfolio.History.GroupFallback", "組合");
                     lines.Add((glabel, ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, gpts));
-                    latest[token] = gseries[^1].Value;
+                    abs[token] = gseries
+                        .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.Value))
+                        .ToList();
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -1166,14 +1179,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
                     .ToList();
                 lines.Add((LabelForToken(token), ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, pts));
-                latest[token] = series[^1].Value;
+                abs[token] = series
+                    .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.Value))
+                    .ToList();
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // 單一項目抓取失敗 → 略過該條
             }
         }
-        _comparisonLatestByToken = latest;
+        _comparisonAbsByToken = abs;
         return lines;
     }
 
