@@ -431,17 +431,55 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0,0,8,0">
-                                <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
-                                           Foreground="{DynamicResource AppTextMuted}"
-                                           Text="{Binding Symbol}" />
-                                <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AppTextPrimary}"
-                                           Text="{Binding Display}" />
-                            </StackPanel>
+                            <Grid Margin="0,0,8,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock FontSize="{DynamicResource Font.Size.Xs}"
+                                               Foreground="{DynamicResource AppTextMuted}"
+                                               Text="{Binding Symbol}" />
+                                    <TextBlock FontSize="{DynamicResource Font.Size.Sm}" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AppTextPrimary}"
+                                               Text="{Binding Display}" />
+                                </StackPanel>
+                                <!--  移除此對標（inline picker）  -->
+                                <Button Grid.Column="1"
+                                        Width="20" Height="20" Padding="0"
+                                        VerticalAlignment="Top"
+                                        Command="{Binding DataContext.RemoveComparisonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding Symbol}"
+                                        Style="{StaticResource AppIconButton}"
+                                        ToolTip="{DynamicResource Portfolio.History.RemoveComparison}">
+                                    <ds:AppIcon FontSize="10" Foreground="{DynamicResource AppTextMuted}" Symbol="Dismiss24" />
+                                </Button>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <!--  inline「新增比較對象」：直接在此加對標（最多 4），免進設定；移除按各列右上 ✕。  -->
+                <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.History.AddComparison}" />
+                    <TextBox
+                        Width="150"
+                        VerticalContentAlignment="Center"
+                        Text="{Binding ComparisonInput, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="{DynamicResource Portfolio.History.AddComparison.Hint}" />
+                    <Button
+                        Margin="6,0,0,0"
+                        MinHeight="30"
+                        Padding="14,0"
+                        Command="{Binding AddComparisonCommand}"
+                        Content="＋"
+                        Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
             </StackPanel>
         </Border>
 

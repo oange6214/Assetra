@@ -79,6 +79,64 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     partial void OnIsComparePercentModeChanged(bool value) => RefreshChart();
 
+    // ── inline「新增比較對象」picker（資產趨勢圖直接加/移對標，免進設定）──────────────
+    [ObservableProperty] private string _comparisonInput = string.Empty;
+
+    private IReadOnlyList<string> CurrentCustomBenchmarks =>
+        _settings?.Current.CustomBenchmarkSymbols ?? [];
+
+    public bool CanAddComparison =>
+        !string.IsNullOrWhiteSpace(ComparisonInput)
+        && CurrentCustomBenchmarks.Count < 4
+        && !CurrentCustomBenchmarks.Any(s => string.Equals(s, ComparisonInput.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    partial void OnComparisonInputChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanAddComparison));
+        AddComparisonCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddComparison))]
+    private async Task AddComparisonAsync()
+    {
+        if (_settings is null || !CanAddComparison)
+            return;
+        var list = CurrentCustomBenchmarks.ToList();
+        list.Add(ComparisonInput.Trim());
+        await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
+        ComparisonInput = string.Empty;
+        RefreshChart(); // 重抓 overlay 疊線 + 下方對標數字
+    }
+
+    [RelayCommand]
+    private async Task RemoveComparisonAsync(string? symbol)
+    {
+        if (_settings is null || string.IsNullOrWhiteSpace(symbol))
+            return;
+        var list = CurrentCustomBenchmarks
+            .Where(s => !string.Equals(s, symbol, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
+        RefreshChart();
+    }
+
+    private async Task PersistCustomBenchmarksAsync(IReadOnlyList<string> symbols)
+    {
+        try
+        {
+            // raiseChanged:false — 由本 VM 自己 RefreshChart 更新圖＋對標數字，避免觸發 app-wide reload。
+            await _settings!
+                .SaveAsync(_settings.Current with { CustomBenchmarkSymbols = symbols.ToList() }, raiseChanged: false)
+                .ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Trends] 儲存自訂對標失敗");
+        }
+        OnPropertyChanged(nameof(CanAddComparison));
+        AddComparisonCommand.NotifyCanExecuteChanged();
+    }
+
     /// <summary>「vs 大盤」% 對比模式的圖例（投組＋各對標線），每項 (label, 顏色 hex)；非 % 模式為空。</summary>
     [ObservableProperty] private IReadOnlyList<ComparisonLegendItem> _comparisonLegend = [];
 

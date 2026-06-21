@@ -172,6 +172,9 @@
     <sys:String x:Key="Portfolio.PnL.NetTooltip">Est. net P&amp;L = Net Value − Total Cost = (Market Value − est. sell fees/tax) − Total Cost&#x0a;• Est. sell fees/tax = commission + securities tax (ETF 0.1% / Stock 0.3%)&#x0a;• Total Cost includes the buy-side commission actually paid&#x0a;This is an estimate based on current price and fee/tax rules; actual execution may differ.</sys:String>
     <sys:String x:Key="Portfolio.History.MarketValue">Market value</sys:String>
     <sys:String x:Key="Portfolio.History.VsMarket">vs market</sys:String>
+    <sys:String x:Key="Portfolio.History.AddComparison">Add comparison</sys:String>
+    <sys:String x:Key="Portfolio.History.AddComparison.Hint">Symbol, e.g. 0050.TW, 2330.TW, ^GSPC (TAIEX ^TWII built in)</sys:String>
+    <sys:String x:Key="Portfolio.History.RemoveComparison">Remove</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">My portfolio</sys:String>
     <sys:String x:Key="Portfolio.History.BenchmarkTaiex">TAIEX</sys:String>
     <sys:String x:Key="Portfolio.Symbol">Symbol</sys:String>
