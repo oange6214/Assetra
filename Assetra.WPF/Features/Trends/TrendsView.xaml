@@ -530,7 +530,8 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" MinWidth="96" />
+                                    <ColumnDefinition Width="Auto" MinWidth="78" />
                                 </Grid.ColumnDefinitions>
                                 <Ellipse Grid.Column="0" Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center">
                                     <Ellipse.Fill>
@@ -543,8 +544,19 @@
                                     FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextPrimary}"
                                     Text="{Binding Label}" />
+                                <!--  現值 / 現價（股票現價 / 我的投組現淨值 / 組合現市值）  -->
                                 <TextBlock
                                     Grid.Column="2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Numeric}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding Value, StringFormat='{}{0:#,##0.##}'}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource Font.Family.Numeric}"
                                     FontSize="{StaticResource Font.Size.Sm}"

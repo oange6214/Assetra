@@ -9,4 +9,5 @@ public sealed record ComparisonRow(
     string ColorHex,
     string? RemoveToken,
     double Percent,
-    System.Windows.Media.Brush PercentBrush);
+    System.Windows.Media.Brush PercentBrush,
+    decimal Value);

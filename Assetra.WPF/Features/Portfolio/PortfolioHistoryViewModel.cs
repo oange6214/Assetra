@@ -236,6 +236,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
     private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
 
+    /// <summary>各比較項目的最新現值/現價（token → 值）：股票現價 / 我的投組現淨值 / 組合現市值。</summary>
+    private IReadOnlyDictionary<string, decimal> _comparisonLatestByToken = new Dictionary<string, decimal>();
+
     partial void OnComparisonHoverDateChanged(DateTime? value) => UpdateComparisonRows();
 
     /// <summary>依目前顯示日（hover 或期末）重算下方清單每項的同期 %。</summary>
@@ -259,7 +262,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             usedDate = pt.DateTime;
             var pct = pt.Value ?? 0d;
             // 漲跌色：PnlColorPalette 已依 ColorSchemeService 處理台股「漲紅跌綠」慣例（pct 為比例 → ×100 成百分比）。
-            rows.Add(new ComparisonRow(label, color, token, pct, Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d)));
+            rows.Add(new ComparisonRow(label, color, token, pct,
+                Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d),
+                _comparisonLatestByToken.GetValueOrDefault(token)));
         }
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
@@ -1092,15 +1097,24 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         var items = CurrentComparisonItems.Where(t => !string.IsNullOrWhiteSpace(t)).Take(6).ToList();
         var lines = new List<(string, string, string, IReadOnlyList<DateTimePoint>)>();
+        var latest = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase); // token → 最新現值/現價
         if (items.Count == 0)
+        {
+            _comparisonLatestByToken = latest;
             return lines;
+        }
 
         var period = new PerformancePeriod(filtered.Min(s => s.SnapshotDate), filtered.Max(s => s.SnapshotDate));
 
         // 我的投組 TWR 只在 @me 在清單時算一次。
         IReadOnlyList<DateTimePoint>? mePts = null;
+        var meLatest = 0m;
         if (items.Any(t => string.Equals(t, PortfolioItemToken, StringComparison.OrdinalIgnoreCase)))
+        {
+            var meVals = BuildCleanedValuations(filtered);
+            meLatest = meVals.Count > 0 ? meVals[^1].Value : 0m; // 我的投組現值 = 期末淨值
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
+        }
 
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
@@ -1108,7 +1122,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             if (string.Equals(token, PortfolioItemToken, StringComparison.OrdinalIgnoreCase))
             {
                 if (mePts is { Count: >= 2 })
+                {
                     lines.Add((GetString("Portfolio.History.MeLabel", "我的投組"), ComparisonPalette[0], token, mePts));
+                    latest[token] = meLatest;
+                }
                 continue;
             }
 
@@ -1129,6 +1146,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     var glabel = _groupCatalog?.FindById(gid)?.Name
                         ?? GetString("Portfolio.History.GroupFallback", "組合");
                     lines.Add((glabel, ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, gpts));
+                    latest[token] = gseries[^1].Value;
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -1148,12 +1166,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
                     .ToList();
                 lines.Add((LabelForToken(token), ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, pts));
+                latest[token] = series[^1].Value;
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // 單一項目抓取失敗 → 略過該條
             }
         }
+        _comparisonLatestByToken = latest;
         return lines;
     }
 

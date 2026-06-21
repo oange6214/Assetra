@@ -39,9 +39,9 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
         if (startPx == 0)
             return null;
 
-        // 每個交易日相對區間起點的累積報酬 = close/startPx − 1（起點本身 = 0%）。
+        // 每個交易日相對區間起點的累積報酬 = close/startPx − 1（起點本身 = 0%）；Value = 當日收盤（現價用）。
         return inRange
-            .Select(c => new BenchmarkSeriesPoint(c.Date, (c.Close - startPx) / startPx))
+            .Select(c => new BenchmarkSeriesPoint(c.Date, (c.Close - startPx) / startPx, c.Close))
             .ToList();
     }
 

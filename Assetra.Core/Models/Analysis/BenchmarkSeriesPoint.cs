@@ -5,4 +5,4 @@ namespace Assetra.Core.Models.Analysis;
 /// 用於資產趨勢圖的 benchmark 疊線：所有標的都從 0% 起跑，不同價位尺度才能同圖比較
 /// （與 Google Finance 的比較圖一致）。
 /// </summary>
-public sealed record BenchmarkSeriesPoint(DateOnly Date, decimal PercentFromStart);
+public sealed record BenchmarkSeriesPoint(DateOnly Date, decimal PercentFromStart, decimal Value = 0m);
