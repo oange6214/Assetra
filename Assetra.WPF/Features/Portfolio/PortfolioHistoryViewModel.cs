@@ -455,7 +455,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         // 比較視圖（資產趨勢頁，常駐）：抓「大盤＋自訂對標」正規化 % 序列 ＋ 我的投組 TWR。
         // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
-        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
+        IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
         IReadOnlyList<DateTimePoint>? twrPoints = null;
         if (filtered.Count >= 2 && points.Count >= 2)
         {
@@ -993,7 +993,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// 抓「大盤（加權指數）＋使用者自訂對標」的正規化 % 序列，各自轉成一條疊線（label, 顏色 hex, 點）。
     /// 個別對標抓不到就略過該條；整段不丟例外（單條 try-catch）—— 主圖不受影響。
     /// </summary>
-    private async Task<IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>>
+    private async Task<IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>>
         BuildBenchmarkOverlaysAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
     {
         var period = new PerformancePeriod(filtered.Min(s => s.SnapshotDate), filtered.Max(s => s.SnapshotDate));
@@ -1007,7 +1007,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             if (!string.IsNullOrWhiteSpace(s))
                 specs.Add((s, s));
 
-        var overlays = new List<(string, string, IReadOnlyList<DateTimePoint>)>();
+        var overlays = new List<(string, string, string?, IReadOnlyList<DateTimePoint>)>();
         for (var i = 0; i < specs.Count; i++)
         {
             try
@@ -1020,8 +1020,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 var pts = series
                     .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
                     .ToList();
-                // palette[0] 留給投組；對標從 [1] 開始循環。
-                overlays.Add((specs[i].Label, ComparisonPalette[(i + 1) % ComparisonPalette.Length], pts));
+                // palette[0] 留給投組；對標從 [1] 開始循環。i==0 是加權指數（大盤、固定不可移除）；
+                // 其餘是自訂對標（RemoveSymbol＝該 symbol，chip 顯示 ✕）。
+                overlays.Add((specs[i].Label, ComparisonPalette[(i + 1) % ComparisonPalette.Length],
+                    i == 0 ? null : specs[i].Symbol, pts));
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -1037,7 +1039,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// </summary>
     private void BuildComparePercentChart(
         IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays,
+        IReadOnlyList<(string Label, string ColorHex, string? RemoveSymbol, IReadOnlyList<DateTimePoint> Points)>? overlays,
         IReadOnlyList<DateTimePoint>? portfolioTwrPoints)
     {
         if (points.Count == 0)
@@ -1084,7 +1086,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var legend = new List<ComparisonLegendItem> { new(meLabel, meColorHex) };
 
         if (overlays is not null)
-            foreach (var (label, colorHex, pts) in overlays)
+            foreach (var (label, colorHex, removeSymbol, pts) in overlays)
             {
                 series.Add(new LineSeries<DateTimePoint>
                 {
@@ -1096,7 +1098,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     LineSmoothness  = 0,
                     AnimationsSpeed = TimeSpan.Zero,
                 });
-                legend.Add(new ComparisonLegendItem(label, colorHex));
+                legend.Add(new ComparisonLegendItem(label, colorHex, removeSymbol));
             }
 
         CompareSeries = [.. series];
