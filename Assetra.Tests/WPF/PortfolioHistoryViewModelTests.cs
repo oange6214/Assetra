@@ -392,12 +392,12 @@ public sealed class PortfolioHistoryViewModelTests
             => Task.FromResult<decimal?>(0.05m);
 
         public Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
-            string symbol, PerformancePeriod period, CancellationToken ct = default)
+            string symbol, PerformancePeriod period, IntradayRange? intraday = null, CancellationToken ct = default)
         {
             IReadOnlyList<BenchmarkSeriesPoint> pts =
             [
-                new BenchmarkSeriesPoint(period.Start, 0m, 100m),
-                new BenchmarkSeriesPoint(period.End, 0.05m, 105m),
+                new BenchmarkSeriesPoint(period.Start.ToDateTime(TimeOnly.MinValue), 0m, 100m),
+                new BenchmarkSeriesPoint(period.End.ToDateTime(TimeOnly.MinValue), 0.05m, 105m),
             ];
             return Task.FromResult<IReadOnlyList<BenchmarkSeriesPoint>?>(pts);
         }

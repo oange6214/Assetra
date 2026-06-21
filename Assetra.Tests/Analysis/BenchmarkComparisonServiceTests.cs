@@ -66,7 +66,7 @@ public sealed class BenchmarkComparisonServiceTests
 
         Assert.NotNull(series);
         Assert.Equal(3, series!.Count);
-        Assert.Equal(new DateOnly(2026, 5, 5), series[0].Date);   // 補的期初點
+        Assert.Equal(new DateTime(2026, 5, 5), series[0].Date);   // 補的期初點
         Assert.Equal(0m, series[0].PercentFromStart);
         Assert.Equal(100m, series[0].Value);                      // 基準 = 期初前 05/01 收盤
         Assert.Equal(0.10m, series[1].PercentFromStart);          // 110/100 − 1
@@ -95,9 +95,41 @@ public sealed class BenchmarkComparisonServiceTests
 
         Assert.NotNull(series);
         Assert.Equal(5, series!.Count);                          // 5 個交易日折線（非 2 點斜線）
-        Assert.Equal(new DateOnly(2026, 5, 8), series[0].Date);  // 基準 = 最後 5 根的第一根
+        Assert.Equal(new DateTime(2026, 5, 8), series[0].Date);  // 基準 = 最後 5 根的第一根
         Assert.Equal(0m, series[0].PercentFromStart);
         Assert.Equal(0.21m, series[^1].PercentFromStart);        // 121/100 − 1
+    }
+
+    [Fact]
+    public async Task ComputeBenchmarkSeriesAsync_WithIntradayRange_UsesIntradayPointsWithTimes()
+    {
+        // 1D/5D：改吃盤中分時（帶「時分」），以盤中第一點收盤為基準；不該退回日線 provider（給 999 當哨兵）。
+        var at9 = new DateTime(2026, 6, 18, 9, 0, 0);
+        var intraday = new StubIntraday(
+        [
+            new IntradayPoint(at9, 100m),
+            new IntradayPoint(at9.AddMinutes(1), 101m),
+            new IntradayPoint(at9.AddMinutes(2), 102m),
+        ]);
+        var svc = new BenchmarkComparisonService(
+            new FakeHistory([(new DateOnly(2026, 6, 18), 999m)]), intraday);
+        var window = new PerformancePeriod(new DateOnly(2026, 6, 17), new DateOnly(2026, 6, 18));
+
+        var series = await svc.ComputeBenchmarkSeriesAsync("0050.TW", window, IntradayRange.OneDay);
+
+        Assert.NotNull(series);
+        Assert.Equal(3, series!.Count);
+        Assert.Equal(at9, series[0].Date);                  // 帶時分（09:00），非午夜 → 走盤中路徑
+        Assert.Equal(0m, series[0].PercentFromStart);       // 基準 = 盤中第一點 100
+        Assert.Equal(0.02m, series[^1].PercentFromStart);   // 102/100 − 1
+        Assert.Equal(100m, series[0].Value);                // 用盤中收盤、非日線哨兵 999
+    }
+
+    private sealed class StubIntraday(IReadOnlyList<IntradayPoint> points) : IIntradayHistoryProvider
+    {
+        public Task<IReadOnlyList<IntradayPoint>> GetIntradayAsync(
+            string symbol, string exchange, IntradayRange range, CancellationToken ct = default)
+            => Task.FromResult(points);
     }
 
     private sealed class FakeHistory(IReadOnlyList<(DateOnly Date, decimal Close)> points)

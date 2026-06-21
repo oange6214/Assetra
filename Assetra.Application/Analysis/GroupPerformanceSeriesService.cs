@@ -125,7 +125,7 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
             return null;
         // twrSeries 與 values 同序同長度（ComputeSeries 每個 valuation 一點）→ index 對齊取絕對市值（現值用）。
         return twrSeries
-            .Select((p, i) => new BenchmarkSeriesPoint(p.Date, p.CumulativeTwr, values[i].Value))
+            .Select((p, i) => new BenchmarkSeriesPoint(p.Date.ToDateTime(TimeOnly.MinValue), p.CumulativeTwr, values[i].Value))
             .ToList();
     }
 }

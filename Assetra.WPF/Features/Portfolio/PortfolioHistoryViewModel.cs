@@ -999,6 +999,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
         }
 
+        // 1D/5D：benchmark 改抓盤中分時（帶時分曲線）；其餘日線。投組／組合無盤中資料 → 維持日線。
+        IntradayRange? intradayRange = ActivePeriodKey switch
+        {
+            "1" => IntradayRange.OneDay,
+            "5" => IntradayRange.FiveDays,
+            _ => null,
+        };
+
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
         {
@@ -1024,13 +1032,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     if (gseries is null || gseries.Count < 2)
                         continue;
                     var gpts = gseries
-                        .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
+                        .Select(p => new DateTimePoint(p.Date, (double)p.PercentFromStart))
                         .ToList();
                     var glabel = _groupCatalog?.FindById(gid)?.Name
                         ?? GetString("Portfolio.History.GroupFallback", "組合");
                     lines.Add((glabel, ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, gpts));
                     abs[token] = gseries
-                        .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.Value))
+                        .Select(p => new DateTimePoint(p.Date, (double)p.Value))
                         .ToList();
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
@@ -1044,15 +1052,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 continue;
             try
             {
-                var series = await _benchmark.ComputeBenchmarkSeriesAsync(token, period).ConfigureAwait(false);
+                var series = await _benchmark.ComputeBenchmarkSeriesAsync(token, period, intradayRange).ConfigureAwait(false);
                 if (series is null || series.Count < 2)
                     continue;
                 var pts = series
-                    .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
+                    .Select(p => new DateTimePoint(p.Date, (double)p.PercentFromStart))
                     .ToList();
                 lines.Add((LabelForToken(token), ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, pts));
                 abs[token] = series
-                    .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.Value))
+                    .Select(p => new DateTimePoint(p.Date, (double)p.Value))
                     .ToList();
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -1117,9 +1125,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ComparisonHoverDate = null; // 重畫後預設顯示期末
         UpdateComparisonRows();
 
+        // 1D 盤中：X 軸用「時:分」＋每小時格線；其餘（含 5D 盤中、各日線期間）用「月/日」日格線。
+        var (xUnit, xLabeler) = ActivePeriodKey == "1"
+            ? (TimeSpan.FromHours(1), (Func<DateTime, string>)(d => d.ToString("HH:mm")))
+            : (TimeSpan.FromDays(1), d => d.ToString("MM/dd"));
+
         CompareXAxes =
         [
-            new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("MM/dd"))
+            new DateTimeAxis(xUnit, xLabeler)
             {
                 TextSize        = 10,
                 LabelsPaint     = new SolidColorPaint(labelColor),

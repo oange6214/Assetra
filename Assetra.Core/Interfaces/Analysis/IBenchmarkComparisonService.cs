@@ -1,3 +1,4 @@
+using Assetra.Core.Models;
 using Assetra.Core.Models.Analysis;
 
 namespace Assetra.Core.Interfaces.Analysis;
@@ -11,10 +12,11 @@ public interface IBenchmarkComparisonService
     Task<decimal?> ComputeBenchmarkTwrAsync(string symbol, PerformancePeriod period, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns the benchmark's normalized return path over the period — each in-range trading day's
-    /// cumulative return from the period start (<c>close / startClose − 1</c>). Null when price
-    /// history is unavailable. Used to overlay the benchmark as a line on the trends chart.
+    /// Returns the benchmark's normalized return path over the period — each point's cumulative return
+    /// from the start (<c>close / startClose − 1</c>). Null when price history is unavailable.
+    /// When <paramref name="intraday"/> is set (1D/5D), fetches intraday minute candles instead of
+    /// daily closes, so the line carries actual times; otherwise daily closes (at midnight).
     /// </summary>
     Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
-        string symbol, PerformancePeriod period, CancellationToken ct = default);
+        string symbol, PerformancePeriod period, IntradayRange? intraday = null, CancellationToken ct = default);
 }

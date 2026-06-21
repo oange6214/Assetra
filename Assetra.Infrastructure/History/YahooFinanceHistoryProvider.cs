@@ -74,6 +74,64 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
     }
 
     /// <summary>
+    /// 盤中分時：1D → 1 分線（range=1d）、5D → 5 分線（range=5d）。回傳帶時分的 <see cref="IntradayPoint"/>。
+    /// 給績效比較頁 1D/5D 用；^指數／海外也走這條（Fugle 盤中不接受 ^）。失敗回空集合。
+    /// </summary>
+    public async Task<IReadOnlyList<IntradayPoint>> GetIntradayAsync(
+        string symbol, string exchange, IntradayRange range, CancellationToken ct = default)
+    {
+        try
+        {
+            var yahooSymbol = YahooSymbolMapper.ToYahooSymbol(symbol, exchange);
+            var (interval, yahooRange) = range == IntradayRange.OneDay ? ("1m", "1d") : ("5m", "5d");
+            var url = $"https://query1.finance.yahoo.com/v8/finance/chart/{yahooSymbol}?interval={interval}&range={yahooRange}";
+
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
+            req.Headers.TryAddWithoutValidation("Accept-Language", "zh-TW,zh;q=0.9,en-US;q=0.8");
+            using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (!response.IsSuccessStatusCode)
+                return [];
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            return ParseIntradayResponse(json, exchange);
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    internal static IReadOnlyList<IntradayPoint> ParseIntradayResponse(string json, string? exchange = null)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var chart = doc.RootElement.GetProperty("chart");
+        var resultEl = chart.GetProperty("result");
+        if (resultEl.ValueKind == JsonValueKind.Null || resultEl.GetArrayLength() == 0)
+            return [];
+
+        var result = resultEl[0];
+        var tz = ResolveExchangeTimeZone(exchange);
+
+        if (!result.TryGetProperty("timestamp", out var tsEl) || tsEl.ValueKind != JsonValueKind.Array)
+            return [];
+        var timestamps = tsEl.EnumerateArray().ToList();
+        var quote = result.GetProperty("indicators").GetProperty("quote")[0];
+        var closes = quote.GetProperty("close").EnumerateArray().ToList();
+
+        var points = new List<IntradayPoint>(timestamps.Count);
+        for (int i = 0; i < timestamps.Count && i < closes.Count; i++)
+        {
+            if (closes[i].ValueKind == JsonValueKind.Null)
+                continue;
+            var dt = DateTimeOffset.FromUnixTimeSeconds(timestamps[i].GetInt64());
+            var local = TimeZoneInfo.ConvertTime(dt, tz);
+            points.Add(new IntradayPoint(local.DateTime, closes[i].GetDecimal()));
+        }
+        return points;
+    }
+
+    /// <summary>
     /// Parses a Yahoo Finance v8 chart response. The session-close timestamp returned by Yahoo is interpreted in
     /// the exchange's local timezone (resolved via <see cref="StockExchangeRegistry"/>). For an unknown exchange
     /// — or the legacy single-arg overload — Taipei is used to preserve v0.15.1 behaviour.

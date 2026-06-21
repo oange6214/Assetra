@@ -14,10 +14,12 @@ namespace Assetra.Application.Analysis;
 public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
 {
     private readonly IStockHistoryProvider _history;
+    private readonly IIntradayHistoryProvider? _intraday;
 
-    public BenchmarkComparisonService(IStockHistoryProvider history)
+    public BenchmarkComparisonService(IStockHistoryProvider history, IIntradayHistoryProvider? intraday = null)
     {
         _history = history;
+        _intraday = intraday;
     }
 
     public async Task<decimal?> ComputeBenchmarkTwrAsync(string symbol, PerformancePeriod period, CancellationToken ct = default)
@@ -30,8 +32,16 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
     }
 
     public async Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
-        string symbol, PerformancePeriod period, CancellationToken ct = default)
+        string symbol, PerformancePeriod period, IntradayRange? intraday = null, CancellationToken ct = default)
     {
+        // 1D/5D：抓盤中分時（帶時分）。抓不到 ≥2 點再退日線、不讓線消失。
+        if (intraday is { } range && _intraday is not null)
+        {
+            var live = await ComputeIntradaySeriesAsync(symbol, range, ct).ConfigureAwait(false);
+            if (live is { Count: >= 2 })
+                return live;
+        }
+
         var r = await GetBaselineAndRangeAsync(symbol, period, ct).ConfigureAwait(false);
         if (r is null)
             return null;
@@ -40,10 +50,26 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
         var points = new List<BenchmarkSeriesPoint>(inRange.Count + 1);
         // 標的在期初當天無資料時，補一個期初 0% 點（abs = 基準價），讓所有線都從期初起跑、同基準。
         if (inRange[0].Date > period.Start)
-            points.Add(new BenchmarkSeriesPoint(period.Start, 0m, baseline));
+            points.Add(new BenchmarkSeriesPoint(period.Start.ToDateTime(TimeOnly.MinValue), 0m, baseline));
         foreach (var c in inRange)
-            points.Add(new BenchmarkSeriesPoint(c.Date, (c.Close - baseline) / baseline, c.Close));
+            points.Add(new BenchmarkSeriesPoint(c.Date.ToDateTime(TimeOnly.MinValue), (c.Close - baseline) / baseline, c.Close));
         return points;
+    }
+
+    /// <summary>盤中分時 → 同期 %：以盤中第一點收盤為基準，每點 close/baseline − 1。少於 2 點或基準 0 回 null。</summary>
+    private async Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeIntradaySeriesAsync(
+        string symbol, IntradayRange range, CancellationToken ct)
+    {
+        var (sym, exch) = SplitSymbol(symbol);
+        var points = await _intraday!.GetIntradayAsync(sym, exch, range, ct).ConfigureAwait(false);
+        if (points.Count < 2)
+            return null;
+        var baseline = points[0].Close;
+        if (baseline == 0m)
+            return null;
+        return points
+            .Select(p => new BenchmarkSeriesPoint(p.At, (p.Close - baseline) / baseline, p.Close))
+            .ToList();
     }
 
     /// <summary>
