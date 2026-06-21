@@ -74,25 +74,30 @@ public sealed class BenchmarkComparisonServiceTests
     }
 
     [Fact]
-    public async Task ComputeBenchmarkSeriesAsync_RecentWindowAfterLastCandle_FallsBackToLatestCandles()
+    public async Task ComputeBenchmarkSeriesAsync_RecentShortWindow_UsesLastNTradingDays()
     {
-        // 快照比行情新／短視窗撞週末 → 視窗 [05/15,05/20] 內無 K 線，但這是「延伸到最新」的近期區間
-        // → 退用最後 2 根（05/09,05/10），讓 5D/1D 仍畫得出最近走勢、不整張空白。修「選 5D/1D 圖空白」。
+        // 近期短窗（如 5D）＝「最近 N 個交易日收盤」，不靠日曆對齊：即使視窗日期比資料新（快照比行情新）或
+        // 撞週末，也畫得出 N 點折線而非 2 點斜線。修「1D/5D 變斜線」。7 根 ＋ 5 天視窗 → 取最後 5 根（05/08..05/14）。
         var svc = new BenchmarkComparisonService(new FakeHistory(
         [
-            (new DateOnly(2026, 5, 8), 100m),
+            (new DateOnly(2026, 5, 6), 90m),
+            (new DateOnly(2026, 5, 7), 95m),
+            (new DateOnly(2026, 5, 8), 100m),   // ← 最後 5 根從這裡開始
             (new DateOnly(2026, 5, 9), 110m),
-            (new DateOnly(2026, 5, 10), 121m),
+            (new DateOnly(2026, 5, 12), 105m),
+            (new DateOnly(2026, 5, 13), 115m),
+            (new DateOnly(2026, 5, 14), 121m),
         ]));
-        var window = new PerformancePeriod(new DateOnly(2026, 5, 15), new DateOnly(2026, 5, 20));
+        // 視窗 5 天、且比最後一根（05/14）新 → 取最後 5 根交易日。
+        var window = new PerformancePeriod(new DateOnly(2026, 5, 18), new DateOnly(2026, 5, 22));
 
         var series = await svc.ComputeBenchmarkSeriesAsync("0050.TW", window);
 
         Assert.NotNull(series);
-        Assert.Equal(2, series!.Count);                          // 退用最後 2 根
-        Assert.Equal(new DateOnly(2026, 5, 9), series[0].Date);  // 基準 = 退用段第一根
+        Assert.Equal(5, series!.Count);                          // 5 個交易日折線（非 2 點斜線）
+        Assert.Equal(new DateOnly(2026, 5, 8), series[0].Date);  // 基準 = 最後 5 根的第一根
         Assert.Equal(0m, series[0].PercentFromStart);
-        Assert.Equal(0.10m, series[1].PercentFromStart);         // 121/110 − 1
+        Assert.Equal(0.21m, series[^1].PercentFromStart);        // 121/100 − 1
     }
 
     private sealed class FakeHistory(IReadOnlyList<(DateOnly Date, decimal Close)> points)

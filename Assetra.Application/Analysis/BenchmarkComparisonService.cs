@@ -67,6 +67,15 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
         if (candles.Count < 2)
             return null;
 
+        // 近期短窗（1D/5D，≤ 一週）：日資料沒有盤中 → 取「最近 span 個交易日收盤」(TakeLast)，而非日曆對齊。
+        // 這樣 5D = 最近 5 個交易日的折線（不會因快照比行情新撞空窗而退化成 2 點斜線/空白）；基準 = 這段第一根。
+        // 只在「延伸到最新」時套用（period.End ≥ 最後一根）；過去的自訂短區間仍走日曆視窗、不假造。
+        if (span <= 7 && period.End >= candles[^1].Date)
+        {
+            var recent = candles.TakeLast(span).ToList();
+            return recent.Count < 2 || recent[0].Close == 0m ? null : (recent[0].Close, recent);
+        }
+
         var inRange = candles.Where(c => c.Date >= period.Start && c.Date <= period.End).ToList();
 
         // 視窗內 K 線不足（短期間 5D/1D 撞週末/假日，或快照比行情新、近幾日尚未發布）→ 若此區間是「延伸
