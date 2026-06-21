@@ -88,6 +88,7 @@ internal sealed class PortfolioViewModelFactory
                 sp.GetRequiredService<ILocalizationService>()),
             // Portfolio-Groups-Refactor P3 — 共用群組目錄注入。
             GroupCatalog: sp.GetService<PortfolioGroupCatalog>(),
+            GroupPerformance: sp.GetService<IGroupPerformanceSeriesService>(),
             // P4.1 — Asset-level XIRR 年化報酬計算（detail panel KPI 矩陣使用）。
             Xirr: sp.GetService<IXirrCalculator>(),
             TransactionFxRateResolver: sp.GetService<TransactionFxRateResolver>())

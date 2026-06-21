@@ -43,6 +43,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly ISharpeRatioCalculator? _sharpe;
     private readonly IConcentrationAnalyzer? _concentration;
     private readonly IStockSearchService? _search;   // 對比 picker autocomplete（＝新增資產用的搜尋）
+    private readonly Assetra.Core.Interfaces.Analysis.IGroupPerformanceSeriesService? _groupPerformance; // 群組比較線
+    private readonly Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? _groupCatalog;          // 群組名稱/清單
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -72,6 +74,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // ── 「＋比較」picker：資產趨勢圖的比較項目（我的投組／大盤／股票，全部使用者自選、可移除、預設空）──
     /// <summary>我的投組（整體 TWR）在比較清單中的特殊 token。</summary>
     public const string PortfolioItemToken = "@me";
+
+    /// <summary>群組比較 token 前綴；完整格式「@group:{guid}」。</summary>
+    public const string GroupTokenPrefix = "@group:";
 
     [ObservableProperty] private string _comparisonInput = string.Empty;
 
@@ -136,6 +141,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     [RelayCommand(CanExecute = nameof(CanAddMarket))]
     private Task AddMarketAsync() => AddComparisonTokenAsync(BenchmarkOverlaySymbol);
+
+    /// <summary>「＋比較」popup 列出的群組（投資組合 bucket，供快速加入為比較線）。catalog 未注入時為 null。</summary>
+    public System.Collections.ObjectModel.ReadOnlyObservableCollection<PortfolioGroup>? ComparisonGroupOptions =>
+        _groupCatalog?.Groups;
+
+    [RelayCommand]
+    private async Task AddGroupAsync(PortfolioGroup? group)
+    {
+        if (group is null)
+            return;
+        await AddComparisonTokenAsync(GroupTokenPrefix + group.Id).ConfigureAwait(true);
+        IsComparisonPickerOpen = false;
+    }
 
     [RelayCommand]
     private async Task SelectComparisonSuggestionAsync(StockSearchResult? r)
@@ -317,7 +335,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IVolatilityCalculator? volatility = null,
         ISharpeRatioCalculator? sharpe = null,
         IConcentrationAnalyzer? concentration = null,
-        IStockSearchService? search = null)
+        IStockSearchService? search = null,
+        Assetra.Core.Interfaces.Analysis.IGroupPerformanceSeriesService? groupPerformance = null,
+        Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? groupCatalog = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -332,6 +352,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _sharpe = sharpe;
         _concentration = concentration;
         _search = search;
+        _groupPerformance = groupPerformance;
+        _groupCatalog = groupCatalog;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
         HasVolatility = _volatility is not null;
@@ -1042,6 +1064,32 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     lines.Add((GetString("Portfolio.History.MeLabel", "我的投組"), ComparisonPalette[0], token, mePts));
                 continue;
             }
+
+            // 群組 token：@group:{guid} → 該群組的同期 % TWR 序列（重建持倉×價格）。
+            if (token.StartsWith(GroupTokenPrefix, StringComparison.Ordinal)
+                && Guid.TryParse(token[GroupTokenPrefix.Length..], out var gid))
+            {
+                if (_groupPerformance is null)
+                    continue;
+                try
+                {
+                    var gseries = await _groupPerformance.ComputeGroupSeriesAsync(gid, period).ConfigureAwait(false);
+                    if (gseries is null || gseries.Count < 2)
+                        continue;
+                    var gpts = gseries
+                        .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
+                        .ToList();
+                    var glabel = _groupCatalog?.FindById(gid)?.Name
+                        ?? GetString("Portfolio.History.GroupFallback", "組合");
+                    lines.Add((glabel, ComparisonPalette[colorIdx++ % ComparisonPalette.Length], token, gpts));
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    // 群組重建失敗 → 略過該條
+                }
+                continue;
+            }
+
             if (_benchmark is null)
                 continue;
             try

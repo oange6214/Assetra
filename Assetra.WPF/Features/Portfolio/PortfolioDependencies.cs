@@ -139,6 +139,8 @@ public sealed record PortfolioServices(
     /// 的群組 ComboBox 隱藏，行為等同尚未啟用群組功能。
     /// </summary>
     PortfolioGroupCatalog? GroupCatalog = null,
+    /// <summary>資產趨勢比較圖：群組同期 % TWR 序列服務（重建持倉×價格）。null 時群組比較不可用。</summary>
+    Assetra.Core.Interfaces.Analysis.IGroupPerformanceSeriesService? GroupPerformance = null,
     /// <summary>
     /// P4.1 — Asset-level XIRR 年化報酬計算。用於 detail panel 的 KPI 矩陣
     /// (XIRR × 1Y / 3Y / 累積)。為 null 時 XIRR 那列顯示「—」。

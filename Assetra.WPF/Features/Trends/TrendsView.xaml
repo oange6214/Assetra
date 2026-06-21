@@ -229,6 +229,26 @@
                                         FontSize="{StaticResource Font.Size.Xs}"
                                         Style="{StaticResource AppSecondaryButton}" />
                                 </StackPanel>
+                                <!--  群組（投資組合 bucket）快速加入 — 比較「我的指定組合」  -->
+                                <ItemsControl ItemsSource="{Binding ComparisonGroupOptions}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                Margin="0,0,6,6"
+                                                Padding="10,3"
+                                                Command="{Binding DataContext.AddGroupCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="{Binding Name}"
+                                                FontSize="{StaticResource Font.Size.Xs}"
+                                                Style="{StaticResource AppSecondaryButton}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                                 <DockPanel>
                                     <Button
                                         DockPanel.Dock="Right"
