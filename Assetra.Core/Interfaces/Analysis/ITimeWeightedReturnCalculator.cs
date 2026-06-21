@@ -12,4 +12,12 @@ public interface ITimeWeightedReturnCalculator
     decimal? Compute(
         IReadOnlyList<(DateOnly Date, decimal Value)> valuations,
         IReadOnlyList<CashFlow> flows);
+
+    /// <summary>
+    /// 與 <see cref="Compute"/> 同邏輯，但回傳每個 valuation 日的「累積 TWR」序列
+    /// （首點 = 0）。末點等於 <see cref="Compute"/>。少於 2 點回 null。
+    /// </summary>
+    IReadOnlyList<(DateOnly Date, decimal CumulativeTwr)>? ComputeSeries(
+        IReadOnlyList<(DateOnly Date, decimal Value)> valuations,
+        IReadOnlyList<CashFlow> flows);
 }

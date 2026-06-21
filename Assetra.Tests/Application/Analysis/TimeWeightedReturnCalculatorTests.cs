@@ -50,4 +50,53 @@ public class TimeWeightedReturnCalculatorTests
         Assert.NotNull(r);
         Assert.Equal(-0.20m, r.Value);
     }
+
+    [Fact]
+    public void ComputeSeries_FirstPointIsZero_EndpointMatchesCompute()
+    {
+        var calc = new TimeWeightedReturnCalculator();
+        var valuations = new[]
+        {
+            (new DateOnly(2026, 1, 1), 100m),
+            (new DateOnly(2026, 1, 2), 110m),
+            (new DateOnly(2026, 1, 3), 121m),
+        };
+        var flows = Array.Empty<CashFlow>();
+
+        var series = calc.ComputeSeries(valuations, flows);
+
+        Assert.NotNull(series);
+        Assert.Equal(3, series!.Count);
+        Assert.Equal(0m, series[0].CumulativeTwr);                     // 首點 = 0%
+        Assert.Equal(calc.Compute(valuations, flows), series[^1].CumulativeTwr); // 末點 = Compute
+    }
+
+    [Fact]
+    public void ComputeSeries_FlowOnSellDay_DividesOut()
+    {
+        // day2: 100→200 = +100%；day3: 200→110 但當天 flow −90（投組角度賣出）→ segReturn 0
+        var calc = new TimeWeightedReturnCalculator();
+        var valuations = new[]
+        {
+            (new DateOnly(2026, 1, 1), 100m),
+            (new DateOnly(2026, 1, 2), 200m),
+            (new DateOnly(2026, 1, 3), 110m),
+        };
+        var flows = new[] { new CashFlow(new DateOnly(2026, 1, 3), -90m) };
+
+        var series = calc.ComputeSeries(valuations, flows);
+
+        Assert.NotNull(series);
+        Assert.Equal(1.0m, series![^1].CumulativeTwr); // 仍 +100%，賣出不計入報酬
+    }
+
+    [Fact]
+    public void ComputeSeries_BelowTwoPoints_ReturnsNull()
+    {
+        var calc = new TimeWeightedReturnCalculator();
+        var series = calc.ComputeSeries(
+            new[] { (new DateOnly(2026, 1, 1), 100m) },
+            Array.Empty<CashFlow>());
+        Assert.Null(series);
+    }
 }
