@@ -62,6 +62,17 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private ICartesianAxis[] _xAxes = [new Axis { IsVisible = false }];
     [ObservableProperty] private ICartesianAxis[] _yAxes = [new Axis { IsVisible = false }];
 
+    /// <summary>
+    /// 「vs 大盤」% 對比模式：開啟時走勢圖改畫「自區間起點正規化的累積報酬 %」，並疊上加權指數
+    /// 對標線（你 vs 大盤）；關閉時維持原本的絕對淨值曲線。
+    /// </summary>
+    [ObservableProperty] private bool _isComparePercentMode;
+
+    /// <summary>對標疊線用的「大盤」symbol — 加權指數（Yahoo ^TWII；router 已導向 Yahoo）。</summary>
+    private const string BenchmarkOverlaySymbol = "^TWII";
+
+    partial void OnIsComparePercentModeChanged(bool value) => RefreshChart();
+
     // Period selection
     [ObservableProperty] private int _selectedDays = 30;
 
@@ -332,7 +343,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
-        BuildChart(points);
+
+        // % 對比模式：先抓「大盤」對標的正規化 % 序列疊上去（失敗回 null，主圖照畫）。
+        IReadOnlyList<DateTimePoint>? benchmarkPct = null;
+        if (IsComparePercentMode && _benchmark is not null && filtered.Count >= 2 && points.Count >= 2)
+            benchmarkPct = await BuildBenchmarkPercentPointsAsync(filtered).ConfigureAwait(false);
+
+        BuildChart(points, benchmarkPct);
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
@@ -761,7 +778,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         return s.MarketValue;
     }
 
-    private void BuildChart(IReadOnlyList<DateTimePoint> points)
+    private void BuildChart(
+        IReadOnlyList<DateTimePoint> points,
+        IReadOnlyList<DateTimePoint>? benchmarkPercentPoints = null)
     {
         HasHistory = points.Count >= 1;
         if (points.Count == 0)
@@ -773,12 +792,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // Read theme colours fresh each time so the chart always matches
         // the current palette (Dark / Light / colour-scheme).
         var accentColor = GetSkColor("AppAccent", "#0078D4");
-        var fillColor = accentColor.WithAlpha(32);
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
         // P2.16 — Grid 進一步降透明度。AppBorderLight 本身已 muted，再乘 0.30 alpha
         // 讓 separator 線在 dark / light 兩個 theme 都成 30% 強度可見但不搶 stroke。
-        // Audit「降低 grid 與 area fill 的存在感」對應這條。
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
+
+        // 「vs 大盤」% 對比模式：改畫正規化報酬 + 加權指數疊線；其餘維持絕對淨值曲線。
+        if (IsComparePercentMode)
+        {
+            BuildComparePercentChart(points, benchmarkPercentPoints, accentColor, labelColor, separatorColor);
+            return;
+        }
+
+        var fillColor = accentColor.WithAlpha(32);
 
         // P2.13 — Stroke 從 2px 降到 1.5px、GeometrySize 從 4 降到 3、
         // GeometryStroke 取消（純 fill 圓點）— 整體更貼近現代金融儀表板的細
@@ -821,6 +847,100 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 SeparatorsPaint = new SolidColorPaint(separatorColor),
                 TicksPaint      = null,
                 Labeler         = v => v.ToString("N0"),
+            }
+        ];
+    }
+
+    /// <summary>
+    /// 抓「大盤」對標（加權指數）的正規化 % 序列，轉成 chart 用 DateTimePoint（% 以小數表示）。
+    /// 失敗或資料不足回 null —「vs 大盤」線就不畫，主圖不受影響。
+    /// </summary>
+    private async Task<IReadOnlyList<DateTimePoint>?> BuildBenchmarkPercentPointsAsync(
+        IReadOnlyList<PortfolioDailySnapshot> filtered)
+    {
+        try
+        {
+            var startDate = filtered.Min(s => s.SnapshotDate);
+            var endDate = filtered.Max(s => s.SnapshotDate);
+            var series = await _benchmark!
+                .ComputeBenchmarkSeriesAsync(BenchmarkOverlaySymbol, new PerformancePeriod(startDate, endDate))
+                .ConfigureAwait(false);
+            if (series is null || series.Count < 2)
+                return null;
+            return series
+                .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
+                .ToList();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 「vs 大盤」模式的圖：投組（accent）與加權指數（muted）兩條線都從區間起點 0% 起算的累積
+    /// 報酬，Y 軸標 %。投組以第一點為基準正規化；benchmark 序列本身已正規化。
+    /// </summary>
+    private void BuildComparePercentChart(
+        IReadOnlyList<DateTimePoint> points,
+        IReadOnlyList<DateTimePoint>? benchmarkPercentPoints,
+        SKColor accentColor, SKColor labelColor, SKColor separatorColor)
+    {
+        var baseVal = points[0].Value ?? 0d;
+        IReadOnlyList<DateTimePoint> portfolioPct = baseVal == 0d
+            ? points
+            : points.Select(p => new DateTimePoint(p.DateTime, ((p.Value ?? 0d) / baseVal) - 1d)).ToList();
+
+        var benchColor = GetSkColor("AppTextSecondary", "#787B86");
+
+        var series = new List<ISeries>
+        {
+            new LineSeries<DateTimePoint>
+            {
+                Values          = portfolioPct,
+                Name            = GetString("Portfolio.History.MeLabel", "我的投組"),
+                Stroke          = new SolidColorPaint(accentColor, 2f),
+                Fill            = null,
+                GeometrySize    = 0,
+                LineSmoothness  = 0,
+                AnimationsSpeed = TimeSpan.Zero,
+            },
+        };
+        if (benchmarkPercentPoints is { Count: >= 2 })
+            series.Add(new LineSeries<DateTimePoint>
+            {
+                Values          = benchmarkPercentPoints,
+                Name            = GetString("Portfolio.History.BenchmarkTaiex", "加權指數"),
+                Stroke          = new SolidColorPaint(benchColor, 1.5f),
+                Fill            = null,
+                GeometrySize    = 0,
+                LineSmoothness  = 0,
+                AnimationsSpeed = TimeSpan.Zero,
+            });
+
+        ValueSeries = [.. series];
+
+        XAxes =
+        [
+            new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("MM/dd"))
+            {
+                TextSize        = 10,
+                LabelsPaint     = new SolidColorPaint(labelColor),
+                SeparatorsPaint = new SolidColorPaint(separatorColor),
+                TicksPaint      = null,
+            }
+        ];
+
+        YAxes =
+        [
+            new Axis
+            {
+                Position        = LiveChartsCore.Measure.AxisPosition.End,
+                TextSize        = 10,
+                LabelsPaint     = new SolidColorPaint(labelColor),
+                SeparatorsPaint = new SolidColorPaint(separatorColor),
+                TicksPaint      = null,
+                Labeler         = v => (v >= 0 ? "+" : "") + (v * 100).ToString("F0", System.Globalization.CultureInfo.InvariantCulture) + "%",
             }
         ];
     }

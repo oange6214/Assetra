@@ -167,6 +167,9 @@
     <sys:String x:Key="Portfolio.PnL">淨損益試算</sys:String>
     <sys:String x:Key="Portfolio.PnL.NetTooltip">淨損益試算 = 淨值 − 付出成本 = (市值 − 預估賣出費/稅) − 付出成本&#x0a;• 預估賣出費/稅 = 手續費 + 證交稅（ETF 0.1% / 股票 0.3%）&#x0a;• 付出成本 = 實付現金（含買入手續費）&#x0a;這是依目前價格與費稅規則推估的結果，實際成交可能不同。</sys:String>
     <sys:String x:Key="Portfolio.History.MarketValue">市值</sys:String>
+    <sys:String x:Key="Portfolio.History.VsMarket">vs 大盤</sys:String>
+    <sys:String x:Key="Portfolio.History.MeLabel">我的投組</sys:String>
+    <sys:String x:Key="Portfolio.History.BenchmarkTaiex">加權指數</sys:String>
     <sys:String x:Key="Portfolio.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.Shares">數量</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">成本均價</sys:String>

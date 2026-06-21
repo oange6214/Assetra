@@ -118,6 +118,16 @@
                     FontSize="{DynamicResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding DataRangeHint}" />
+                <!--  vs 大盤 % 對比切換：開啟時走勢圖改畫「自起點正規化的累積報酬 %」並疊加權指數線  -->
+                <CheckBox
+                    Margin="20,0,0,0"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding IsComparePercentMode}">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.History.VsMarket}" />
+                </CheckBox>
             </StackPanel>
         </DockPanel>
 
