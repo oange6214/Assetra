@@ -68,8 +68,17 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
             return null;
 
         var inRange = candles.Where(c => c.Date >= period.Start && c.Date <= period.End).ToList();
+
+        // 視窗內 K 線不足（短期間 5D/1D 撞週末/假日，或快照比行情新、近幾日尚未發布）→ 若此區間是「延伸
+        // 到最新」的近期區間（period.End 不早於最後一根），退用抓回來的最後 2 根，至少畫得出最近走勢、不空白；
+        // 基準改用退用段的第一根（不 prepend）。過去的自訂區間（period.End 早於最後一根）維持嚴格、不假造。
         if (inRange.Count < 2)
-            return null;
+        {
+            if (period.End < candles[^1].Date)
+                return null;
+            var last2 = candles.TakeLast(2).ToList();
+            return last2[0].Close == 0m ? null : (last2[0].Close, last2);
+        }
 
         // 期初基準價：期初當天或之前最後一根收盤（candles 已升冪 → Last()）；無則退回第一根 in-range。
         var baseline = candles

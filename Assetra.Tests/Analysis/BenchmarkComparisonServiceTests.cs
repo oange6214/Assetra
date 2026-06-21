@@ -73,6 +73,28 @@ public sealed class BenchmarkComparisonServiceTests
         Assert.Equal(0.21m, series[2].PercentFromStart);          // 121/100 − 1
     }
 
+    [Fact]
+    public async Task ComputeBenchmarkSeriesAsync_RecentWindowAfterLastCandle_FallsBackToLatestCandles()
+    {
+        // 快照比行情新／短視窗撞週末 → 視窗 [05/15,05/20] 內無 K 線，但這是「延伸到最新」的近期區間
+        // → 退用最後 2 根（05/09,05/10），讓 5D/1D 仍畫得出最近走勢、不整張空白。修「選 5D/1D 圖空白」。
+        var svc = new BenchmarkComparisonService(new FakeHistory(
+        [
+            (new DateOnly(2026, 5, 8), 100m),
+            (new DateOnly(2026, 5, 9), 110m),
+            (new DateOnly(2026, 5, 10), 121m),
+        ]));
+        var window = new PerformancePeriod(new DateOnly(2026, 5, 15), new DateOnly(2026, 5, 20));
+
+        var series = await svc.ComputeBenchmarkSeriesAsync("0050.TW", window);
+
+        Assert.NotNull(series);
+        Assert.Equal(2, series!.Count);                          // 退用最後 2 根
+        Assert.Equal(new DateOnly(2026, 5, 9), series[0].Date);  // 基準 = 退用段第一根
+        Assert.Equal(0m, series[0].PercentFromStart);
+        Assert.Equal(0.10m, series[1].PercentFromStart);         // 121/110 − 1
+    }
+
     private sealed class FakeHistory(IReadOnlyList<(DateOnly Date, decimal Close)> points)
         : IStockHistoryProvider
     {
