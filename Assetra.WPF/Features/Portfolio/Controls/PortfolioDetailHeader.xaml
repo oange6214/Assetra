@@ -116,18 +116,11 @@
                             Padding="16,8"
                             Command="{Binding AddInvestmentForSelectedPortfolioCommand}"
                             Style="{StaticResource AccentSplitSegment}">
-                            <StackPanel Orientation="Horizontal">
-                                <ds:AppIcon
-                                    Margin="0,0,6,0"
-                                    VerticalAlignment="Center"
-                                    FontSize="10"
-                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                    Symbol="Add24" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Foreground="{DynamicResource Brush.Text.OnAccent}"
-                                    Text="{DynamicResource Portfolio.DetailHeader.AddInvestment}" />
-                            </StackPanel>
+                            <!--  資源字串本身已含「＋」前綴，故不再另加 Add24 icon（避免雙重 ＋）  -->
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                Text="{DynamicResource Portfolio.DetailHeader.AddInvestment}" />
                         </Button>
                         <Border
                             Width="1"
