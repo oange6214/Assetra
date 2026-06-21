@@ -354,20 +354,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     [ObservableProperty] private bool _hasSharpe;
     [ObservableProperty] private bool _hasHhi;
 
-    // Stage 1：對標比較（4 個固定 benchmark）
-    // 每個都是「該對標期間 TWR」字串，未啟用 / 無歷史 = "—"
-    [ObservableProperty] private string _benchmarkTaiexDisplay = "—";
-    [ObservableProperty] private string _benchmarkTw0050Display = "—";
-    [ObservableProperty] private string _benchmarkTw00981ADisplay = "—";
-    [ObservableProperty] private string _benchmarkDeposit15Display = "—";   // 1.5% 年化參考（合成）
-    /// <summary>True 當 IBenchmarkComparisonService 已注入。隱藏整個對標區用。</summary>
-    [ObservableProperty] private bool _hasBenchmark;
-
-    /// <summary>
-    /// 對標區實際比對的時間範圍顯示字串（如「2026-04-12 ~ 2026-05-12 · 30 天」）。
-    /// 由 UpdateBenchmarksAsync 在每次計算前依照 filtered snapshots 的首末日設定，
-    /// 讓使用者知道「同期」是哪段期間。</summary>
-    [ObservableProperty] private string _benchmarkPeriodDisplay = "—";
+    // 舊「同期對標報酬率」4-固定-benchmark 的顯示屬性已移除 — 比較改用 ComparisonItems / ComparisonRows。
 
     /// <summary>
     /// 「可用資料 X 天」hint：snapshot 表實際涵蓋的日數。
@@ -376,14 +363,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// </summary>
     [ObservableProperty] private string _dataRangeHint = string.Empty;
 
-    // v2：使用者自訂對標。每個項目是 (symbol, display) — UI 用 ObservableCollection
-    // 綁定，序列化結果直接從 AppSettings.CustomBenchmarkSymbols 拉。最多 4 個。
-    private readonly System.Collections.ObjectModel.ObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> _customBenchmarks = [];
-    public System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow> CustomBenchmarks { get; }
-
-    // P5：上次套用的自訂對標清單快照，用來在 IAppSettingsService.Changed 觸發時判斷
-    // CustomBenchmarkSymbols 是否真的變了（避免每次無關設定儲存都重跑對標）。
-    private IReadOnlyList<string> _lastBenchmarkSymbols;
 
     public PortfolioHistoryViewModel(
         IPortfolioHistoryQueryService historyQueryService,
@@ -417,24 +396,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _groupPerformance = groupPerformance;
         _groupCatalog = groupCatalog;
         HasDrawdown = _drawdown is not null;
-        HasBenchmark = _benchmark is not null;
         HasVolatility = _volatility is not null;
         HasSharpe = _sharpe is not null;
         HasHhi = _concentration is not null;
-        CustomBenchmarks = new System.Collections.ObjectModel.ReadOnlyObservableCollection<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>(_customBenchmarks);
-
-        // P5：記住建構當下的自訂對標清單；之後 Changed 觸發時與此比對偵測變動。
-        _lastBenchmarkSymbols = (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).ToList();
 
         // 還原使用者上次選的走勢圖期間（一次性；之後由 ChangePeriod 負責持久化）。
         var savedPeriod = _settings?.Current.PortfolioHistoryPeriod;
         if (!string.IsNullOrWhiteSpace(savedPeriod))
             ApplyPeriodKey(savedPeriod);
-
-        // app-lifetime singleton（由 PortfolioViewModel 持有），無 Dispose 生命週期；
-        // 訂閱隨 app 存活，與 PortfolioViewModel 對 Changed 的訂閱相同模式。
-        if (_settings is not null)
-            _settings.Changed += OnSettingsChanged;
     }
 
     // Public API
@@ -578,9 +547,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         try
         {
             await UpdateKpisAsync(filtered, points).ConfigureAwait(false);
-            // 註：舊「同期對標報酬率」固定表的 XAML 已移除，但其計算（UpdateBenchmarksAsync）＋顯示屬性
-            // 暫時保留（無人綁定），整組舊 benchmark 子系統的移除列為 M2 清理，避免本輪牽動其測試。
-            await UpdateBenchmarksAsync(filtered).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -594,45 +560,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             ? FilterByRange(_allSnapshots, s, e)
             : FilterByDays(_allSnapshots, SelectedDays);
 
-    // ── P5: 自訂對標清單即時生效 ───────────────────────────────────────────
-    //
-    // 使用者在設定頁改 CustomBenchmarkSymbols 時，若正停在 Trends 頁，對標比較區
-    // 原本要等切換期間 / 重載才會用新清單重算（UpdateBenchmarksAsync 只在 chart
-    // refresh 流程被呼叫）。訂閱 IAppSettingsService.Changed，偵測到清單實際變動就
-    // 只重跑對標（不重建整張圖 / KPI），讓改完設定即時看到新對標列。
-    private void OnSettingsChanged()
-    {
-        var current = _settings?.Current.CustomBenchmarkSymbols ?? new List<string>();
-        if (CustomBenchmarkSymbolsEqual(current, _lastBenchmarkSymbols))
-            return;
-        _lastBenchmarkSymbols = current.ToList();
-        AsyncHelpers.SafeFireAndForget(RefreshBenchmarksAsync, "PortfolioHistory.RefreshBenchmarksOnSettingsChanged");
-    }
-
-    private async Task RefreshBenchmarksAsync()
-    {
-        try
-        {
-            await UpdateBenchmarksAsync(ComputeFilteredSnapshots()).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // 對標重算失敗不應影響其餘 UI；維持原本顯示。
-        }
-    }
-
-    private static bool CustomBenchmarkSymbolsEqual(
-        IReadOnlyList<string> a, IReadOnlyList<string> b)
-    {
-        if (a.Count != b.Count)
-            return false;
-        for (var i = 0; i < a.Count; i++)
-        {
-            if (!string.Equals(a[i], b[i], StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-        return true;
-    }
+    // 舊「自訂對標清單即時生效」(OnSettingsChanged / RefreshBenchmarksAsync / CustomBenchmarkSymbolsEqual) 已移除
+    // — 比較改用 ComparisonItems（raiseChanged:false 持久化、本 VM 自行 RefreshChart），不再訂閱 Settings.Changed。
 
     // ── Stage 1: 區間 KPI 計算 ─────────────────────────────────────────
     // 報酬率優先用 full TWR（ITimeWeightedReturnCalculator + 交易 cash flow），
@@ -789,89 +718,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // HasKpis 已在第一個 await 之前設好（避免初次渲染 bug），這裡不再重設
     }
 
-    // ── Stage 1: 對標 TWR 計算 ─────────────────────────────────────────
-    // 4 個固定 benchmark：加權指數 / 0050 / 00981A / 1.5% 定存（合成）。
-    // 任一無歷史時對應字串顯示 "—"，不影響其他項。
-    private async Task UpdateBenchmarksAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
-    {
-        if (_benchmark is null || filtered.Count < 2)
-        {
-            InvokeOnUi(() =>
-            {
-                BenchmarkTaiexDisplay = BenchmarkTw0050Display =
-                    BenchmarkTw00981ADisplay = BenchmarkDeposit15Display = "—";
-                BenchmarkPeriodDisplay = "—";
-                _customBenchmarks.Clear();
-            });
-            return;
-        }
-
-        var startDate = filtered.OrderBy(s => s.SnapshotDate).First().SnapshotDate;
-        var endDate = filtered.OrderByDescending(s => s.SnapshotDate).First().SnapshotDate;
-        var period = new PerformancePeriod(startDate, endDate);
-
-        // 1.5% 年化定存的合成報酬：(1.015)^(days/365) − 1
-        // 注意：annualize 用 segment 天數（end - start）；UI 顯示用 inclusive 天數（+1）
-        // 以對齊 chip 區的「可用資料 N 天」hint（兩處同樣定義成 calendar day 含頭含尾）。
-        var segmentDays = Math.Max(1, endDate.DayNumber - startDate.DayNumber);
-        var inclusiveDays = segmentDays + 1;
-        var depositTwr = (decimal)(Math.Pow(1.015, segmentDays / 365.0) - 1.0);
-
-        // 期間文字：例「2026-04-12 ~ 2026-05-12 · 23 天」。實際使用 filtered 的首末日，
-        // 因為 snapshot 可能稀疏，跟 chip 上的「近 30 天」不一定完全對應。
-        var periodText = $"{startDate:yyyy-MM-dd} ~ {endDate:yyyy-MM-dd} · {inclusiveDays} 天";
-
-        // 三個 ETF / index — 平行抓
-        var taiexTask = SafeBenchmarkAsync("^TWII", period);
-        var tw0050Task = SafeBenchmarkAsync("0050.TW", period);
-        var tw00981aTask = SafeBenchmarkAsync("00981A.TW", period);
-
-        await Task.WhenAll(taiexTask, tw0050Task, tw00981aTask).ConfigureAwait(false);
-
-        var taiexText = FormatPct(taiexTask.Result);
-        var tw0050Text = FormatPct(tw0050Task.Result);
-        var tw00981aText = FormatPct(tw00981aTask.Result);
-        var depositText = FormatPct(depositTwr);
-
-        // v2：自訂對標清單。最多 4 個避免畫面爆掉；每抓一個 TWR 都 try-catch。
-        var custom = _settings?.Current.CustomBenchmarkSymbols ?? new List<string>();
-        var customRows = new List<Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow>();
-        foreach (var symbol in custom.Take(4))
-        {
-            if (string.IsNullOrWhiteSpace(symbol))
-                continue;
-            var twr = await SafeBenchmarkAsync(symbol, period).ConfigureAwait(false);
-            customRows.Add(new Assetra.WPF.Features.FinancialOverview.CustomBenchmarkRow(
-                Symbol: symbol,
-                Display: FormatPct(twr)));
-        }
-
-        // 一次 marshal 回 UI thread：避免 cross-thread 漏 binding 通知 +
-        // ObservableCollection mutate 在非 UI thread 會 throw。
-        InvokeOnUi(() =>
-        {
-            BenchmarkPeriodDisplay = periodText;
-            BenchmarkTaiexDisplay = taiexText;
-            BenchmarkTw0050Display = tw0050Text;
-            BenchmarkTw00981ADisplay = tw00981aText;
-            BenchmarkDeposit15Display = depositText;
-            _customBenchmarks.Clear();
-            foreach (var row in customRows)
-                _customBenchmarks.Add(row);
-        });
-    }
-
-    private async Task<decimal?> SafeBenchmarkAsync(string symbol, PerformancePeriod period)
-    {
-        try
-        {
-            return await _benchmark!.ComputeBenchmarkTwrAsync(symbol, period).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            return null;
-        }
-    }
+    // 舊 4-固定-benchmark TWR 計算 (UpdateBenchmarksAsync / SafeBenchmarkAsync) 已移除 — 比較改用 BuildComparisonLinesAsync。
 
     /// <summary>
     /// 嘗試用 full TWR 計算區間報酬率。需要兩個服務都注入；任一缺或交易資料
@@ -899,11 +746,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             return null;
         }
     }
-
-    private static string FormatPct(decimal? pct) =>
-        pct is null
-            ? "—"
-            : (pct.Value >= 0 ? "+" : "") + (pct.Value * 100m).ToString("F2", CultureInfo.InvariantCulture) + "%";
 
     private void RefreshChart()
     {
