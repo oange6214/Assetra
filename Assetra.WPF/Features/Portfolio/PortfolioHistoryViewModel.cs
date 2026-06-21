@@ -414,10 +414,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // % 對比模式：抓「大盤＋自訂對標」的正規化 % 序列疊上去（抓不到的線略過，主圖照畫）。
         // 此處刻意不 ConfigureAwait(false)：BuildChart 需回到 UI thread 設 ValueSeries / ComparisonLegend。
         IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
-        if (IsComparePercentMode && _benchmark is not null && filtered.Count >= 2 && points.Count >= 2)
-            overlays = await BuildBenchmarkOverlaysAsync(filtered);
+        IReadOnlyList<DateTimePoint>? twrPoints = null;
+        if (IsComparePercentMode && filtered.Count >= 2 && points.Count >= 2)
+        {
+            twrPoints = await BuildPortfolioTwrPercentPointsAsync(filtered);
+            if (_benchmark is not null)
+                overlays = await BuildBenchmarkOverlaysAsync(filtered);
+        }
 
-        BuildChart(points, overlays);
+        BuildChart(points, overlays, twrPoints);
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
@@ -480,6 +485,65 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // ── Stage 1: 區間 KPI 計算 ─────────────────────────────────────────
     // 報酬率優先用 full TWR（ITimeWeightedReturnCalculator + 交易 cash flow），
     // 處理中間出入金的影響；服務未注入時回退到 naive value-based 計算。
+    /// <summary>剝掉領頭「建倉假象」低值點（median×0.05），回 cleaned (date,value) 序列。TWR／波動率／回撤共用。</summary>
+    private static IReadOnlyList<(DateOnly Date, decimal Value)> BuildCleanedValuations(
+        IReadOnlyList<PortfolioDailySnapshot> filtered)
+    {
+        var raw = filtered
+            .OrderBy(s => s.SnapshotDate)
+            .Select(s => (s.SnapshotDate, s.MarketValue))
+            .ToList();
+        if (raw.Count == 0)
+            return raw;
+        var median = raw.Select(s => s.MarketValue).OrderBy(v => v).ElementAt(raw.Count / 2);
+        var threshold = median * 0.05m;
+        var first = 0;
+        while (first < raw.Count - 1 && raw[first].MarketValue < threshold)
+            first++;
+        return raw.Skip(first).ToList();
+    }
+
+    /// <summary>
+    /// 投組角度 cash flow（Buy 正 / Sell 負）；null 交易服務回空。供 KPI 端點 TWR 與對比線 TWR 序列共用。
+    /// </summary>
+    private async Task<IReadOnlyList<Assetra.Core.Models.Analysis.CashFlow>> BuildPortfolioFlowsAsync(
+        DateOnly start, DateOnly end)
+    {
+        if (_trades is null)
+            return [];
+        var allTrades = await _trades.GetAllAsync().ConfigureAwait(false);
+        var rawFlows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
+            allTrades, new PerformancePeriod(start, end));
+
+        // ⚠ 符號慣例對齊：PerformanceFlowBuilder 的 flow 是「投資人現金角度」（Buy 負、Sell 正）；
+        //   TimeWeightedReturnCalculator 跑在「MarketValue 序列」上需「投資組合角度」（Buy 正、Sell 負）。
+        //   兩者相反 → 統一 negate 一次。不修 Builder（其 contract 是投資人角度，XIRR 等依賴之）。
+        //   漏 negate 會讓 Buy 被當 2 倍貢獻、算出 6234% 荒謬值。
+        return rawFlows
+            .Select(f => new Assetra.Core.Models.Analysis.CashFlow(f.Date, -f.Amount, f.Currency))
+            .ToList();
+    }
+
+    /// <summary>
+    /// 「我的投組」對比線的 TWR % 點（每日累積 TWR）。服務缺／序列不足 → null（caller fallback 裸淨值%）。
+    /// </summary>
+    private async Task<IReadOnlyList<DateTimePoint>?> BuildPortfolioTwrPercentPointsAsync(
+        IReadOnlyList<PortfolioDailySnapshot> filtered)
+    {
+        if (_twr is null || _trades is null)
+            return null;
+        var vals = BuildCleanedValuations(filtered);
+        if (vals.Count < 2)
+            return null;
+        var flows = await BuildPortfolioFlowsAsync(vals[0].Date, vals[^1].Date).ConfigureAwait(false);
+        var series = _twr.ComputeSeries(vals, flows);
+        if (series is null || series.Count < 2)
+            return null;
+        return series
+            .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.CumulativeTwr))
+            .ToList();
+    }
+
     private async Task UpdateKpisAsync(
         IReadOnlyList<PortfolioDailySnapshot> filtered,
         IReadOnlyList<DateTimePoint> points)
@@ -530,17 +594,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 跟 BuildPointsAsync 一致 — 剝掉領頭的「建倉假象」低值點，避免波動率/TWR 算出
         // 20000% 那種荒謬數字（從 $0 跳到 $8.8M 的單日 return 是 +infinity）。
         // 移到 TWR 之前計算，TWR 也使用這個 cleaned series。
-        var rawSeries = filtered
-            .OrderBy(s => s.SnapshotDate)
-            .Select(s => (s.SnapshotDate, s.MarketValue))
-            .ToList();
-        var seriesMedian = rawSeries.Count == 0 ? 0m
-            : rawSeries.Select(s => s.MarketValue).OrderBy(v => v).ElementAt(rawSeries.Count / 2);
-        var seriesThreshold = seriesMedian * 0.05m;
-        var seriesFirstValid = 0;
-        while (seriesFirstValid < rawSeries.Count - 1 && rawSeries[seriesFirstValid].MarketValue < seriesThreshold)
-            seriesFirstValid++;
-        var series = rawSeries.Skip(seriesFirstValid).ToList();
+        var series = BuildCleanedValuations(filtered);
 
         // 進階：TWR refine 報酬率（涵蓋現金流影響）— 用 cleaned series 而非 raw filtered，
         // 避免領頭低值點把 segment return 放大到幾千 %。
@@ -683,26 +737,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             // caller (UpdateKpisAsync) 已經處理過了。
             var startDate = valuations[0].Date;
             var endDate = valuations[^1].Date;
-            var period = new PerformancePeriod(startDate, endDate);
-
-            var allTrades = await _trades.GetAllAsync().ConfigureAwait(false);
-            var rawFlows = Assetra.Application.Analysis.PerformanceFlowBuilder.BuildPerformanceFlows(
-                allTrades, period);
-
-            // ⚠ 符號慣例對齊：PerformanceFlowBuilder 產的 flow 是「投資人現金角度」
-            //   （Buy = 負，因為投資人掏錢出去；Sell = 正）。
-            //   但 TimeWeightedReturnCalculator 跑在「MarketValue 序列」上，需要的
-            //   是「投資組合角度」的 flow（Buy = 正，因為 MarketValue 因 Buy 而增加；
-            //   Sell = 負，因為 MarketValue 因 Sell 而減少）。
-            //   兩個 sign convention 剛好相反；這裡統一 negate 一次。
-            //   不修 Builder 本身是因為它對外宣告的 contract 是投資人角度，改了會
-            //   影響到任何未來呼叫者（例：XIRR 用的是投資人角度，不應反向）。
-            //   過去這裡漏 negate 導致 Buy 在 TWR 公式裡被當成 2 倍貢獻，算出 6234%
-            //   這種荒謬數字。修正後 Buy/Sell 對 segment return 的影響歸零，
-            //   TWR 只反映真實市場波動。
-            var flows = rawFlows
-                .Select(f => new Assetra.Core.Models.Analysis.CashFlow(f.Date, -f.Amount, f.Currency))
-                .ToList();
+            // 投組角度 cash flow（Buy 正 / Sell 負）；negate 與其原因見 BuildPortfolioFlowsAsync。
+            var flows = await BuildPortfolioFlowsAsync(startDate, endDate).ConfigureAwait(false);
 
             return _twr.Compute(valuations, flows);
         }
@@ -848,7 +884,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private void BuildChart(
         IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null)
+        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null,
+        IReadOnlyList<DateTimePoint>? portfolioTwrPoints = null)
     {
         HasHistory = points.Count >= 1;
         if (points.Count == 0)
@@ -868,7 +905,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 「vs 大盤」% 對比模式：改畫正規化報酬 + 對標疊線；其餘維持絕對淨值曲線。
         if (IsComparePercentMode)
         {
-            BuildComparePercentChart(points, overlays, labelColor, separatorColor);
+            BuildComparePercentChart(points, overlays, portfolioTwrPoints, labelColor, separatorColor);
             return;
         }
 
@@ -969,12 +1006,23 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private void BuildComparePercentChart(
         IReadOnlyList<DateTimePoint> points,
         IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays,
+        IReadOnlyList<DateTimePoint>? portfolioTwrPoints,
         SKColor labelColor, SKColor separatorColor)
     {
-        var baseVal = points[0].Value ?? 0d;
-        IReadOnlyList<DateTimePoint> portfolioPct = baseVal == 0d
-            ? points
-            : points.Select(p => new DateTimePoint(p.DateTime, ((p.Value ?? 0d) / baseVal) - 1d)).ToList();
+        // 我的投組線：優先用 TWR 序列（與 benchmark 同基準、除現金流／建倉假尖峰）；
+        // 服務缺時 fallback 回「裸淨值正規化 %」（舊行為）。
+        IReadOnlyList<DateTimePoint> portfolioPct;
+        if (portfolioTwrPoints is { Count: >= 2 })
+        {
+            portfolioPct = portfolioTwrPoints;
+        }
+        else
+        {
+            var baseVal = points[0].Value ?? 0d;
+            portfolioPct = baseVal == 0d
+                ? points
+                : points.Select(p => new DateTimePoint(p.DateTime, ((p.Value ?? 0d) / baseVal) - 1d)).ToList();
+        }
 
         var meLabel = GetString("Portfolio.History.MeLabel", "我的投組");
         var meColorHex = ComparisonPalette[0];
