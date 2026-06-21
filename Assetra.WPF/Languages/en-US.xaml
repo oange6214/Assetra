@@ -642,6 +642,8 @@
     <sys:String x:Key="Portfolio.Record.Destination.CreditCardCharge">Liability (Credit Card) · Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Record.Destination.CreditCardPayment">Liability (Credit Card) · Funds Account (debit) · Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreatedSnackbar">{0} added — view it in the Transaction Log</sys:String>
+    <sys:String x:Key="Portfolio.Tx.BackdatedRebuildHint">Back-dated trade saved — rebuild snapshots to update trends/calendar</sys:String>
+    <sys:String x:Key="Portfolio.Tx.GoRebuild">Rebuild</sys:String>
     <sys:String x:Key="Portfolio.Tx.ViewTransactions">View transactions</sys:String>
     <sys:String x:Key="Portfolio.Tx.Generic">transaction</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">Income</sys:String>

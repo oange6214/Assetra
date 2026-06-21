@@ -640,6 +640,8 @@
     <sys:String x:Key="Portfolio.Record.Destination.CreditCardCharge">負債（信用卡）· 交易記錄</sys:String>
     <sys:String x:Key="Portfolio.Record.Destination.CreditCardPayment">負債（信用卡）· 資金帳戶（扣款）· 交易記錄</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreatedSnackbar">已新增 {0}，可在「交易記錄」查看</sys:String>
+    <sys:String x:Key="Portfolio.Tx.BackdatedRebuildHint">已存回溯交易 — 走勢/日曆需「重建快照」才會更新</sys:String>
+    <sys:String x:Key="Portfolio.Tx.GoRebuild">去重建</sys:String>
     <sys:String x:Key="Portfolio.Tx.ViewTransactions">查看交易</sys:String>
     <sys:String x:Key="Portfolio.Tx.Generic">交易</sys:String>
     <sys:String x:Key="Portfolio.Tx.Income">收入</sys:String>

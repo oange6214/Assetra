@@ -255,12 +255,34 @@ public partial class TransactionDialogViewModel
             "creditCardPayment" => L("Portfolio.TradeType.CreditCardPayment", "信用卡繳款"),
             _ => L("Portfolio.Tx.Generic", "交易"),
         };
+        // A — 回溯投資交易：過去的每日快照（走勢圖/報酬日曆來源）會變舊，改提示去「設定 → 重建快照」
+        // 用安全流程（自動備份＋dry-run 預覽）重算，而非在此靜默改 snapshot 資料。
+        if (TryShowBackdatedRebuildHint())
+            return;
+
         var template = L("Portfolio.Tx.CreatedSnackbar", "已新增 {0}，可在「交易記錄」查看");
         var actionLabel = L("Portfolio.Tx.ViewTransactions", "查看交易");
         _snackbar.Show(
             string.Format(template, typeLabel),
             actionLabel,
             () => Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("TransactionLog"));
+    }
+
+    /// <summary>
+    /// A — 回溯（back-dated）投資交易提示：新增/改日期後若日期在過去，提示去「重建快照」更新走勢/
+    /// 日曆（走安全流程：自動備份＋dry-run 預覽，不靜默改 snapshot 資料）。回傳 true = 已顯示提示。
+    /// </summary>
+    private bool TryShowBackdatedRebuildHint()
+    {
+        if (_snackbar is null
+            || TxType is not ("buy" or "sell" or "cashDiv" or "stockDiv")
+            || TxDate.Date >= DateTime.Today)
+            return false;
+        _snackbar.Show(
+            L("Portfolio.Tx.BackdatedRebuildHint", "已存回溯交易 — 走勢/日曆需「重建快照」才會更新"),
+            L("Portfolio.Tx.GoRebuild", "去重建"),
+            () => Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Settings"));
+        return true;
     }
 
     /// <summary>
@@ -296,6 +318,8 @@ public partial class TransactionDialogViewModel
                     "更新失敗，找不到此筆記錄或記錄已被修改。請關閉後重試。");
                 return;
             }
+            // 改日期成功後，若是回溯投資交易則提示重建快照（在 CloseTxDialog 清空狀態前先判斷）。
+            TryShowBackdatedRebuildHint();
             CloseTxDialog();
             await _loadTradesAsync();
             TransactionCompleted?.Invoke(this, EventArgs.Empty);
