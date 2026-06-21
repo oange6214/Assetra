@@ -76,11 +76,19 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
             return null;
 
         // 逐日重建群組市值：running holdings + 推進交易指標（O(dates + moves)）。
+        // 寬鬆策略（比較線可近似、非權威快照）：每個 symbol 的收盤用 forward-fill（沿用最後已知值），
+        // 某持倉「至今尚無任何收盤」才略過其貢獻——只要當日有任一持倉可定價就照畫，不讓單一缺價標的
+        // 把整條線清成 null（這正是「柏翰」這類群組加不進來的主因）。
         var holdings = new Dictionary<string, int>();
+        var lastPrice = new Dictionary<string, decimal>();
         var mi = 0;
         var values = new List<(DateOnly Date, decimal Value)>();
         foreach (var d in axis)
         {
+            foreach (var (sym, byDate) in priceBySymbol)
+                if (byDate.TryGetValue(d, out var c))
+                    lastPrice[sym] = c;
+
             while (mi < holdingMoves.Count && holdingMoves[mi].Date <= d)
             {
                 var m = holdingMoves[mi];
@@ -89,19 +97,18 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
             }
 
             decimal value = 0m;
-            var ok = true;
+            var anyPriced = false;
             foreach (var (sym, qty) in holdings)
             {
                 if (qty == 0)
                     continue;
-                if (!priceBySymbol.TryGetValue(sym, out var byDate) || !byDate.TryGetValue(d, out var close))
+                if (lastPrice.TryGetValue(sym, out var p))
                 {
-                    ok = false; // all-or-nothing：任一持倉缺價，整天跳過
-                    break;
+                    value += p * qty;
+                    anyPriced = true;
                 }
-                value += close * qty;
             }
-            if (ok && value > 0m)
+            if (anyPriced && value > 0m)
                 values.Add((d, value));
         }
         if (values.Count < 2)

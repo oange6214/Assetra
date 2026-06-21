@@ -166,12 +166,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IsComparisonPickerOpen = false;
     }
 
-    /// <summary>搜尋結果 → benchmark 抓取用 symbol：TWSE→.TW、TPEX→.TWO、其餘原樣（指數／US）。</summary>
+    /// <summary>
+    /// 搜尋結果 → benchmark 抓取用 symbol：TWSE→.TW、TPEX→.TWO、其餘（NASDAQ／NYSE 等美股）保留交易所
+    /// 後綴「{symbol}.{exchange}」。SplitSymbol 會還原出交易所，DynamicHistoryProvider 對 NYSE/NASDAQ 等
+    /// 外國交易所自動 route 到 Yahoo。先前美股漏掉後綴 → SplitSymbol 預設 TW → 抓不到。
+    /// </summary>
     private static string FormatBenchmarkSymbol(StockSearchResult r) => r.Exchange switch
     {
         "TWSE" => $"{r.Symbol}.TW",
         "TPEX" => $"{r.Symbol}.TWO",
-        _ => r.Symbol,
+        _ => string.IsNullOrWhiteSpace(r.Exchange) ? r.Symbol : $"{r.Symbol}.{r.Exchange}",
     };
 
     [RelayCommand(CanExecute = nameof(CanAddComparison))]
