@@ -118,16 +118,6 @@
                     FontSize="{DynamicResource Font.Size.Xs}"
                     Foreground="{DynamicResource AppTextMuted}"
                     Text="{Binding DataRangeHint}" />
-                <!--  vs 大盤 % 對比切換：開啟時走勢圖改畫「自起點正規化的累積報酬 %」並疊加權指數線  -->
-                <CheckBox
-                    Margin="20,0,0,0"
-                    VerticalAlignment="Center"
-                    IsChecked="{Binding IsComparePercentMode}">
-                    <TextBlock
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.History.VsMarket}" />
-                </CheckBox>
             </StackPanel>
         </DockPanel>
 
@@ -136,20 +126,19 @@
             <Grid Style="{StaticResource PageContentGrid}">
                 <lvc:CartesianChart
                     Background="Transparent"
-                    Series="{Binding ValueSeries}"
+                    Series="{Binding CompareSeries}"
                     TooltipPosition="Top"
                     TooltipTextSize="12"
                     Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    XAxes="{Binding XAxes}"
-                    YAxes="{Binding YAxes}" />
+                    XAxes="{Binding CompareXAxes}"
+                    YAxes="{Binding CompareYAxes}" />
 
                 <!--  vs 大盤 % 對比圖例：投組＋各對標線的色點＋標籤；僅 % 模式顯示，疊在圖左上。  -->
                 <ItemsControl
                     Margin="6,2,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    ItemsSource="{Binding ComparisonLegend}"
-                    Visibility="{Binding IsComparePercentMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    ItemsSource="{Binding ComparisonLegend}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" />

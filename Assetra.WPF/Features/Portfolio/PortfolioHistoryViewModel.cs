@@ -57,21 +57,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ReturnCalendar
     { get; }
 
-    // Chart series
+    // Chart series — ValueSeries（絕對淨值）給投資資產概覽迷你圖；CompareSeries（% 比較）給資產趨勢頁。
     [ObservableProperty] private ISeries[] _valueSeries = [];
     [ObservableProperty] private ICartesianAxis[] _xAxes = [new Axis { IsVisible = false }];
     [ObservableProperty] private ICartesianAxis[] _yAxes = [new Axis { IsVisible = false }];
-
-    /// <summary>
-    /// 「vs 大盤」% 對比模式：開啟時走勢圖改畫「自區間起點正規化的累積報酬 %」，並疊上加權指數
-    /// 對標線（你 vs 大盤）；關閉時維持原本的絕對淨值曲線。
-    /// </summary>
-    [ObservableProperty] private bool _isComparePercentMode;
+    [ObservableProperty] private ISeries[] _compareSeries = [];
+    [ObservableProperty] private ICartesianAxis[] _compareXAxes = [new Axis { IsVisible = false }];
+    [ObservableProperty] private ICartesianAxis[] _compareYAxes = [new Axis { IsVisible = false }];
 
     /// <summary>對標疊線用的「大盤」symbol — 加權指數（Yahoo ^TWII；router 已導向 Yahoo）。</summary>
     private const string BenchmarkOverlaySymbol = "^TWII";
-
-    partial void OnIsComparePercentModeChanged(bool value) => RefreshChart();
 
     // ── inline「新增比較對象」picker（資產趨勢圖直接加/移對標，免進設定）──────────────
     [ObservableProperty] private string _comparisonInput = string.Empty;
@@ -411,18 +406,19 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
 
-        // % 對比模式：抓「大盤＋自訂對標」的正規化 % 序列疊上去（抓不到的線略過，主圖照畫）。
-        // 此處刻意不 ConfigureAwait(false)：BuildChart 需回到 UI thread 設 ValueSeries / ComparisonLegend。
+        // 比較視圖（資產趨勢頁，常駐）：抓「大盤＋自訂對標」正規化 % 序列 ＋ 我的投組 TWR。
+        // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
         IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
         IReadOnlyList<DateTimePoint>? twrPoints = null;
-        if (IsComparePercentMode && filtered.Count >= 2 && points.Count >= 2)
+        if (filtered.Count >= 2 && points.Count >= 2)
         {
             twrPoints = await BuildPortfolioTwrPercentPointsAsync(filtered);
             if (_benchmark is not null)
                 overlays = await BuildBenchmarkOverlaysAsync(filtered);
         }
 
-        BuildChart(points, overlays, twrPoints);
+        BuildChart(points);                                    // 絕對淨值 → ValueSeries（概覽迷你圖）
+        BuildComparePercentChart(points, overlays, twrPoints); // % 比較 → CompareSeries（資產趨勢頁）
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
@@ -882,10 +878,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         return s.MarketValue;
     }
 
-    private void BuildChart(
-        IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null,
-        IReadOnlyList<DateTimePoint>? portfolioTwrPoints = null)
+    private void BuildChart(IReadOnlyList<DateTimePoint> points)
     {
         HasHistory = points.Count >= 1;
         if (points.Count == 0)
@@ -902,15 +895,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 讓 separator 線在 dark / light 兩個 theme 都成 30% 強度可見但不搶 stroke。
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
-        // 「vs 大盤」% 對比模式：改畫正規化報酬 + 對標疊線；其餘維持絕對淨值曲線。
-        if (IsComparePercentMode)
-        {
-            BuildComparePercentChart(points, overlays, portfolioTwrPoints, labelColor, separatorColor);
-            return;
-        }
-
         var fillColor = accentColor.WithAlpha(32);
-        ComparisonLegend = []; // 絕對淨值模式無對比圖例
 
         // P2.13 — Stroke 從 2px 降到 1.5px、GeometrySize 從 4 降到 3、
         // GeometryStroke 取消（純 fill 圓點）— 整體更貼近現代金融儀表板的細
@@ -1006,9 +991,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private void BuildComparePercentChart(
         IReadOnlyList<DateTimePoint> points,
         IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays,
-        IReadOnlyList<DateTimePoint>? portfolioTwrPoints,
-        SKColor labelColor, SKColor separatorColor)
+        IReadOnlyList<DateTimePoint>? portfolioTwrPoints)
     {
+        if (points.Count == 0)
+        {
+            CompareSeries = [];
+            ComparisonLegend = [];
+            return;
+        }
+
+        var labelColor = GetSkColor("AppTextSecondary", "#787B86");
+        var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
+
         // 我的投組線：優先用 TWR 序列（與 benchmark 同基準、除現金流／建倉假尖峰）；
         // 服務缺時 fallback 回「裸淨值正規化 %」（舊行為）。
         IReadOnlyList<DateTimePoint> portfolioPct;
@@ -1058,10 +1052,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 legend.Add(new ComparisonLegendItem(label, colorHex));
             }
 
-        ValueSeries = [.. series];
+        CompareSeries = [.. series];
         ComparisonLegend = legend;
 
-        XAxes =
+        CompareXAxes =
         [
             new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("MM/dd"))
             {
@@ -1072,7 +1066,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             }
         ];
 
-        YAxes =
+        CompareYAxes =
         [
             new Axis
             {
