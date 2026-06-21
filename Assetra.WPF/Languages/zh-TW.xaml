@@ -325,7 +325,9 @@
     <sys:String x:Key="Portfolio.Header.Cash">現金</sys:String>
     <sys:String x:Key="Portfolio.Header.Liabilities">負債</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.AddInvestment">＋ 新增交易</sys:String>
-    <sys:String x:Key="Portfolio.DetailHeader.Overview">概覽</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.Overview">概覽（市值走勢）</sys:String>
+    <sys:String x:Key="Portfolio.DetailHeader.AddWatchlistMenu">加入觀察清單</sys:String>
+    <sys:String x:Key="Portfolio.Kpi.AnalysisLabel">分析</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.MarketValue">市值</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.TodayChange">今日漲跌</sys:String>
     <sys:String x:Key="Portfolio.DetailHeader.Pnl">損益</sys:String>

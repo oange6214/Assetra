@@ -178,6 +178,15 @@
             Orientation="Horizontal"
             Visibility="{Binding IsOverviewExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
 
+            <!--  「分析」區塊小標題（對齊設計稿，讓 chips 有個歸屬標題）  -->
+            <TextBlock
+                Margin="0,0,12,0"
+                VerticalAlignment="Center"
+                FontSize="{StaticResource Font.Size.Sm}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextPrimary}"
+                Text="{DynamicResource Portfolio.Kpi.AnalysisLabel}" />
+
             <!--  持股佔比  -->
             <Button
                 Command="{Binding ToggleKpiPanelCommand}"

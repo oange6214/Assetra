@@ -138,7 +138,7 @@
                                 Symbol="ChevronDown24" />
                             <Button.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Command="{Binding OpenAddWatchlistDialogCommand}" Header="{DynamicResource Portfolio.Watchlist.AddCommand}" />
+                                    <MenuItem Command="{Binding OpenAddWatchlistDialogCommand}" Header="{DynamicResource Portfolio.DetailHeader.AddWatchlistMenu}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
