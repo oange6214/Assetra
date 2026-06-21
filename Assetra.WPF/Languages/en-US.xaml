@@ -1462,6 +1462,7 @@
     <!-- Trends / Net-worth trend -->
     <sys:String x:Key="Trends.Title">Net-Worth Trend</sys:String>
     <!--  P5.9 — 7 chips: 5D / 1M / 6M / YTD / 1Y / 5Y / All. Trends.Period.90 retained for any legacy callers.  -->
+    <sys:String x:Key="Trends.Period.1">1 D</sys:String>
     <sys:String x:Key="Trends.Period.5">5 D</sys:String>
     <sys:String x:Key="Trends.Period.30">1 M</sys:String>
     <sys:String x:Key="Trends.Period.90">3 M</sys:String>

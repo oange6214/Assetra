@@ -53,6 +53,13 @@
             <StackPanel Orientation="Horizontal">
                 <RadioButton
                     Command="{Binding ChangePeriodCommand}"
+                    CommandParameter="1"
+                    Content="{DynamicResource Trends.Period.1}"
+                    GroupName="TrendsPeriod"
+                    IsChecked="{Binding ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=1}"
+                    Style="{StaticResource NavTabBtn}" />
+                <RadioButton
+                    Command="{Binding ChangePeriodCommand}"
                     CommandParameter="5"
                     Content="{DynamicResource Trends.Period.5}"
                     GroupName="TrendsPeriod"

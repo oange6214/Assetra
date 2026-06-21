@@ -536,14 +536,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
 
-        // 比較視圖（資產趨勢頁）：使用者自選的比較項目（我的投組 TWR ＋ 大盤 ＋ 股票），預設空。
+        // 比較視圖（績效比較頁）：只要有比較項目就畫，期間用「選的視窗」(ComputeComparisonPeriod)。
+        // benchmark 走每日 K 線、不靠投組快照密度 → 即使近幾天快照很疏（如選 5D / 1D）圖也不會空白。
         // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
         IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> compareLines = [];
-        if (filtered.Count >= 2 && points.Count >= 2)
-            compareLines = await BuildComparisonLinesAsync(filtered);
+        if (ComputeComparisonPeriod() is { } comparePeriod
+            && CurrentComparisonItems.Any(t => !string.IsNullOrWhiteSpace(t)))
+            compareLines = await BuildComparisonLinesAsync(filtered, comparePeriod);
 
         BuildChart(points);                     // 絕對淨值 → ValueSeries（概覽迷你圖）
-        BuildComparePercentChart(compareLines); // % 比較 → CompareSeries（資產趨勢頁）
+        BuildComparePercentChart(compareLines); // % 比較 → CompareSeries（績效比較頁）
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
@@ -561,6 +563,34 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         (CustomStartDate, CustomEndDate) is ({ } s, { } e)
             ? FilterByRange(_allSnapshots, s, e)
             : FilterByDays(_allSnapshots, SelectedDays);
+
+    /// <summary>
+    /// 比較圖的期間 = 使用者「選的視窗」，與投組快照疏密無關：自訂範圍 → 該範圍、全部 → 全 snapshot 範圍、
+    /// YTD → 今年 1/1 到最後一筆、其餘 day chip → [最後一筆 −(天數−1), 最後一筆]。視窗至少 2 天，benchmark
+    /// 才有 ≥2 根可畫（修「選 5D / 1D 圖空白」：近幾天投組快照 &lt;2 筆時 benchmark 仍用每日 K 線畫滿整段）。
+    /// 無任何 snapshot 時回 null。
+    /// </summary>
+    private PerformancePeriod? ComputeComparisonPeriod()
+    {
+        if (_allSnapshots.Count == 0)
+            return null;
+
+        if ((CustomStartDate, CustomEndDate) is ({ } cs, { } ce))
+        {
+            var lo = DateOnly.FromDateTime(cs <= ce ? cs : ce);
+            var hi = DateOnly.FromDateTime(cs <= ce ? ce : cs);
+            return new PerformancePeriod(lo, hi);
+        }
+
+        var latest = _allSnapshots.Max(s => s.SnapshotDate);
+        if (SelectedDays == AllPeriodDays)
+            return new PerformancePeriod(_allSnapshots.Min(s => s.SnapshotDate), latest);
+        if (string.Equals(ActivePeriodKey, "YTD", StringComparison.OrdinalIgnoreCase))
+            return new PerformancePeriod(new DateOnly(latest.Year, 1, 1), latest);
+
+        var span = Math.Max(2, SelectedDays);   // ≥2 天 → benchmark 至少 2 根可畫
+        return new PerformancePeriod(latest.AddDays(-(span - 1)), latest);
+    }
 
     // 舊「自訂對標清單即時生效」(OnSettingsChanged / RefreshBenchmarksAsync / CustomBenchmarkSymbolsEqual) 已移除
     // — 比較改用 ComparisonItems（raiseChanged:false 持久化、本 VM 自行 RefreshChart），不再訂閱 Settings.Changed。
@@ -947,7 +977,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// benchmark 正規化 % 序列。我的投組固定 palette[0]；個別抓不到就略過該條（主圖不受影響）。
     /// </summary>
     private async Task<IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)>>
-        BuildComparisonLinesAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
+        BuildComparisonLinesAsync(IReadOnlyList<PortfolioDailySnapshot> filtered, PerformancePeriod period)
     {
         var items = CurrentComparisonItems.Where(t => !string.IsNullOrWhiteSpace(t)).Take(6).ToList();
         var lines = new List<(string, string, string, IReadOnlyList<DateTimePoint>)>();
@@ -957,8 +987,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             _comparisonAbsByToken = abs;
             return lines;
         }
-
-        var period = new PerformancePeriod(filtered.Min(s => s.SnapshotDate), filtered.Max(s => s.SnapshotDate));
 
         // 我的投組 TWR 只在 @me 在清單時算一次。
         IReadOnlyList<DateTimePoint>? mePts = null;

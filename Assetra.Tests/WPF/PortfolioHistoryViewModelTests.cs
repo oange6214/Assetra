@@ -2,6 +2,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Interfaces.Analysis;
 using Assetra.Core.Models;
+using Assetra.Core.Models.Analysis;
 using Assetra.WPF.Features.Portfolio;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -50,6 +51,31 @@ public sealed class PortfolioHistoryViewModelTests
 
         Assert.Equal("All", vm.ActivePeriod);
         Assert.Equal([10d, 20d], ChartValues(vm));
+    }
+
+    [Fact]
+    public async Task ShortPeriod_WithSparseSnapshots_StillRendersBenchmarkComparison()
+    {
+        // WHY: benchmark 走每日 K 線、不該被「投組快照密度」綁住。投組快照很疏（5 天視窗內只剩 1 筆）時，
+        // 選 5D 仍要畫出 benchmark 線（修「選 5D 圖空白」）。兩筆快照相隔 10 天 → 5D 視窗只含最後一筆。
+        var latest = DateOnly.FromDateTime(DateTime.Today);
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(latest.AddDays(-10), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(latest, 0m, 1_100m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            settings: new FakeSettings(new AppSettings(BaseCurrency: "TWD", ComparisonItems: ["0050.TW"])),
+            benchmark: new StubBenchmark());
+
+        await vm.LoadAsync();
+        vm.ChangePeriodCommand.Execute("5");
+        await Task.Yield();
+
+        Assert.Equal("5", vm.ActivePeriod);
+        // 舊 gate（filtered.Count >= 2）會讓近幾天快照疏的情況整張圖空白；新邏輯用「選的視窗」畫 benchmark。
+        Assert.NotEmpty(vm.CompareSeries);
     }
 
     [Fact]
@@ -356,6 +382,24 @@ public sealed class PortfolioHistoryViewModelTests
             return rates.TryGetValue((from.ToUpperInvariant(), to.ToUpperInvariant()), out var rate)
                 ? Task.FromResult<decimal?>(amount * rate)
                 : Task.FromResult<decimal?>(null);
+        }
+    }
+
+    private sealed class StubBenchmark : IBenchmarkComparisonService
+    {
+        public Task<decimal?> ComputeBenchmarkTwrAsync(
+            string symbol, PerformancePeriod period, CancellationToken ct = default)
+            => Task.FromResult<decimal?>(0.05m);
+
+        public Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
+            string symbol, PerformancePeriod period, CancellationToken ct = default)
+        {
+            IReadOnlyList<BenchmarkSeriesPoint> pts =
+            [
+                new BenchmarkSeriesPoint(period.Start, 0m, 100m),
+                new BenchmarkSeriesPoint(period.End, 0.05m, 105m),
+            ];
+            return Task.FromResult<IReadOnlyList<BenchmarkSeriesPoint>?>(pts);
         }
     }
 
