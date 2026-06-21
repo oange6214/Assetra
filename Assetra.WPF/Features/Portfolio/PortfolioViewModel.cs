@@ -465,6 +465,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             services.Volatility,
             services.Sharpe,
             services.Concentration);
+        History.CompareLiteMode = true; // 概覽迷你圖：「vs 大盤」%對比只疊大盤一條、不放整排自訂對標
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().

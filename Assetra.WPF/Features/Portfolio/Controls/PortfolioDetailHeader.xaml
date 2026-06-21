@@ -297,6 +297,16 @@
                         GroupName="DetailHeaderPeriod"
                         IsChecked="{Binding History.ActivePeriod, Mode=OneWay, Converter={StaticResource EqualityConverter}, ConverterParameter=All}"
                         Style="{StaticResource NavTabBtn}" />
+                    <!--  概覽迷你圖「vs 大盤」%對比（精簡：只疊加權指數一條）  -->
+                    <CheckBox
+                        Margin="14,0,0,0"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding History.IsComparePercentMode}">
+                        <TextBlock
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.History.VsMarket}" />
+                    </CheckBox>
                 </StackPanel>
 
                 <lvc:CartesianChart

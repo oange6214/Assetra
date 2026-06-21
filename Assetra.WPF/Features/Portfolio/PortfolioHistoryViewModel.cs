@@ -71,6 +71,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>對標疊線用的「大盤」symbol — 加權指數（Yahoo ^TWII；router 已導向 Yahoo）。</summary>
     private const string BenchmarkOverlaySymbol = "^TWII";
 
+    /// <summary>
+    /// 精簡對比模式（投資資產頁概覽迷你圖用）：% 對比只疊「大盤」一條、不帶自訂對標，避免小圖塞太多線。
+    /// 資產趨勢頁維持 false（完整多線＋圖例）。
+    /// </summary>
+    [ObservableProperty] private bool _compareLiteMode;
+
     partial void OnIsComparePercentModeChanged(bool value) => RefreshChart();
 
     /// <summary>「vs 大盤」% 對比模式的圖例（投組＋各對標線），每項 (label, 顏色 hex)；非 % 模式為空。</summary>
@@ -876,9 +882,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         {
             (BenchmarkOverlaySymbol, GetString("Portfolio.History.BenchmarkTaiex", "加權指數")),
         };
-        foreach (var s in (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).Take(4))
-            if (!string.IsNullOrWhiteSpace(s))
-                specs.Add((s, s));
+        // 精簡模式（概覽迷你圖）只留大盤；完整模式才接使用者自訂對標。
+        if (!CompareLiteMode)
+            foreach (var s in (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).Take(4))
+                if (!string.IsNullOrWhiteSpace(s))
+                    specs.Add((s, s));
 
         var overlays = new List<(string, string, IReadOnlyList<DateTimePoint>)>();
         for (var i = 0; i < specs.Count; i++)
