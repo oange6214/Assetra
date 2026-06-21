@@ -125,7 +125,10 @@
         <Border Grid.Row="3" Style="{StaticResource AppCardSummary}">
             <Grid Style="{StaticResource PageContentGrid}">
                 <lvc:CartesianChart
+                    x:Name="CompareChart"
                     Background="Transparent"
+                    MouseLeave="CompareChart_MouseLeave"
+                    MouseMove="CompareChart_MouseMove"
                     Series="{Binding CompareSeries}"
                     TooltipPosition="Top"
                     TooltipTextSize="12"
@@ -184,6 +187,21 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <!--  空清單提示（預設無比較項目時）  -->
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.History.ComparePrompt}"
+                        Visibility="{Binding HasComparisonItems, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                </StackPanel>
+
+                <!--  「＋比較」鈕 ＋ 搜尋 popup；疊在圖右上（與 chips 分開、仿 Google 工具列把「比較」獨立）。  -->
+                <StackPanel
+                    Margin="0,2,6,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
                     <Button
                         x:Name="CompareBtn"
                         Margin="2,0,0,0"
@@ -304,15 +322,6 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-
-                    <!--  空清單提示（預設無比較項目時）  -->
-                    <TextBlock
-                        Margin="8,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.History.ComparePrompt}"
-                        Visibility="{Binding HasComparisonItems, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </StackPanel>
 
                 <StackPanel
@@ -493,7 +502,62 @@
             </Border>
         </UniformGrid>
 
-        <!--  舊「同期對標報酬率」固定表已移除；比較改由圖上方 chips ＋「＋比較」彈性選擇（ComparisonItems）。  -->
+        <!--  ── 比較清單（Google 式）：每個比較項目 ＋ 截至顯示日的同期報酬 %（hover 圖表會更新那天的值）。──  -->
+        <Border
+            Grid.Row="4"
+            Margin="0,8,0,0"
+            Padding="16"
+            Style="{StaticResource AppCardSummary}"
+            Visibility="{Binding HasComparisonItems, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                    <TextBlock
+                        DockPanel.Dock="Left"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.History.CompareTableHeading}" />
+                    <TextBlock
+                        DockPanel.Dock="Right"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{Binding ComparisonAsOfText}" />
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding ComparisonRows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,3,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Ellipse Grid.Column="0" Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{Binding ColorHex}" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Label}" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Numeric}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}"
+                                    Typography.NumeralAlignment="Tabular" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
 
         <!--  ── Footer hint — P5.1 修復可疑點工具列已移除（曲線改算真實淨值後 partial-price 假象問題不存在）  -->
         <TextBlock

@@ -26,4 +26,33 @@ public partial class TrendsView : UserControl
         if (vm.ChangePeriodCommand.CanExecute(param))
             vm.ChangePeriodCommand.Execute(param);
     }
+
+    /// <summary>
+    /// 滑鼠在比較圖上移動 → 把游標 X 換算成日期，設定 VM.ComparisonHoverDate，下方清單即顯示那天的同期 %。
+    /// LiveCharts2 DateTimeAxis 以 <c>DateTime.Ticks</c> 當 X 座標；取值失敗時靜默忽略（清單退回顯示期末）。
+    /// </summary>
+    private void CompareChart_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (DataContext is not PortfolioHistoryViewModel vm
+            || sender is not LiveChartsCore.SkiaSharpView.WPF.CartesianChart chart)
+            return;
+        try
+        {
+            var pos = e.GetPosition(chart);
+            var data = chart.ScalePixelsToData(new LiveChartsCore.Drawing.LvcPointD(pos.X, pos.Y));
+            var ticks = (long)data.X;
+            if (ticks > System.DateTime.MinValue.Ticks && ticks < System.DateTime.MaxValue.Ticks)
+                vm.ComparisonHoverDate = new System.DateTime(ticks);
+        }
+        catch
+        {
+            // hover 取值失敗不影響圖表 / 清單
+        }
+    }
+
+    private void CompareChart_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (DataContext is PortfolioHistoryViewModel vm)
+            vm.ComparisonHoverDate = null;
+    }
 }

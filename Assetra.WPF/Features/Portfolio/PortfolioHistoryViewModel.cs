@@ -220,6 +220,47 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>是否有任何比較項目；false 時資產趨勢圖顯示「點 ＋比較 選擇要比較的項目」提示。</summary>
     [ObservableProperty] private bool _hasComparisonItems;
 
+    /// <summary>下方比較清單：每項 ＋ 截至顯示日的同期報酬 %（自區間起點起算）。隨滑鼠 hover 更新。</summary>
+    [ObservableProperty] private IReadOnlyList<ComparisonRow> _comparisonRows = [];
+
+    /// <summary>下方清單顯示的「截至日期」（hover 到的那天；null＝期末）。圖表 hover 由 code-behind 設定。</summary>
+    [ObservableProperty] private DateTime? _comparisonHoverDate;
+
+    /// <summary>下方清單的「截至 YYYY/MM/DD」文字（hover 中那天 / 期末）。</summary>
+    [ObservableProperty] private string _comparisonAsOfText = string.Empty;
+
+    /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
+    private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
+
+    partial void OnComparisonHoverDateChanged(DateTime? value) => UpdateComparisonRows();
+
+    /// <summary>依目前顯示日（hover 或期末）重算下方清單每項的同期 %。</summary>
+    private void UpdateComparisonRows()
+    {
+        if (_comparisonLines.Count == 0)
+        {
+            ComparisonRows = [];
+            ComparisonAsOfText = string.Empty;
+            return;
+        }
+        var rows = new List<ComparisonRow>(_comparisonLines.Count);
+        DateTime usedDate = default;
+        foreach (var (label, color, token, pts) in _comparisonLines)
+        {
+            if (pts.Count == 0)
+                continue;
+            var pt = ComparisonHoverDate is { } d
+                ? pts.LastOrDefault(p => p.DateTime <= d) ?? pts[0]
+                : pts[^1];
+            usedDate = pt.DateTime;
+            rows.Add(new ComparisonRow(label, color, token, pt.Value ?? 0d));
+        }
+        ComparisonRows = rows;
+        ComparisonAsOfText = usedDate == default
+            ? string.Empty
+            : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
     /// <summary>對比線配色：我的投組固定取 [0] 藍；其餘對標從 [1] 開始循環。固定色（兩主題皆可讀）。</summary>
     private static readonly string[] ComparisonPalette =
     {
@@ -1128,6 +1169,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         {
             CompareSeries = [];
             ComparisonLegend = [];
+            _comparisonLines = [];
+            UpdateComparisonRows();
             return;
         }
 
@@ -1153,6 +1196,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         CompareSeries = [.. series];
         ComparisonLegend = legend;
+        _comparisonLines = lines;
+        ComparisonHoverDate = null; // 重畫後預設顯示期末
+        UpdateComparisonRows();
 
         CompareXAxes =
         [

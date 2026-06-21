@@ -171,6 +171,7 @@
     <sys:String x:Key="Portfolio.History.AddComparison">新增比較對象</sys:String>
     <sys:String x:Key="Portfolio.History.Compare">＋ 比較</sys:String>
     <sys:String x:Key="Portfolio.History.ComparePrompt">點「＋ 比較」選擇要比較的項目（我的投組 / 大盤 / 股票）</sys:String>
+    <sys:String x:Key="Portfolio.History.CompareTableHeading">同期報酬率</sys:String>
     <sys:String x:Key="Portfolio.History.AddComparison.Hint">輸入代號，如 0050.TW、2330.TW、^GSPC（大盤 ^TWII 已內建）</sys:String>
     <sys:String x:Key="Portfolio.History.RemoveComparison">移除</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">我的投組</sys:String>
