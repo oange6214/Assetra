@@ -10,4 +10,6 @@ public sealed record ComparisonRow(
     string? RemoveToken,
     double Percent,
     System.Windows.Media.Brush PercentBrush,
-    decimal Value);
+    decimal Value,         // 現值 / 現價（顯示日的絕對值）
+    decimal StartValue,    // 期初值（區間基準＝絕對序列首點）
+    decimal AbsChange);    // 漲跌＝Value − StartValue

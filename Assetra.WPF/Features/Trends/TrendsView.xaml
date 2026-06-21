@@ -523,37 +523,66 @@
                         Foreground="{DynamicResource AppTextMuted}"
                         Text="{Binding ComparisonAsOfText}" />
                 </DockPanel>
+                <!--  欄標題（仿 Google：項目 / 現值 / 漲跌 / 同期 % / 期初）  -->
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="96" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.History.Col.Item}" />
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.History.Col.Value}" />
+                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.History.Col.Change}" />
+                    <TextBlock Grid.Column="3" HorizontalAlignment="Right" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.History.Col.Pct}" />
+                    <TextBlock Grid.Column="4" HorizontalAlignment="Right" FontSize="{StaticResource Font.Size.Xs}" Foreground="{DynamicResource AppTextMuted}" Text="{DynamicResource Portfolio.History.Col.Start}" />
+                </Grid>
                 <ItemsControl ItemsSource="{Binding ComparisonRows}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid Margin="0,3,0,3">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" MinWidth="96" />
-                                    <ColumnDefinition Width="Auto" MinWidth="78" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="96" />
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="100" />
                                 </Grid.ColumnDefinitions>
-                                <Ellipse Grid.Column="0" Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center">
-                                    <Ellipse.Fill>
-                                        <SolidColorBrush Color="{Binding ColorHex}" />
-                                    </Ellipse.Fill>
-                                </Ellipse>
+                                <!--  項目：色點 ＋ 名稱  -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Ellipse Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{Binding ColorHex}" />
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding Label}" />
+                                </StackPanel>
+                                <!--  現值（股票現價 / 我的投組現淨值 / 組合現市值）  -->
                                 <TextBlock
                                     Grid.Column="1"
+                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Numeric}"
                                     FontSize="{StaticResource Font.Size.Sm}"
                                     Foreground="{DynamicResource AppTextPrimary}"
-                                    Text="{Binding Label}" />
-                                <!--  現值 / 現價（股票現價 / 我的投組現淨值 / 組合現市值）  -->
+                                    Text="{Binding Value, StringFormat='{}{0:#,##0.##}'}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <!--  漲跌（現值 − 期初；漲紅跌綠）  -->
                                 <TextBlock
                                     Grid.Column="2"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource Font.Family.Numeric}"
                                     FontSize="{StaticResource Font.Size.Sm}"
-                                    Foreground="{DynamicResource AppTextSecondary}"
-                                    Text="{Binding Value, StringFormat='{}{0:#,##0.##}'}"
+                                    Foreground="{Binding PercentBrush}"
+                                    Text="{Binding AbsChange, StringFormat='+#,##0.##;-#,##0.##;0'}"
                                     Typography.NumeralAlignment="Tabular" />
+                                <!--  同期 %  -->
                                 <TextBlock
                                     Grid.Column="3"
                                     HorizontalAlignment="Right"
@@ -563,6 +592,16 @@
                                     FontWeight="SemiBold"
                                     Foreground="{Binding PercentBrush}"
                                     Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}"
+                                    Typography.NumeralAlignment="Tabular" />
+                                <!--  期初（區間基準值）  -->
+                                <TextBlock
+                                    Grid.Column="4"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{StaticResource Font.Family.Numeric}"
+                                    FontSize="{StaticResource Font.Size.Sm}"
+                                    Foreground="{DynamicResource AppTextMuted}"
+                                    Text="{Binding StartValue, StringFormat='{}{0:#,##0.##}'}"
                                     Typography.NumeralAlignment="Tabular" />
                             </Grid>
                         </DataTemplate>

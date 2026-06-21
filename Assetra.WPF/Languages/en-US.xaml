@@ -176,6 +176,11 @@
     <sys:String x:Key="Portfolio.History.Compare">+ Compare</sys:String>
     <sys:String x:Key="Portfolio.History.ComparePrompt">Click “+ Compare” to pick items (my portfolio / market / stocks)</sys:String>
     <sys:String x:Key="Portfolio.History.CompareTableHeading">Period return</sys:String>
+    <sys:String x:Key="Portfolio.History.Col.Item">Item</sys:String>
+    <sys:String x:Key="Portfolio.History.Col.Value">Value</sys:String>
+    <sys:String x:Key="Portfolio.History.Col.Change">Change</sys:String>
+    <sys:String x:Key="Portfolio.History.Col.Pct">Period %</sys:String>
+    <sys:String x:Key="Portfolio.History.Col.Start">Start</sys:String>
     <sys:String x:Key="Portfolio.History.AddComparison.Hint">Symbol, e.g. 0050.TW, 2330.TW, ^GSPC (TAIEX ^TWII built in)</sys:String>
     <sys:String x:Key="Portfolio.History.RemoveComparison">Remove</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">My portfolio</sys:String>

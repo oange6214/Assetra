@@ -262,11 +262,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 : pts[^1];
             usedDate = pt.DateTime;
             var pct = pt.Value ?? 0d;
-            // 現值/現價：同樣依顯示日（hover 或期末）從絕對價序列取值。
+            // 現值＋期初＋漲跌：依顯示日（hover 或期末）從絕對序列取值；期初＝序列首點（區間基準）。
             var absPts = _comparisonAbsByToken.GetValueOrDefault(token);
             var value = 0m;
+            var startValue = 0m;
             if (absPts is { Count: > 0 })
             {
+                startValue = (decimal)(absPts[0].Value ?? 0d);
                 var ap = ComparisonHoverDate is { } hd
                     ? absPts.LastOrDefault(p => p.DateTime <= hd) ?? absPts[0]
                     : absPts[^1];
@@ -274,7 +276,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             }
             // 漲跌色：PnlColorPalette 已依 ColorSchemeService 處理台股「漲紅跌綠」慣例（pct 為比例 → ×100 成百分比）。
             rows.Add(new ComparisonRow(label, color, token, pct,
-                Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d), value));
+                Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d), value, startValue, value - startValue));
         }
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
