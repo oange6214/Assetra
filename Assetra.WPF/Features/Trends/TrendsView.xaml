@@ -549,7 +549,7 @@
                                     FontFamily="{StaticResource Font.Family.Numeric}"
                                     FontSize="{StaticResource Font.Size.Sm}"
                                     FontWeight="SemiBold"
-                                    Foreground="{DynamicResource AppTextPrimary}"
+                                    Foreground="{Binding PercentBrush}"
                                     Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}"
                                     Typography.NumeralAlignment="Tabular" />
                             </Grid>

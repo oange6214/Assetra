@@ -253,7 +253,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 ? pts.LastOrDefault(p => p.DateTime <= d) ?? pts[0]
                 : pts[^1];
             usedDate = pt.DateTime;
-            rows.Add(new ComparisonRow(label, color, token, pt.Value ?? 0d));
+            var pct = pt.Value ?? 0d;
+            // 漲跌色：PnlColorPalette 已依 ColorSchemeService 處理台股「漲紅跌綠」慣例（pct 為比例 → ×100 成百分比）。
+            rows.Add(new ComparisonRow(label, color, token, pct, Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d)));
         }
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
@@ -1190,6 +1192,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 GeometrySize    = 0,
                 LineSmoothness  = 0,
                 AnimationsSpeed = TimeSpan.Zero,
+                // tooltip 顯示精確 %（+0.69%）而非 LiveCharts 預設的粗略 -1% / -0%。
+                YToolTipLabelFormatter = p =>
+                    (p.Coordinate.PrimaryValue >= 0 ? "+" : "")
+                    + (p.Coordinate.PrimaryValue * 100d).ToString("F2", CultureInfo.InvariantCulture) + "%",
             });
             legend.Add(new ComparisonLegendItem(label, colorHex, removeToken));
         }
