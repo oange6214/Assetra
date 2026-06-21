@@ -49,6 +49,30 @@ public sealed class BenchmarkComparisonServiceTests
         Assert.Null(await svc.ComputeBenchmarkSeriesAsync("^TWII", Window));
     }
 
+    [Fact]
+    public async Task ComputeBenchmarkSeriesAsync_FirstCandleAfterStart_UsesPrePeriodBaselineAndPrependsStart()
+    {
+        // 標的在期初當天（05/05）無資料 → 用「期初前」最近一根（05/01=100）當基準，並補一個期初 0% 點，
+        // 讓線從選定的期初日 05/05 起跑（而非該標的第一根 in-range 05/10）。修「00830 看起來缺五月資料」。
+        var svc = new BenchmarkComparisonService(new FakeHistory(
+        [
+            (new DateOnly(2026, 5, 1), 100m),   // 期初前的基準
+            (new DateOnly(2026, 5, 10), 110m),
+            (new DateOnly(2026, 5, 15), 121m),
+        ]));
+        var window = new PerformancePeriod(new DateOnly(2026, 5, 5), new DateOnly(2026, 5, 15));
+
+        var series = await svc.ComputeBenchmarkSeriesAsync("0050.TW", window);
+
+        Assert.NotNull(series);
+        Assert.Equal(3, series!.Count);
+        Assert.Equal(new DateOnly(2026, 5, 5), series[0].Date);   // 補的期初點
+        Assert.Equal(0m, series[0].PercentFromStart);
+        Assert.Equal(100m, series[0].Value);                      // 基準 = 期初前 05/01 收盤
+        Assert.Equal(0.10m, series[1].PercentFromStart);          // 110/100 − 1
+        Assert.Equal(0.21m, series[2].PercentFromStart);          // 121/100 − 1
+    }
+
     private sealed class FakeHistory(IReadOnlyList<(DateOnly Date, decimal Close)> points)
         : IStockHistoryProvider
     {

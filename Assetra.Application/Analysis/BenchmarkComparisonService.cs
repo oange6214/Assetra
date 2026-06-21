@@ -6,7 +6,10 @@ using Assetra.Core.Models.Analysis;
 namespace Assetra.Application.Analysis;
 
 /// <summary>
-/// Benchmark TWR = (priceEnd / priceStart) − 1, using close prices from IStockHistoryProvider.
+/// Benchmark 同期 % = close / <b>期初基準價</b> − 1。期初基準價 = 「<b>使用者選的期間起點</b>當天或之前
+/// 最後一根收盤」（而非該標的第一根 in-range candle）。所以選 5D 就是用「5 天前」的價當起點，所有線
+/// 都從同一個期初日 0% 起跑、可公平比較。標的在期初當天無資料（如 00830 五月有缺口）時，仍以期初前
+/// 最近一根當基準，並補一個期初 0% 點讓線從期初起跑（缺口段為連線、非真實逐日資料）。
 /// </summary>
 public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
 {
@@ -19,56 +22,62 @@ public sealed class BenchmarkComparisonService : IBenchmarkComparisonService
 
     public async Task<decimal?> ComputeBenchmarkTwrAsync(string symbol, PerformancePeriod period, CancellationToken ct = default)
     {
-        var inRange = await GetInRangeCandlesAsync(symbol, period, ct).ConfigureAwait(false);
-        if (inRange is null)
+        var r = await GetBaselineAndRangeAsync(symbol, period, ct).ConfigureAwait(false);
+        if (r is null)
             return null;
-
-        var startPx = inRange[0].Close;
-        var endPx = inRange[^1].Close;
-        return startPx == 0 ? null : (endPx - startPx) / startPx;
+        var (baseline, inRange) = r.Value;
+        return (inRange[^1].Close - baseline) / baseline;
     }
 
     public async Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeBenchmarkSeriesAsync(
         string symbol, PerformancePeriod period, CancellationToken ct = default)
     {
-        var inRange = await GetInRangeCandlesAsync(symbol, period, ct).ConfigureAwait(false);
-        if (inRange is null)
+        var r = await GetBaselineAndRangeAsync(symbol, period, ct).ConfigureAwait(false);
+        if (r is null)
             return null;
+        var (baseline, inRange) = r.Value;
 
-        var startPx = inRange[0].Close;
-        if (startPx == 0)
-            return null;
-
-        // 每個交易日相對區間起點的累積報酬 = close/startPx − 1（起點本身 = 0%）；Value = 當日收盤（現價用）。
-        return inRange
-            .Select(c => new BenchmarkSeriesPoint(c.Date, (c.Close - startPx) / startPx, c.Close))
-            .ToList();
+        var points = new List<BenchmarkSeriesPoint>(inRange.Count + 1);
+        // 標的在期初當天無資料時，補一個期初 0% 點（abs = 基準價），讓所有線都從期初起跑、同基準。
+        if (inRange[0].Date > period.Start)
+            points.Add(new BenchmarkSeriesPoint(period.Start, 0m, baseline));
+        foreach (var c in inRange)
+            points.Add(new BenchmarkSeriesPoint(c.Date, (c.Close - baseline) / baseline, c.Close));
+        return points;
     }
 
     /// <summary>
-    /// Fetches the benchmark's candles and returns those within <paramref name="period"/> in date
-    /// order. Null when there are fewer than 2 usable points (can't form a return). Shared by the
-    /// TWR endpoint and the full normalized series.
+    /// 抓 candles（窗比期間略長，確保有「期初前」一根可當基準）、回 (期初基準價, in-range candles)。
+    /// 基準價 = 期初當天或之前最後一根收盤；無則退回第一根 in-range。少於 2 根 in-range 或基準 0 回 null。
     /// </summary>
-    private async Task<IReadOnlyList<OhlcvPoint>?> GetInRangeCandlesAsync(
+    private async Task<(decimal Baseline, IReadOnlyList<OhlcvPoint> InRange)?> GetBaselineAndRangeAsync(
         string symbol, PerformancePeriod period, CancellationToken ct)
     {
         var (sym, exch) = SplitSymbol(symbol);
         var span = period.End.DayNumber - period.Start.DayNumber + 1;
-        var chartPeriod = span <= 31 ? ChartPeriod.OneMonth
-            : span <= 95 ? ChartPeriod.ThreeMonths
-            : span <= 370 ? ChartPeriod.OneYear
+        // 抓比期間略長的窗：閾值比期間長度小一階，確保 fetch 涵蓋「期初前」幾根（找基準用）。
+        var chartPeriod = span <= 24 ? ChartPeriod.OneMonth
+            : span <= 88 ? ChartPeriod.ThreeMonths
+            : span <= 360 ? ChartPeriod.OneYear
             : ChartPeriod.TwoYears;
 
-        var candles = await _history.GetHistoryAsync(sym, exch, chartPeriod, ct).ConfigureAwait(false);
+        var candles = (await _history.GetHistoryAsync(sym, exch, chartPeriod, ct).ConfigureAwait(false))
+            .OrderBy(c => c.Date)
+            .ToList();
         if (candles.Count < 2)
             return null;
 
-        var inRange = candles
-            .Where(c => c.Date >= period.Start && c.Date <= period.End)
-            .OrderBy(c => c.Date)
-            .ToList();
-        return inRange.Count < 2 ? null : inRange;
+        var inRange = candles.Where(c => c.Date >= period.Start && c.Date <= period.End).ToList();
+        if (inRange.Count < 2)
+            return null;
+
+        // 期初基準價：期初當天或之前最後一根收盤（candles 已升冪 → Last()）；無則退回第一根 in-range。
+        var baseline = candles
+            .Where(c => c.Date <= period.Start)
+            .Select(c => c.Close)
+            .DefaultIfEmpty(inRange[0].Close)
+            .Last();
+        return baseline == 0m ? null : (baseline, inRange);
     }
 
     private static (string symbol, string exchange) SplitSymbol(string raw)
