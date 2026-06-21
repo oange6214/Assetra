@@ -143,6 +143,43 @@
                     XAxes="{Binding XAxes}"
                     YAxes="{Binding YAxes}" />
 
+                <!--  vs 大盤 % 對比圖例：投組＋各對標線的色點＋標籤；僅 % 模式顯示，疊在圖左上。  -->
+                <ItemsControl
+                    Margin="6,2,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    ItemsSource="{Binding ComparisonLegend}"
+                    Visibility="{Binding IsComparePercentMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel
+                                Margin="0,0,14,0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                                <Ellipse
+                                    Width="9"
+                                    Height="9"
+                                    Margin="0,0,5,0"
+                                    VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{Binding ColorHex}" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding Label}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
                 <StackPanel
                     Style="{StaticResource EmptyStatePanel}"
                     Visibility="{Binding HasHistory, Converter={StaticResource InverseBooleanToVisibilityConverter}}">

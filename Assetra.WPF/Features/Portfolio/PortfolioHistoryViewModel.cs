@@ -73,6 +73,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     partial void OnIsComparePercentModeChanged(bool value) => RefreshChart();
 
+    /// <summary>「vs 大盤」% 對比模式的圖例（投組＋各對標線），每項 (label, 顏色 hex)；非 % 模式為空。</summary>
+    [ObservableProperty] private IReadOnlyList<ComparisonLegendItem> _comparisonLegend = [];
+
+    /// <summary>對比線配色：[0] 投組，[1..] 各對標（加權指數、自訂…）循環使用。固定色（兩主題皆可讀）。</summary>
+    private static readonly string[] ComparisonPalette =
+    {
+        "#2563EB", "#F59E0B", "#14B8A6", "#8B5CF6", "#EC4899", "#10B981",
+    };
+
     // Period selection
     [ObservableProperty] private int _selectedDays = 30;
 
@@ -344,12 +353,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
 
-        // % 對比模式：先抓「大盤」對標的正規化 % 序列疊上去（失敗回 null，主圖照畫）。
-        IReadOnlyList<DateTimePoint>? benchmarkPct = null;
+        // % 對比模式：抓「大盤＋自訂對標」的正規化 % 序列疊上去（抓不到的線略過，主圖照畫）。
+        // 此處刻意不 ConfigureAwait(false)：BuildChart 需回到 UI thread 設 ValueSeries / ComparisonLegend。
+        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null;
         if (IsComparePercentMode && _benchmark is not null && filtered.Count >= 2 && points.Count >= 2)
-            benchmarkPct = await BuildBenchmarkPercentPointsAsync(filtered).ConfigureAwait(false);
+            overlays = await BuildBenchmarkOverlaysAsync(filtered);
 
-        BuildChart(points, benchmarkPct);
+        BuildChart(points, overlays);
 
         // Stage 1: KPI 列 + 對標。失敗不影響主圖。
         try
@@ -780,7 +790,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private void BuildChart(
         IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<DateTimePoint>? benchmarkPercentPoints = null)
+        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays = null)
     {
         HasHistory = points.Count >= 1;
         if (points.Count == 0)
@@ -797,14 +807,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 讓 separator 線在 dark / light 兩個 theme 都成 30% 強度可見但不搶 stroke。
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
-        // 「vs 大盤」% 對比模式：改畫正規化報酬 + 加權指數疊線；其餘維持絕對淨值曲線。
+        // 「vs 大盤」% 對比模式：改畫正規化報酬 + 對標疊線；其餘維持絕對淨值曲線。
         if (IsComparePercentMode)
         {
-            BuildComparePercentChart(points, benchmarkPercentPoints, accentColor, labelColor, separatorColor);
+            BuildComparePercentChart(points, overlays, labelColor, separatorColor);
             return;
         }
 
         var fillColor = accentColor.WithAlpha(32);
+        ComparisonLegend = []; // 絕對淨值模式無對比圖例
 
         // P2.13 — Stroke 從 2px 降到 1.5px、GeometrySize 從 4 降到 3、
         // GeometryStroke 取消（純 fill 圓點）— 整體更貼近現代金融儀表板的細
@@ -852,29 +863,45 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 抓「大盤」對標（加權指數）的正規化 % 序列，轉成 chart 用 DateTimePoint（% 以小數表示）。
-    /// 失敗或資料不足回 null —「vs 大盤」線就不畫，主圖不受影響。
+    /// 抓「大盤（加權指數）＋使用者自訂對標」的正規化 % 序列，各自轉成一條疊線（label, 顏色 hex, 點）。
+    /// 個別對標抓不到就略過該條；整段不丟例外（單條 try-catch）—— 主圖不受影響。
     /// </summary>
-    private async Task<IReadOnlyList<DateTimePoint>?> BuildBenchmarkPercentPointsAsync(
-        IReadOnlyList<PortfolioDailySnapshot> filtered)
+    private async Task<IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>>
+        BuildBenchmarkOverlaysAsync(IReadOnlyList<PortfolioDailySnapshot> filtered)
     {
-        try
+        var period = new PerformancePeriod(filtered.Min(s => s.SnapshotDate), filtered.Max(s => s.SnapshotDate));
+
+        // 大盤（加權指數）固定第一條；其後接使用者自訂對標（最多 4，沿用既有 Settings 清單）。
+        var specs = new List<(string Symbol, string Label)>
         {
-            var startDate = filtered.Min(s => s.SnapshotDate);
-            var endDate = filtered.Max(s => s.SnapshotDate);
-            var series = await _benchmark!
-                .ComputeBenchmarkSeriesAsync(BenchmarkOverlaySymbol, new PerformancePeriod(startDate, endDate))
-                .ConfigureAwait(false);
-            if (series is null || series.Count < 2)
-                return null;
-            return series
-                .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
-                .ToList();
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+            (BenchmarkOverlaySymbol, GetString("Portfolio.History.BenchmarkTaiex", "加權指數")),
+        };
+        foreach (var s in (_settings?.Current.CustomBenchmarkSymbols ?? new List<string>()).Take(4))
+            if (!string.IsNullOrWhiteSpace(s))
+                specs.Add((s, s));
+
+        var overlays = new List<(string, string, IReadOnlyList<DateTimePoint>)>();
+        for (var i = 0; i < specs.Count; i++)
         {
-            return null;
+            try
+            {
+                var series = await _benchmark!
+                    .ComputeBenchmarkSeriesAsync(specs[i].Symbol, period)
+                    .ConfigureAwait(false);
+                if (series is null || series.Count < 2)
+                    continue;
+                var pts = series
+                    .Select(p => new DateTimePoint(p.Date.ToDateTime(TimeOnly.MinValue), (double)p.PercentFromStart))
+                    .ToList();
+                // palette[0] 留給投組；對標從 [1] 開始循環。
+                overlays.Add((specs[i].Label, ComparisonPalette[(i + 1) % ComparisonPalette.Length], pts));
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // 單一對標抓取失敗 → 略過該條
+            }
         }
+        return overlays;
     }
 
     /// <summary>
@@ -883,42 +910,50 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// </summary>
     private void BuildComparePercentChart(
         IReadOnlyList<DateTimePoint> points,
-        IReadOnlyList<DateTimePoint>? benchmarkPercentPoints,
-        SKColor accentColor, SKColor labelColor, SKColor separatorColor)
+        IReadOnlyList<(string Label, string ColorHex, IReadOnlyList<DateTimePoint> Points)>? overlays,
+        SKColor labelColor, SKColor separatorColor)
     {
         var baseVal = points[0].Value ?? 0d;
         IReadOnlyList<DateTimePoint> portfolioPct = baseVal == 0d
             ? points
             : points.Select(p => new DateTimePoint(p.DateTime, ((p.Value ?? 0d) / baseVal) - 1d)).ToList();
 
-        var benchColor = GetSkColor("AppTextSecondary", "#787B86");
+        var meLabel = GetString("Portfolio.History.MeLabel", "我的投組");
+        var meColorHex = ComparisonPalette[0];
 
         var series = new List<ISeries>
         {
             new LineSeries<DateTimePoint>
             {
                 Values          = portfolioPct,
-                Name            = GetString("Portfolio.History.MeLabel", "我的投組"),
-                Stroke          = new SolidColorPaint(accentColor, 2f),
+                Name            = meLabel,
+                Stroke          = new SolidColorPaint(SKColor.Parse(meColorHex), 2.5f),
                 Fill            = null,
                 GeometrySize    = 0,
                 LineSmoothness  = 0,
                 AnimationsSpeed = TimeSpan.Zero,
             },
         };
-        if (benchmarkPercentPoints is { Count: >= 2 })
-            series.Add(new LineSeries<DateTimePoint>
+        var legend = new List<ComparisonLegendItem> { new(meLabel, meColorHex) };
+
+        if (overlays is not null)
+            foreach (var (label, colorHex, pts) in overlays)
             {
-                Values          = benchmarkPercentPoints,
-                Name            = GetString("Portfolio.History.BenchmarkTaiex", "加權指數"),
-                Stroke          = new SolidColorPaint(benchColor, 1.5f),
-                Fill            = null,
-                GeometrySize    = 0,
-                LineSmoothness  = 0,
-                AnimationsSpeed = TimeSpan.Zero,
-            });
+                series.Add(new LineSeries<DateTimePoint>
+                {
+                    Values          = pts,
+                    Name            = label,
+                    Stroke          = new SolidColorPaint(SKColor.Parse(colorHex), 1.5f),
+                    Fill            = null,
+                    GeometrySize    = 0,
+                    LineSmoothness  = 0,
+                    AnimationsSpeed = TimeSpan.Zero,
+                });
+                legend.Add(new ComparisonLegendItem(label, colorHex));
+            }
 
         ValueSeries = [.. series];
+        ComparisonLegend = legend;
 
         XAxes =
         [
