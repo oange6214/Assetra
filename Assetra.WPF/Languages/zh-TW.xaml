@@ -29,7 +29,7 @@
     <sys:String x:Key="Assistant.Clear">清除對話</sys:String>
     <sys:String x:Key="Assistant.DismissInsight">關閉這條提示</sys:String>
     <sys:String x:Key="Assistant.Export">匯出 Markdown</sys:String>
-    <sys:String x:Key="Nav.Trends">資產趨勢</sys:String>
+    <sys:String x:Key="Nav.Trends">績效比較</sys:String>
     <sys:String x:Key="Nav.Goals">財務目標</sys:String>
     <sys:String x:Key="Nav.Alerts">警示</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">價格警示</sys:String>
@@ -1495,7 +1495,7 @@
     <sys:String x:Key="Trends.Benchmark.Deposit15">定存參考 1.5%</sys:String>
     <!--  Stage 2 (Dashboard consolidation)：4-tab 財務概覽  -->
     <sys:String x:Key="Dashboard.Tab.Overview">總覽</sys:String>
-    <sys:String x:Key="Dashboard.Tab.Trends">資產趨勢</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Trends">績效比較</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar">報酬日曆</sys:String>
     <sys:String x:Key="Dashboard.Tab.Allocation">配置</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">報酬日曆即將推出</sys:String>

@@ -68,7 +68,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [
         new("FinancialOverview", "財務總覽"),
         new("Portfolio", "投資組合"),
-        new("Trends", "資產趨勢"),
+        new("Trends", "績效比較"),
         new("Reports", "月結報告"),
     ];
 

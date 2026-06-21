@@ -29,7 +29,7 @@
     <sys:String x:Key="Assistant.Clear">Clear</sys:String>
     <sys:String x:Key="Assistant.DismissInsight">Dismiss this insight</sys:String>
     <sys:String x:Key="Assistant.Export">Export Markdown</sys:String>
-    <sys:String x:Key="Nav.Trends">Trends</sys:String>
+    <sys:String x:Key="Nav.Trends">Performance Comparison</sys:String>
     <sys:String x:Key="Nav.Goals">Goals</sys:String>
     <sys:String x:Key="Nav.Alerts">Alerts</sys:String>
     <sys:String x:Key="Nav.Alerts.Tooltip">Price Alerts</sys:String>
@@ -1491,7 +1491,7 @@
     <sys:String x:Key="Trends.Benchmark.Deposit15">1.5% deposit baseline</sys:String>
     <!-- Stage 2 (Dashboard consolidation): 4-tab financial dashboard -->
     <sys:String x:Key="Dashboard.Tab.Overview">Overview</sys:String>
-    <sys:String x:Key="Dashboard.Tab.Trends">Asset Trends</sys:String>
+    <sys:String x:Key="Dashboard.Tab.Trends">Performance Comparison</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar">Return Calendar</sys:String>
     <sys:String x:Key="Dashboard.Tab.Allocation">Allocation</sys:String>
     <sys:String x:Key="Dashboard.Tab.Calendar.ComingSoon">Return calendar coming soon</sys:String>
