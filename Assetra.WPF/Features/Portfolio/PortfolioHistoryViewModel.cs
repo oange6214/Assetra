@@ -42,6 +42,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly IVolatilityCalculator? _volatility;
     private readonly ISharpeRatioCalculator? _sharpe;
     private readonly IConcentrationAnalyzer? _concentration;
+    private readonly IStockSearchService? _search;   // 對比 picker autocomplete（＝新增資產用的搜尋）
 
     /// <summary>Full snapshot history (all dates), cached on each DB load.</summary>
     private IReadOnlyList<PortfolioDailySnapshot> _allSnapshots = [];
@@ -79,11 +80,55 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         && CurrentCustomBenchmarks.Count < 4
         && !CurrentCustomBenchmarks.Any(s => string.Equals(s, ComparisonInput.Trim(), StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>對比 picker 的 autocomplete 候選（邊打邊出，最多 8 筆）。</summary>
+    [ObservableProperty] private IReadOnlyList<StockSearchResult> _comparisonSuggestions = [];
+
+    /// <summary>「＋比較」搜尋 popup 是否開啟。</summary>
+    [ObservableProperty] private bool _isComparisonPickerOpen;
+
     partial void OnComparisonInputChanged(string value)
     {
         OnPropertyChanged(nameof(CanAddComparison));
         AddComparisonCommand.NotifyCanExecuteChanged();
+        ComparisonSuggestions = string.IsNullOrWhiteSpace(value) || _search is null
+            ? []
+            : _search.Search(value.Trim()).Take(8).ToList();
     }
+
+    [RelayCommand]
+    private void OpenComparisonPicker()
+    {
+        ComparisonInput = string.Empty;
+        ComparisonSuggestions = [];
+        IsComparisonPickerOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task SelectComparisonSuggestionAsync(StockSearchResult? r)
+    {
+        if (_settings is null || r is null)
+            return;
+        var symbol = FormatBenchmarkSymbol(r);
+        if (CurrentCustomBenchmarks.Count < 4
+            && !CurrentCustomBenchmarks.Any(s => string.Equals(s, symbol, StringComparison.OrdinalIgnoreCase)))
+        {
+            var list = CurrentCustomBenchmarks.ToList();
+            list.Add(symbol);
+            await PersistCustomBenchmarksAsync(list).ConfigureAwait(true);
+            RefreshChart();
+        }
+        ComparisonInput = string.Empty;
+        ComparisonSuggestions = [];
+        IsComparisonPickerOpen = false;
+    }
+
+    /// <summary>搜尋結果 → benchmark 抓取用 symbol：TWSE→.TW、TPEX→.TWO、其餘原樣（指數／US）。</summary>
+    private static string FormatBenchmarkSymbol(StockSearchResult r) => r.Exchange switch
+    {
+        "TWSE" => $"{r.Symbol}.TW",
+        "TPEX" => $"{r.Symbol}.TWO",
+        _ => r.Symbol,
+    };
 
     [RelayCommand(CanExecute = nameof(CanAddComparison))]
     private async Task AddComparisonAsync()
@@ -243,7 +288,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ITradeRepository? trades = null,
         IVolatilityCalculator? volatility = null,
         ISharpeRatioCalculator? sharpe = null,
-        IConcentrationAnalyzer? concentration = null)
+        IConcentrationAnalyzer? concentration = null,
+        IStockSearchService? search = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -257,6 +303,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _volatility = volatility;
         _sharpe = sharpe;
         _concentration = concentration;
+        _search = search;
         HasDrawdown = _drawdown is not null;
         HasBenchmark = _benchmark is not null;
         HasVolatility = _volatility is not null;

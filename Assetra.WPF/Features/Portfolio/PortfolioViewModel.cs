@@ -464,7 +464,8 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             services.Trades,
             services.Volatility,
             services.Sharpe,
-            services.Concentration);
+            services.Concentration,
+            services.Search);
 
         // TradeFilter must be created before LoadAsync so LoadTradesAsync can call
         // TradeFilter.InitTradeTypeFilters() and TradeFilter.RefreshTradesView().

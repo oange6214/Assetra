@@ -281,6 +281,35 @@ public sealed class PortfolioHistoryViewModelTests
         Assert.False(vm.HasKpis);
     }
 
+    [Fact]
+    public void TypingComparisonInput_PopulatesSuggestions()
+    {
+        var search = new StubStockSearch(
+            new StockSearchResult("0050", "元大台灣50", "TWSE"),
+            new StockSearchResult("2330", "台積電", "TWSE"));
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(System.Array.Empty<PortfolioDailySnapshot>()),
+            search: search);
+
+        vm.ComparisonInput = "0050";
+
+        Assert.Single(vm.ComparisonSuggestions);
+        Assert.Equal("0050", vm.ComparisonSuggestions[0].Symbol);
+    }
+
+    private sealed class StubStockSearch(params StockSearchResult[] all) : IStockSearchService
+    {
+        public IReadOnlyList<StockSearchResult> Search(string query) =>
+            all.Where(r => r.Symbol.Contains(query, System.StringComparison.OrdinalIgnoreCase)
+                        || r.Name.Contains(query, System.StringComparison.OrdinalIgnoreCase)).ToList();
+        public IReadOnlyList<StockSearchResult> GetAll() => all;
+        public string? GetExchange(string symbol) => all.FirstOrDefault(r => r.Symbol == symbol)?.Exchange;
+        public string? GetName(string symbol) => all.FirstOrDefault(r => r.Symbol == symbol)?.Name;
+        public string? GetSector(string symbol) => null;
+        public bool IsEtf(string symbol) => false;
+        public bool IsBondEtf(string symbol) => false;
+    }
+
     private sealed class StubBenchmark(decimal? result) : IBenchmarkComparisonService
     {
         public Task<decimal?> ComputeBenchmarkTwrAsync(
