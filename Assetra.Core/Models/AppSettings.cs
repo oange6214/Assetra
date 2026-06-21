@@ -202,10 +202,8 @@ public sealed record AppSettings(
     Dictionary<string, bool>? AssetClassFocusVisibility = null,
 
     /// <summary>
-    /// v2：使用者自訂的對標 symbol 清單（最多 4 個，超出忽略）。
-    /// 例：["2330.TW", "QQQ"]。會顯示在「資產趨勢」tab 的對標比較區，
-    /// 與內建 4 個（TAIEX / 0050 / 00981A / 1.5% 定存）並列。
-    /// 目前沒有編輯 UI；使用者編輯 settings.json 即可生效。
+    /// [Deprecated] 舊「自訂對標」symbol 清單。對標子系統已移除（比較改用 <see cref="ComparisonItems"/> chips）；
+    /// 此欄位僅保留以相容舊 settings.json（反序列化不報錯），新版不讀寫、儲存時 with 沿用原值。
     /// </summary>
     List<string>? CustomBenchmarkSymbols = null,
 

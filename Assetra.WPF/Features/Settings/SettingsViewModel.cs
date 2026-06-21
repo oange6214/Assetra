@@ -205,21 +205,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _llmModel = string.Empty;
     [ObservableProperty] private string _llmEndpoint = string.Empty;
 
-    // ── v2：自訂對標清單（最多 4 個）+ 資產類焦點卡顯示偏好 ────────────────
-    /// <summary>使用者編輯的自訂對標 symbol；XAML 用 ListBox 綁，配 +/− 按鈕。</summary>
-    public ObservableCollection<string> CustomBenchmarkSymbols { get; } = [];
-
-    /// <summary>新增自訂對標時的輸入框文字。</summary>
-    [ObservableProperty] private string _customBenchmarkInput = string.Empty;
-
-    public bool CanAddCustomBenchmark =>
-        !string.IsNullOrWhiteSpace(CustomBenchmarkInput)
-        && CustomBenchmarkSymbols.Count < 4
-        && !CustomBenchmarkSymbols.Any(s => string.Equals(s, CustomBenchmarkInput.Trim(), StringComparison.OrdinalIgnoreCase));
-
-    partial void OnCustomBenchmarkInputChanged(string _) =>
-        OnPropertyChanged(nameof(CanAddCustomBenchmark));
-
+    // ── v2：資產類焦點卡顯示偏好 ────────────────
+    // （舊「自訂對標」清單已隨 benchmark 子系統移除；比較項目改用績效比較頁的 ComparisonItems chips。）
     [ObservableProperty] private bool _isCashFocusEnabled = true;
     [ObservableProperty] private bool _isLiabilityFocusEnabled = true;
     [ObservableProperty] private bool _isRealEstateFocusEnabled = true;
@@ -400,11 +387,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             LlmModel = s.LlmModel ?? string.Empty;
             LlmEndpoint = s.LlmEndpoint ?? string.Empty;
 
-            // v2 — 自訂對標 + 焦點卡顯示偏好
-            CustomBenchmarkSymbols.Clear();
-            if (s.CustomBenchmarkSymbols is not null)
-                foreach (var sym in s.CustomBenchmarkSymbols)
-                    CustomBenchmarkSymbols.Add(sym);
+            // v2 — 焦點卡顯示偏好
             var vis = s.AssetClassFocusVisibility;
             IsCashFocusEnabled = vis?.GetValueOrDefault("Cash", true) ?? true;
             IsLiabilityFocusEnabled = vis?.GetValueOrDefault("Liability", true) ?? true;
@@ -656,10 +639,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             LlmApiKey = LlmApiKey?.Trim() ?? string.Empty,
             LlmModel = LlmModel?.Trim() ?? string.Empty,
             LlmEndpoint = LlmEndpoint?.Trim() ?? string.Empty,
-            // v2：自訂對標清單 + 資產類焦點卡顯示偏好
-            CustomBenchmarkSymbols = CustomBenchmarkSymbols.Count == 0
-                ? null
-                : CustomBenchmarkSymbols.Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+            // v2：資產類焦點卡顯示偏好（CustomBenchmarkSymbols 已 deprecated → with 不覆寫、沿用原值）
             AssetClassFocusVisibility = BuildFocusVisibilityMap(),
         };
         await _settings.SaveAsync(updated).ConfigureAwait(true);
@@ -679,31 +659,6 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         };
         // 都是 true 就不存（settings.json 留乾淨）
         return map.Values.All(v => v) ? null : map;
-    }
-
-    [RelayCommand]
-    private void AddCustomBenchmark()
-    {
-        if (!CanAddCustomBenchmark)
-            return;
-        CustomBenchmarkSymbols.Add(CustomBenchmarkInput.Trim());
-        CustomBenchmarkInput = string.Empty;
-        OnPropertyChanged(nameof(CanAddCustomBenchmark));
-        if (!_isLoading)
-            _ = SaveAsync();
-    }
-
-    [RelayCommand]
-    private void RemoveCustomBenchmark(string? symbol)
-    {
-        if (string.IsNullOrEmpty(symbol))
-            return;
-        if (CustomBenchmarkSymbols.Remove(symbol))
-        {
-            OnPropertyChanged(nameof(CanAddCustomBenchmark));
-            if (!_isLoading)
-                _ = SaveAsync();
-        }
     }
 
     partial void OnLlmProviderChanged(string value) { if (!_isLoading) _ = SaveAsync(); }

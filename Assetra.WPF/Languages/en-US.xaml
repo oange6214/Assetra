@@ -1563,9 +1563,6 @@
     <sys:String x:Key="Dashboard.Calendar.YearView">Year view</sys:String>
     <!-- v2 Settings: dashboard customization -->
     <sys:String x:Key="Settings.Section.DashboardCustomize">Financial Overview customization</sys:String>
-    <sys:String x:Key="Settings.CustomBenchmarks.Heading">Custom benchmarks</sys:String>
-    <sys:String x:Key="Settings.CustomBenchmarks.Hint">Track your own benchmark symbols in the Asset Trends tab (max 4). e.g., 2330.TW, QQQ.</sys:String>
-    <sys:String x:Key="Settings.CustomBenchmarks.Add">Add</sys:String>
     <sys:String x:Key="Settings.AssetClassFocus.Heading">Asset-class focus cells</sys:String>
     <sys:String x:Key="Settings.AssetClassFocus.Hint">Uncheck to hide focus cards for asset classes you don't track.</sys:String>
     <sys:String x:Key="FinancialOverview.Kpi.MoveDown">Move down</sys:String>

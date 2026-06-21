@@ -220,11 +220,9 @@ DI 註冊集中在 `Infrastructure/PortfolioServiceCollectionExtensions.AddPortf
 
 `FinancialOverviewViewModel.MoveKpiUpCommand` / `MoveKpiDownCommand`，每 KPI editor item 旁有 ▲▼ button。`ObservableCollection.Move()` 保留物件 ref；`RecomputeKpiEditorState()` 觸發 OverviewKpis 順序持久化。
 
-### 對標自訂（`#6c` / `87eac86`）
+### 對標自訂（`#6c` / `87eac86`）— 已移除
 
-`AppSettings.CustomBenchmarkSymbols: List<string>?` — 最多 4 個。`PortfolioHistoryViewModel.CustomBenchmarks` 集合在每次 `UpdateBenchmarksAsync` 計算 TWR。TrendsView 對標區下方 ItemsControl 展示。
-
-無編輯 UI；使用者編輯 `settings.json` 加 `"CustomBenchmarkSymbols": ["2330.TW", "QQQ"]` 即生效。
+舊 benchmark 子系統（`PortfolioHistoryViewModel.UpdateBenchmarksAsync` + `CustomBenchmarks` 集合）於 `51f325e` 移除，比較改用「績效比較」頁的 `AppSettings.ComparisonItems` chips（我的投組／大盤／股票／組合，使用者自選、可移除、持久化）。Settings 的「自訂對標」編輯區與 lang key 隨後一併移除。`AppSettings.CustomBenchmarkSymbols` 欄位保留標 deprecated，僅相容舊 settings.json。
 
 ### 資產類焦點卡客製顯示（`#6e` / `5264020`）
 
