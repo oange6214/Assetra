@@ -42,7 +42,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private readonly IVolatilityCalculator? _volatility;
     private readonly ISharpeRatioCalculator? _sharpe;
     private readonly IConcentrationAnalyzer? _concentration;
-    private readonly IStockSearchService? _search;   // 對比 picker autocomplete（＝新增資產用的搜尋）
+    private readonly IStockSearchService? _search;          // 對比 picker autocomplete fallback（台股 CSV）
+    private readonly ISymbolDirectory? _symbolDirectory;    // 對比 picker autocomplete 主來源（composite：台股＋美股）
     private readonly Assetra.Core.Interfaces.Analysis.IGroupPerformanceSeriesService? _groupPerformance; // 群組比較線
     private readonly Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? _groupCatalog;          // 群組名稱/清單
 
@@ -108,9 +109,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanAddComparison));
         AddComparisonCommand.NotifyCanExecuteChanged();
-        ComparisonSuggestions = string.IsNullOrWhiteSpace(value) || _search is null
+        // 主來源用 composite symbol directory（含美股）；沒注入時 fallback 台股 search service。
+        ComparisonSuggestions = string.IsNullOrWhiteSpace(value)
             ? []
-            : _search.Search(value.Trim()).Take(8).ToList();
+            : (_symbolDirectory?.Search(value.Trim()) ?? _search?.Search(value.Trim()) ?? []).Take(8).ToList();
     }
 
     [RelayCommand]
@@ -394,7 +396,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         IConcentrationAnalyzer? concentration = null,
         IStockSearchService? search = null,
         Assetra.Core.Interfaces.Analysis.IGroupPerformanceSeriesService? groupPerformance = null,
-        Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? groupCatalog = null)
+        Assetra.WPF.Features.PortfolioGroups.PortfolioGroupCatalog? groupCatalog = null,
+        ISymbolDirectory? symbolDirectory = null)
     {
         _historyQueryService = historyQueryService;
         _localization = localization ?? NullLocalizationService.Instance;
@@ -411,6 +414,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         _search = search;
         _groupPerformance = groupPerformance;
         _groupCatalog = groupCatalog;
+        _symbolDirectory = symbolDirectory;
         HasDrawdown = _drawdown is not null;
         HasVolatility = _volatility is not null;
         HasSharpe = _sharpe is not null;
@@ -1033,13 +1037,16 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         }
 
         // 1D/5D 用盤中分時；其餘日線。盤中跨日的非交易空檔由 IntradayGapCompressor 在繪圖時壓掉（Google 式）。
-        // 投組／組合無盤中資料 → 一律日線。
         IntradayRange? intradayRange = ActivePeriodKey switch
         {
             "1" => IntradayRange.OneDay,
             "5" => IntradayRange.FiveDays,
             _ => null,
         };
+        // 盤中只在「全部同市場的 benchmark」時對齊得了：台股↔美股盤中時段/時區不同、@我的投組/組合是日線，
+        // 混在一起會亂序 → 退日線（日線照日期對齊、仍可比較，即使用者所說「1M/1Y 一天一天算」）。
+        if (intradayRange is not null && !ComparisonCanUseIntraday(items))
+            intradayRange = null;
 
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
@@ -1111,6 +1118,28 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         string.Equals(token, BenchmarkOverlaySymbol, StringComparison.OrdinalIgnoreCase)
             ? GetString("Portfolio.History.BenchmarkTaiex", "加權指數")
             : token;
+
+    /// <summary>
+    /// 盤中（1D/5D）是否可用：需所有項目都是「同一市場的 benchmark 個股/指數」。@me/@group 是日線（無盤中），
+    /// 台股與美股盤中時段/時區也不同 → 任一情況都退日線（避免不同 session 在同一張圖亂序）。
+    /// </summary>
+    private static bool ComparisonCanUseIntraday(IReadOnlyList<string> items)
+    {
+        var hasTw = false;
+        var hasForeign = false;
+        foreach (var t in items)
+        {
+            if (t.StartsWith('@'))
+                return false; // @me / @group → 日線，無盤中
+            var dot = t.LastIndexOf('.');
+            var ex = dot > 0 ? t[(dot + 1)..].ToUpperInvariant() : string.Empty;
+            if (ex is "NASDAQ" or "NYSE" or "NYSEARCA" or "AMEX" or "BATS" or "IEX" or "HKEX" or "TSE")
+                hasForeign = true;
+            else
+                hasTw = true; // .TW / .TWO / ^指數 / 裸代號 → 台股
+        }
+        return !(hasTw && hasForeign);
+    }
 
     /// <summary>
     /// 比較圖：把使用者選的每個項目各畫一條 % 線（我的投組 TWR ＋ 大盤 ＋ 股票），全部可移除。

@@ -150,7 +150,9 @@ public sealed record PortfolioServices(
     /// Transaction buy flow FX resolver. Optional so tests can omit it and same-currency
     /// flows continue without an FX history dependency.
     /// </summary>
-    TransactionFxRateResolver? TransactionFxRateResolver = null)
+    TransactionFxRateResolver? TransactionFxRateResolver = null,
+    /// <summary>比較圖「＋比較」搜尋來源：composite symbol directory（台股＋美股）。null 時 fallback 台股 Search。</summary>
+    ISymbolDirectory? SymbolDirectory = null)
 {
     /// <summary>
     /// 投組摘要計算服務：統一計算 totals、allocation 與財務摘要指標。

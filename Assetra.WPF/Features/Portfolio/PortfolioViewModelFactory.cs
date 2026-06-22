@@ -34,6 +34,7 @@ internal sealed class PortfolioViewModelFactory
         new PortfolioServices(
             Stock: sp.GetRequiredService<IStockService>(),
             Search: sp.GetRequiredService<IStockSearchService>(),
+            SymbolDirectory: sp.GetService<ISymbolDirectory>(),
             HistoryMaintenance: sp.GetRequiredService<IPortfolioHistoryMaintenanceService>(),
             HistoryQuery: sp.GetRequiredService<IPortfolioHistoryQueryService>(),
             TradeDeletionWorkflow: sp.GetRequiredService<ITradeDeletionWorkflowService>(),
