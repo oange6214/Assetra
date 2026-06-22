@@ -1130,14 +1130,24 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             ? (TimeSpan.FromHours(1), (Func<DateTime, string>)(d => d.ToString("HH:mm")))
             : (TimeSpan.FromDays(1), d => d.ToString("MM/dd"));
 
+        // 滑鼠十字準星（仿 Google）：虛線直線 ＋ 跟著游標、貼齊資料點的日期/時間 label。
+        var crosshairColor = GetSkColor("AppTextMuted", "#787B86");
+
         CompareXAxes =
         [
             new DateTimeAxis(xUnit, xLabeler)
             {
-                TextSize        = 10,
-                LabelsPaint     = new SolidColorPaint(labelColor),
-                SeparatorsPaint = new SolidColorPaint(separatorColor),
-                TicksPaint      = null,
+                TextSize             = 10,
+                LabelsPaint          = new SolidColorPaint(labelColor),
+                SeparatorsPaint      = new SolidColorPaint(separatorColor),
+                TicksPaint           = null,
+                CrosshairPaint       = new SolidColorPaint(crosshairColor)
+                {
+                    StrokeThickness = 1,
+                    PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect([4f, 4f]),
+                },
+                CrosshairLabelsPaint = new SolidColorPaint(GetSkColor("AppTextPrimary", "#131722")),
+                CrosshairSnapEnabled = true,
             }
         ];
 
