@@ -999,13 +999,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
         }
 
-        // 1D/5D：benchmark 改抓盤中分時（帶時分曲線）；其餘日線。投組／組合無盤中資料 → 維持日線。
-        IntradayRange? intradayRange = ActivePeriodKey switch
-        {
-            "1" => IntradayRange.OneDay,
-            "5" => IntradayRange.FiveDays,
-            _ => null,
-        };
+        // 只有 1D 用盤中（單一 session、無空檔，效果好）。5D 改回日線 5 點：盤中跨日的非交易時間（週末／
+        // 假日，如端午）在時間軸上會連成一條長直線，不如乾淨日線；要做 Google 式「壓縮非交易時間」(X 軸改
+        // index 制) 是另一個較大工程。投組／組合無盤中 → 一律日線。
+        IntradayRange? intradayRange = ActivePeriodKey == "1" ? IntradayRange.OneDay : null;
 
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
