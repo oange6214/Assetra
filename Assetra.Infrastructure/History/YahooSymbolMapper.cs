@@ -18,11 +18,16 @@ public static class YahooSymbolMapper
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(symbol);
         var s = symbol.Trim();
+        // 指數（^TWII / ^GSPC）：Yahoo 用原樣、不加交易所後綴。
+        if (s.StartsWith('^'))
+            return s;
         var ex = exchange?.Trim().ToUpperInvariant();
         return ex switch
         {
-            "TWSE" => $"{s}.TW",
-            "TPEX" => $"{s}.TWO",
+            // "TWSE"/"TPEX" 是內部交易所碼；"TW"/"TWO" 是比較 token 拆出來的後綴
+            // （如 0050.TW → ("0050","TW")）。兩種都要對應到 Yahoo 的 .TW / .TWO。
+            "TWSE" or "TW" => $"{s}.TW",
+            "TPEX" or "TWO" => $"{s}.TWO",
             "HKEX" => $"{s}.HK",
             "TSE" => $"{s}.T",
             "NYSE" or "NASDAQ" or "NYSEARCA" or "AMEX" or "BATS" or "IEX" => s,

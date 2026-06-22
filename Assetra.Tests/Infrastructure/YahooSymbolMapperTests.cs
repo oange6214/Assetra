@@ -16,6 +16,10 @@ public class YahooSymbolMapperTests
     [InlineData("TEST", "IEX", "TEST")]
     [InlineData("0700", "HKEX", "0700.HK")]
     [InlineData("7203", "TSE", "7203.T")]
+    [InlineData("0050", "TW", "0050.TW")]    // 比較 token 拆出的後綴（0050.TW → ("0050","TW")）→ Yahoo .TW（修盤中 0050 變直線）
+    [InlineData("6488", "TWO", "6488.TWO")]  // .TWO 後綴
+    [InlineData("^TWII", "TW", "^TWII")]     // 指數：原樣、不加後綴
+    [InlineData("^GSPC", "NASDAQ", "^GSPC")]
     public void ToYahooSymbol_KnownExchanges_AppliesCorrectSuffix(string symbol, string exchange, string expected)
     {
         Assert.Equal(expected, YahooSymbolMapper.ToYahooSymbol(symbol, exchange));

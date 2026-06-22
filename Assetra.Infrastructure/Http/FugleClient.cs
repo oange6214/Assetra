@@ -80,42 +80,6 @@ internal sealed class FugleClient(
         }
     }
 
-    /// <summary>
-    /// 盤中分時 candles。Fugle 盤中只有「今日」→ 只服務 <see cref="IntradayRange.OneDay"/>（timeframe=1，逐分）；
-    /// 5D 交給 Yahoo（DynamicIntradayProvider 路由）。未設 key／失敗回空集合。
-    /// </summary>
-    public async Task<IReadOnlyList<IntradayPoint>> FetchIntradayCandlesAsync(
-        string symbol,
-        IntradayRange range,
-        CancellationToken ct = default)
-    {
-        if (range != IntradayRange.OneDay)
-            return [];
-
-        var apiKey = settings.Current.FugleApiKey?.Trim();
-        if (string.IsNullOrWhiteSpace(apiKey))
-            return [];
-
-        var url = $"{BaseUrl}/intraday/candles/{symbol}?timeframe=1";
-        using var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.TryAddWithoutValidation("X-API-KEY", apiKey);
-
-        try
-        {
-            using var resp = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
-            if (!resp.IsSuccessStatusCode)
-                return [];
-
-            var json = await resp.Content.ReadAsStringAsync(ct);
-            return ParseIntradayCandles(json);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or JsonException or TaskCanceledException)
-        {
-            logger.LogWarning(ex, "Fugle intraday fetch failed for {Symbol}", symbol);
-            return [];
-        }
-    }
-
     internal static StockQuote? ParseQuote(string json)
     {
         using var doc = JsonDocument.Parse(json);
@@ -193,28 +157,6 @@ internal sealed class FugleClient(
             list.Add(new OhlcvPoint(date, open, high, low, close, volume));
         }
 
-        return list;
-    }
-
-    internal static IReadOnlyList<IntradayPoint> ParseIntradayCandles(string json)
-    {
-        using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("data", out var dataEl) || dataEl.ValueKind != JsonValueKind.Array)
-            return [];
-
-        var list = new List<IntradayPoint>();
-        foreach (var item in dataEl.EnumerateArray())
-        {
-            if (!item.TryGetProperty("date", out var dateEl)
-                || !DateTimeOffset.TryParse(dateEl.GetString(), out var at))
-                continue;
-            var close = GetDecimal(item, "close");
-            if (close == 0m)
-                continue;
-            list.Add(new IntradayPoint(at.LocalDateTime, close));
-        }
-
-        list.Sort((a, b) => a.At.CompareTo(b.At));
         return list;
     }
 

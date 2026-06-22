@@ -1,39 +1,23 @@
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
-using Assetra.Infrastructure.Http;
 
 namespace Assetra.Infrastructure.History;
 
 /// <summary>
-/// 盤中分時來源路由（績效比較頁 1D/5D）：台股個股 + 1D + 有 Fugle key → Fugle 官方盤中（<c>/intraday/candles</c>，
-/// 最準）；^指數／海外、以及所有 5D（Fugle 盤中僅「今日」）一律走 Yahoo（<c>interval=1m/5m</c>）。Fugle 未設 key
-/// 或回傳點數不足時自動退 Yahoo，盡量不讓圖空白。
+/// 盤中分時來源（績效比較頁 1D/5D）：一律走 Yahoo（<c>interval=1m/5m &amp; range=1d/5d</c>）——它對台股個股(.TW)、
+/// 指數(^TWII)、海外都穩定，且 1D/5D 都支援。Fugle 盤中經實測對 0050 等 ETF 回點不足（畫成 2 點直線），
+/// 且多一次失敗的 round-trip 會拖慢切換，故盤中不採用 Fugle（Fugle 仍用於即時報價與日線）。
 /// </summary>
 internal sealed class DynamicIntradayProvider : IIntradayHistoryProvider
 {
     private readonly YahooFinanceHistoryProvider _yahoo;
-    private readonly FugleClient _fugle;
 
-    public DynamicIntradayProvider(HttpClient http, FugleClient fugleClient)
+    public DynamicIntradayProvider(HttpClient http)
     {
         _yahoo = new YahooFinanceHistoryProvider(http);
-        _fugle = fugleClient;
     }
 
-    public async Task<IReadOnlyList<IntradayPoint>> GetIntradayAsync(
+    public Task<IReadOnlyList<IntradayPoint>> GetIntradayAsync(
         string symbol, string exchange, IntradayRange range, CancellationToken ct = default)
-    {
-        var isIndexOrForeign = YahooSymbolMapper.IsForeignExchange(exchange)
-            || (!string.IsNullOrEmpty(symbol) && symbol.StartsWith('^'));
-
-        // 台股個股 ＋ 1D ＋ 有 Fugle key → Fugle 官方盤中；點數不足再退 Yahoo。
-        if (!isIndexOrForeign && range == IntradayRange.OneDay && _fugle.IsConfigured)
-        {
-            var fugle = await _fugle.FetchIntradayCandlesAsync(symbol, range, ct).ConfigureAwait(false);
-            if (fugle.Count >= 2)
-                return fugle;
-        }
-
-        return await _yahoo.GetIntradayAsync(symbol, exchange, range, ct).ConfigureAwait(false);
-    }
+        => _yahoo.GetIntradayAsync(symbol, exchange, range, ct);
 }

@@ -155,10 +155,9 @@ internal static class ServiceCollectionExtensions
             sp.GetRequiredService<DynamicHistoryProvider>(),
             sp.GetRequiredService<IEquityOhlcCacheRepository>(),
             sp.GetRequiredService<TimeProvider>()));
-        // 盤中分時來源（績效比較頁 1D/5D）：Fugle-for-1D-TW / Yahoo-else，路由見 DynamicIntradayProvider。
+        // 盤中分時來源（績效比較頁 1D/5D）：一律 Yahoo（1m/5m），見 DynamicIntradayProvider。
         services.AddSingleton<IIntradayHistoryProvider>(sp => new DynamicIntradayProvider(
-            sp.GetRequiredService<HttpClient>(),
-            sp.GetRequiredService<FugleClient>()));
+            sp.GetRequiredService<HttpClient>()));
 
         services.AddSingleton<SnackbarViewModel>();
         services.AddSingleton<ISnackbarService>(sp =>
