@@ -1042,11 +1042,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 1D/5D 用盤中分時；@我的投組/組合是日線（無盤中）→ 有它就退日線。盤中再分兩種繪法：
         //  • 單一市場 → 壓縮非交易空檔（連續，IntradayGapCompressor）。
         //  • 跨市場（台股＋美股，時段/時區不同）→ 不壓縮、走真實本地時間軸，各 session 自然錯開（仿 Google）。
-        var benchmarksOnly = !items.Any(t => t.StartsWith('@'));
-        IntradayRange? intradayRange = (ActivePeriodKey, benchmarksOnly) switch
+        // 1D/5D 一律用盤中分時（benchmark 個股/指數）。@我的投組/@組合是日線快照、無盤中資料，會在下方迴圈
+        // 於盤中時跳過不畫——所以「比較清單裡有 @ 項目」不再強制整張退日線（這正是先前 1D/5D 看似壞掉的主因：
+        // 清單裡有一條沒顯示出來的 @group 幽靈線，把 intradayRange 打成 null）。
+        IntradayRange? intradayRange = ActivePeriodKey switch
         {
-            ("1", true) => IntradayRange.OneDay,
-            ("5", true) => IntradayRange.FiveDays,
+            "1" => IntradayRange.OneDay,
+            "5" => IntradayRange.FiveDays,
             _ => null,
         };
         _comparisonIsIntraday = intradayRange is not null;
@@ -1055,6 +1057,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
         {
+            // 盤中（1D/5D）只畫 benchmark 個股/指數；@我的投組/@組合是日線快照、無盤中資料 → 盤中時跳過不畫
+            // （否則日線點與盤中點混在同圖會錯位）。日線期間照常顯示這些線。
+            if (_comparisonIsIntraday && token.StartsWith('@'))
+                continue;
+
             if (string.Equals(token, PortfolioItemToken, StringComparison.OrdinalIgnoreCase))
             {
                 if (mePts is { Count: >= 2 })
