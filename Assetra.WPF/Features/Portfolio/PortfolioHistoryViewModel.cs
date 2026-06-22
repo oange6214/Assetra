@@ -1169,9 +1169,6 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             xLabeler = d => d.ToString("MM/dd", System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        // 滑鼠十字準星（仿 Google）：虛線直線 ＋ 跟著游標、貼齊資料點的日期/時間 label。
-        var crosshairColor = GetSkColor("AppTextMuted", "#787B86");
-
         CompareXAxes =
         [
             new DateTimeAxis(xUnit, xLabeler)
@@ -1180,12 +1177,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 LabelsPaint          = new SolidColorPaint(labelColor),
                 SeparatorsPaint      = new SolidColorPaint(separatorColor),
                 TicksPaint           = null,
-                CrosshairPaint       = new SolidColorPaint(crosshairColor)
-                {
-                    StrokeThickness = 1,
-                    PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect([4f, 4f]),
-                },
-                CrosshairLabelsPaint = new SolidColorPaint(GetSkColor("AppTextPrimary", "#131722")),
+                // 十字準星線（CrosshairPaint）只在 hover 時由 code-behind 掛上、離開時清掉——VM 不設，避免靜止
+                // 時殘留一條虛線（CrosshairPaint 一設好就會持續畫在預設位置）。Snap 讓 hover 時貼齊資料點。
                 CrosshairSnapEnabled = true,
             }
         ];
