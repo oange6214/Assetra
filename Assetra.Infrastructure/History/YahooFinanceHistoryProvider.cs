@@ -94,7 +94,7 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
                 return [];
 
             var json = await response.Content.ReadAsStringAsync(ct);
-            return ParseIntradayResponse(json, exchange);
+            return ParseIntradayResponse(json);
         }
         catch
         {
@@ -102,7 +102,7 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
         }
     }
 
-    internal static IReadOnlyList<IntradayPoint> ParseIntradayResponse(string json, string? exchange = null)
+    internal static IReadOnlyList<IntradayPoint> ParseIntradayResponse(string json)
     {
         using var doc = JsonDocument.Parse(json);
         var chart = doc.RootElement.GetProperty("chart");
@@ -111,7 +111,6 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             return [];
 
         var result = resultEl[0];
-        var tz = ResolveExchangeTimeZone(exchange);
 
         if (!result.TryGetProperty("timestamp", out var tsEl) || tsEl.ValueKind != JsonValueKind.Array)
             return [];
@@ -124,9 +123,10 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
         {
             if (closes[i].ValueKind == JsonValueKind.Null)
                 continue;
+            // 用「使用者本地時區」呈現（DateTimeOffset.LocalDateTime）：台股盤中落在白天、美股落在台灣半夜，
+            // 跨市場放同一時間軸時各 session 才會自然錯開（仿 Google）。
             var dt = DateTimeOffset.FromUnixTimeSeconds(timestamps[i].GetInt64());
-            var local = TimeZoneInfo.ConvertTime(dt, tz);
-            points.Add(new IntradayPoint(local.DateTime, closes[i].GetDecimal()));
+            points.Add(new IntradayPoint(dt.LocalDateTime, closes[i].GetDecimal()));
         }
         return points;
     }

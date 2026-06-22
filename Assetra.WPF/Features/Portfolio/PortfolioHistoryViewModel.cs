@@ -242,6 +242,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     // 時間（索引 = (合成 − SyntheticBase) 分鐘），供軸標籤／as-of 顯示。_comparisonIsIntraday 標示目前是否盤中。
     private IReadOnlyList<DateTime> _intradayRealTimes = [];
     private bool _comparisonIsIntraday;
+    private bool _intradayCompressed; // true=單市場（壓縮非交易空檔）；false=跨市場（真實時間軸、各 session 自然錯開）
 
     /// <summary>benchmark／盤中抓取中（有網路延遲）→ XAML 顯示「更新中…」，讓使用者知道在動而非當機。</summary>
     [ObservableProperty] private bool _isRefreshingComparison;
@@ -294,10 +295,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
             ? string.Empty
-            : _comparisonIsIntraday
+            : _intradayCompressed
                 ? IntradayGapCompressor.ToReal(usedDate, _intradayRealTimes)
                     .ToString("MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)
-                : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
+                : _comparisonIsIntraday
+                    ? usedDate.ToString("MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)
+                    : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>對比線配色：我的投組固定取 [0] 藍；其餘對標從 [1] 開始循環。固定色（兩主題皆可讀）。</summary>
@@ -1036,17 +1039,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
         }
 
-        // 1D/5D 用盤中分時；其餘日線。盤中跨日的非交易空檔由 IntradayGapCompressor 在繪圖時壓掉（Google 式）。
-        IntradayRange? intradayRange = ActivePeriodKey switch
+        // 1D/5D 用盤中分時；@我的投組/組合是日線（無盤中）→ 有它就退日線。盤中再分兩種繪法：
+        //  • 單一市場 → 壓縮非交易空檔（連續，IntradayGapCompressor）。
+        //  • 跨市場（台股＋美股，時段/時區不同）→ 不壓縮、走真實本地時間軸，各 session 自然錯開（仿 Google）。
+        var benchmarksOnly = !items.Any(t => t.StartsWith('@'));
+        IntradayRange? intradayRange = (ActivePeriodKey, benchmarksOnly) switch
         {
-            "1" => IntradayRange.OneDay,
-            "5" => IntradayRange.FiveDays,
+            ("1", true) => IntradayRange.OneDay,
+            ("5", true) => IntradayRange.FiveDays,
             _ => null,
         };
-        // 盤中只在「全部同市場的 benchmark」時對齊得了：台股↔美股盤中時段/時區不同、@我的投組/組合是日線，
-        // 混在一起會亂序 → 退日線（日線照日期對齊、仍可比較，即使用者所說「1M/1Y 一天一天算」）。
-        if (intradayRange is not null && !ComparisonCanUseIntraday(items))
-            intradayRange = null;
+        _comparisonIsIntraday = intradayRange is not null;
+        _intradayCompressed = _comparisonIsIntraday && !ComparisonSpansMixedMarkets(items);
 
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
@@ -1120,17 +1124,17 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             : token;
 
     /// <summary>
-    /// 盤中（1D/5D）是否可用：需所有項目都是「同一市場的 benchmark 個股/指數」。@me/@group 是日線（無盤中），
-    /// 台股與美股盤中時段/時區也不同 → 任一情況都退日線（避免不同 session 在同一張圖亂序）。
+    /// 比較項目是否跨市場（同時有台股與美股/海外 benchmark）。盤中時：單市場 → 壓縮空檔；跨市場 → 不壓縮、
+    /// 走真實本地時間軸讓各 session 錯開。@me/@group 不計入市場（它們是日線、已在外層擋掉盤中）。
     /// </summary>
-    private static bool ComparisonCanUseIntraday(IReadOnlyList<string> items)
+    private static bool ComparisonSpansMixedMarkets(IReadOnlyList<string> items)
     {
         var hasTw = false;
         var hasForeign = false;
         foreach (var t in items)
         {
             if (t.StartsWith('@'))
-                return false; // @me / @group → 日線，無盤中
+                continue;
             var dot = t.LastIndexOf('.');
             var ex = dot > 0 ? t[(dot + 1)..].ToUpperInvariant() : string.Empty;
             if (ex is "NASDAQ" or "NYSE" or "NYSEARCA" or "AMEX" or "BATS" or "IEX" or "HKEX" or "TSE")
@@ -1138,7 +1142,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             else
                 hasTw = true; // .TW / .TWO / ^指數 / 裸代號 → 台股
         }
-        return !(hasTw && hasForeign);
+        return hasTw && hasForeign;
     }
 
     /// <summary>
@@ -1158,11 +1162,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             return;
         }
 
-        // 盤中（1D/5D）：把真實時間壓成連續合成時間 → 移除夜盤／週末／假日空檔（仿 Google，無長直線 gap）。
-        // 所有線 ＋ abs 共用同一份排序真實時間（索引一致才對齊）；軸標籤／hover 再映回真實時間。
-        _comparisonIsIntraday = ActivePeriodKey is "1" or "5";
+        // 單市場盤中：把真實時間壓成連續合成時間 → 移除夜盤／週末／假日空檔（仿 Google 單一市場，無長直線 gap）。
+        // 跨市場盤中（_intradayCompressed=false）不壓縮、走真實本地時間軸，各市場 session 自然錯開。
+        // _comparisonIsIntraday / _intradayCompressed 已於 BuildComparisonLinesAsync 設好。
         _intradayRealTimes = [];
-        if (_comparisonIsIntraday)
+        if (_intradayCompressed)
         {
             var (toSynthetic, realTimes) = IntradayGapCompressor.Build(
                 lines.Select(l => l.Points).Concat(_comparisonAbsByToken.Values));
@@ -1206,16 +1210,22 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ComparisonHoverDate = null; // 重畫後預設顯示期末
         UpdateComparisonRows();
 
-        // X 軸：盤中走「合成時間」→ 標籤先映回真實時間再格式化（1D HH:mm、5D MM/dd）；日線期間直接 MM/dd。
+        // X 軸：單市場盤中＝合成時間（標籤映回真實時間）；跨市場盤中＝真實本地時間（各 session 自然錯開）；
+        // 日線期間＝MM/dd。1D 標 HH:mm、5D 標 MM/dd。
         TimeSpan xUnit;
         Func<DateTime, string> xLabeler;
-        if (_comparisonIsIntraday)
+        var fmt = ActivePeriodKey == "1" ? "HH:mm" : "MM/dd";
+        if (_intradayCompressed)
         {
             var realTimes = _intradayRealTimes;
-            var fmt = ActivePeriodKey == "1" ? "HH:mm" : "MM/dd";
             xUnit = TimeSpan.FromMinutes(1);
             xLabeler = syn => IntradayGapCompressor.ToReal(syn, realTimes)
                 .ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+        }
+        else if (_comparisonIsIntraday)
+        {
+            xUnit = ActivePeriodKey == "1" ? TimeSpan.FromHours(1) : TimeSpan.FromDays(1);
+            xLabeler = d => d.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
         }
         else
         {
