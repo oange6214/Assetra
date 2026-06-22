@@ -236,6 +236,11 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
     private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
 
+    // 盤中壓縮：比較線在盤中（1D/5D）改用「合成連續時間」繪製（移除非交易空檔）；這份清單把合成時間映回真實
+    // 時間（索引 = (合成 − SyntheticBase) 分鐘），供軸標籤／as-of 顯示。_comparisonIsIntraday 標示目前是否盤中。
+    private IReadOnlyList<DateTime> _intradayRealTimes = [];
+    private bool _comparisonIsIntraday;
+
     /// <summary>各比較項目的「絕對現值序列」（token → 每日值點）：股票收盤 / 我的投組淨值 / 組合市值。
     /// 下方清單依顯示日（hover 或期末）取值，故現值也會跟著 hover 變。</summary>
     private IReadOnlyDictionary<string, IReadOnlyList<DateTimePoint>> _comparisonAbsByToken = new Dictionary<string, IReadOnlyList<DateTimePoint>>();
@@ -281,7 +286,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ComparisonRows = rows;
         ComparisonAsOfText = usedDate == default
             ? string.Empty
-            : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
+            : _comparisonIsIntraday
+                ? IntradayGapCompressor.ToReal(usedDate, _intradayRealTimes)
+                    .ToString("MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)
+                : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>對比線配色：我的投組固定取 [0] 藍；其餘對標從 [1] 開始循環。固定色（兩主題皆可讀）。</summary>
@@ -999,10 +1007,14 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             mePts = await BuildPortfolioTwrPercentPointsAsync(filtered).ConfigureAwait(false);
         }
 
-        // 只有 1D 用盤中（單一 session、無空檔，效果好）。5D 改回日線 5 點：盤中跨日的非交易時間（週末／
-        // 假日，如端午）在時間軸上會連成一條長直線，不如乾淨日線；要做 Google 式「壓縮非交易時間」(X 軸改
-        // index 制) 是另一個較大工程。投組／組合無盤中 → 一律日線。
-        IntradayRange? intradayRange = ActivePeriodKey == "1" ? IntradayRange.OneDay : null;
+        // 1D/5D 用盤中分時；其餘日線。盤中跨日的非交易空檔由 IntradayGapCompressor 在繪圖時壓掉（Google 式）。
+        // 投組／組合無盤中資料 → 一律日線。
+        IntradayRange? intradayRange = ActivePeriodKey switch
+        {
+            "1" => IntradayRange.OneDay,
+            "5" => IntradayRange.FiveDays,
+            _ => null,
+        };
 
         var colorIdx = 1; // palette[0] 保留給我的投組
         foreach (var token in items)
@@ -1092,6 +1104,24 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             return;
         }
 
+        // 盤中（1D/5D）：把真實時間壓成連續合成時間 → 移除夜盤／週末／假日空檔（仿 Google，無長直線 gap）。
+        // 所有線 ＋ abs 共用同一份排序真實時間（索引一致才對齊）；軸標籤／hover 再映回真實時間。
+        _comparisonIsIntraday = ActivePeriodKey is "1" or "5";
+        _intradayRealTimes = [];
+        if (_comparisonIsIntraday)
+        {
+            var (toSynthetic, realTimes) = IntradayGapCompressor.Build(
+                lines.Select(l => l.Points).Concat(_comparisonAbsByToken.Values));
+            lines = lines
+                .Select(l => (l.Label, l.ColorHex, l.RemoveToken, IntradayGapCompressor.Remap(l.Points, toSynthetic)))
+                .ToList();
+            _comparisonAbsByToken = _comparisonAbsByToken.ToDictionary(
+                kv => kv.Key,
+                kv => IntradayGapCompressor.Remap(kv.Value, toSynthetic),
+                StringComparer.OrdinalIgnoreCase);
+            _intradayRealTimes = realTimes;
+        }
+
         var labelColor = GetSkColor("AppTextSecondary", "#787B86");
         var separatorColor = GetSkColor("AppBorderLight", "#2E2E2E").WithAlpha(76);
 
@@ -1122,10 +1152,22 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         ComparisonHoverDate = null; // 重畫後預設顯示期末
         UpdateComparisonRows();
 
-        // 1D 盤中：X 軸用「時:分」＋每小時格線；其餘（含 5D 盤中、各日線期間）用「月/日」日格線。
-        var (xUnit, xLabeler) = ActivePeriodKey == "1"
-            ? (TimeSpan.FromHours(1), (Func<DateTime, string>)(d => d.ToString("HH:mm")))
-            : (TimeSpan.FromDays(1), d => d.ToString("MM/dd"));
+        // X 軸：盤中走「合成時間」→ 標籤先映回真實時間再格式化（1D HH:mm、5D MM/dd）；日線期間直接 MM/dd。
+        TimeSpan xUnit;
+        Func<DateTime, string> xLabeler;
+        if (_comparisonIsIntraday)
+        {
+            var realTimes = _intradayRealTimes;
+            var fmt = ActivePeriodKey == "1" ? "HH:mm" : "MM/dd";
+            xUnit = TimeSpan.FromMinutes(1);
+            xLabeler = syn => IntradayGapCompressor.ToReal(syn, realTimes)
+                .ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            xUnit = TimeSpan.FromDays(1);
+            xLabeler = d => d.ToString("MM/dd", System.Globalization.CultureInfo.InvariantCulture);
+        }
 
         // 滑鼠十字準星（仿 Google）：虛線直線 ＋ 跟著游標、貼齊資料點的日期/時間 label。
         var crosshairColor = GetSkColor("AppTextMuted", "#787B86");
