@@ -60,6 +60,8 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
             req.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
             req.Headers.TryAddWithoutValidation("Accept-Language", "zh-TW,zh;q=0.9,en-US;q=0.8");
+            // Yahoo 對「無 User-Agent」的請求節流很兇（實測第一個放行、後續一律回空）→ 帶瀏覽器 UA 才穩定。
+            req.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)
                 return [];
@@ -89,6 +91,8 @@ internal sealed class YahooFinanceHistoryProvider : IStockHistoryProvider
             using var req = new HttpRequestMessage(HttpMethod.Get, url);
             req.Headers.TryAddWithoutValidation("Accept", "application/json, text/plain, */*");
             req.Headers.TryAddWithoutValidation("Accept-Language", "zh-TW,zh;q=0.9,en-US;q=0.8");
+            // Yahoo 對「無 User-Agent」的請求節流很兇（實測第一個放行、後續一律回空）→ 帶瀏覽器 UA 才穩定。
+            req.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)
                 return [];
