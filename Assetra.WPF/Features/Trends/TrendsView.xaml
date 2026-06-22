@@ -137,6 +137,22 @@
                     XAxes="{Binding CompareXAxes}"
                     YAxes="{Binding CompareYAxes}" />
 
+                <!--  載入指示：benchmark/盤中抓取期間顯示「更新中…」，讓使用者知道在抓資料（非當機）。  -->
+                <Border
+                    Padding="16,9"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource AppHover}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    Visibility="{Binding IsRefreshingComparison, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.History.Loading}" />
+                </Border>
+
                 <!--  對比 chips（投組／大盤固定、自訂可移除 ✕）＋「＋比較」搜尋 popup；疊在圖左上。  -->
                 <StackPanel
                     Margin="6,2,0,0"

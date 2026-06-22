@@ -172,6 +172,7 @@
     <sys:String x:Key="Portfolio.History.Compare">＋ 比較</sys:String>
     <sys:String x:Key="Portfolio.History.ComparePrompt">點「＋ 比較」選擇要比較的項目（我的投組 / 大盤 / 股票）</sys:String>
     <sys:String x:Key="Portfolio.History.CompareTableHeading">同期報酬率</sys:String>
+    <sys:String x:Key="Portfolio.History.Loading">更新中…</sys:String>
     <sys:String x:Key="Portfolio.History.Col.Item">項目</sys:String>
     <sys:String x:Key="Portfolio.History.Col.Value">現值</sys:String>
     <sys:String x:Key="Portfolio.History.Col.Change">漲跌</sys:String>

@@ -241,6 +241,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     private IReadOnlyList<DateTime> _intradayRealTimes = [];
     private bool _comparisonIsIntraday;
 
+    /// <summary>benchmark／盤中抓取中（有網路延遲）→ XAML 顯示「更新中…」，讓使用者知道在動而非當機。</summary>
+    [ObservableProperty] private bool _isRefreshingComparison;
+
+    // 連續 refresh 防亂序：每次 RefreshChartAsync ++；完成時若 generation 已變，代表有更新的 refresh → 丟棄舊結果。
+    private int _refreshGeneration;
+
     /// <summary>各比較項目的「絕對現值序列」（token → 每日值點）：股票收盤 / 我的投組淨值 / 組合市值。
     /// 下方清單依顯示日（hover 或期末）取值，故現值也會跟著 hover 變。</summary>
     private IReadOnlyDictionary<string, IReadOnlyList<DateTimePoint>> _comparisonAbsByToken = new Dictionary<string, IReadOnlyList<DateTimePoint>>();
@@ -541,16 +547,35 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     private async Task RefreshChartAsync()
     {
+        // 連續切換期間/加減項目時，舊的非同步 refresh 可能比新的晚完成 → 用 generation 把舊結果丟棄，
+        // 避免亂序覆蓋 CompareSeries 造成閃爍/「卡」。
+        var gen = ++_refreshGeneration;
+
         var filtered = ComputeFilteredSnapshots();
         var points = await BuildPointsAsync(filtered);
 
-        // 比較視圖（績效比較頁）：只要有比較項目就畫，期間用「選的視窗」(ComputeComparisonPeriod)。
-        // benchmark 走每日 K 線、不靠投組快照密度 → 即使近幾天快照很疏（如選 5D / 1D）圖也不會空白。
+        // 比較視圖（績效比較頁）：只要有比較項目就畫，期間用「選的視窗」(ComputeComparisonPeriod)。benchmark/盤中
+        // 走網路抓取（有延遲）→ 抓取期間秀「更新中…」(IsRefreshingComparison)，使用者才知道在動而非當機。
         // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
         IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> compareLines = [];
         if (ComputeComparisonPeriod() is { } comparePeriod
             && CurrentComparisonItems.Any(t => !string.IsNullOrWhiteSpace(t)))
-            compareLines = await BuildComparisonLinesAsync(filtered, comparePeriod);
+        {
+            IsRefreshingComparison = true;
+            try
+            {
+                compareLines = await BuildComparisonLinesAsync(filtered, comparePeriod);
+            }
+            finally
+            {
+                if (gen == _refreshGeneration)
+                    IsRefreshingComparison = false;
+            }
+        }
+
+        // 較新的 refresh 已啟動（使用者連續操作）→ 丟棄這次舊結果，別覆蓋。
+        if (gen != _refreshGeneration)
+            return;
 
         BuildChart(points);                     // 絕對淨值 → ValueSeries（概覽迷你圖）
         BuildComparePercentChart(compareLines); // % 比較 → CompareSeries（績效比較頁）
