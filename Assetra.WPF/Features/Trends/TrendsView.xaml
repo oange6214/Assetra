@@ -213,6 +213,65 @@
                         Visibility="{Binding HasComparisonItems, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </StackPanel>
 
+                <!--  hover 讀數（Google 式）：滑到曲線時於上方顯示「日期時間 ＋ 每項 現值＋同期%」；固定置中、不擋圖。
+                      只在 hover（ComparisonHoverDate 非 null）時顯示；資料由 ComparisonRows / ComparisonAsOfText 隨游標更新。  -->
+                <Border
+                    Margin="0,8,0,0"
+                    Padding="10,5"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="{DynamicResource AppHover}"
+                    BorderBrush="{DynamicResource AppBorderLight}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding ComparisonHoverDate, Converter={StaticResource NullToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding ComparisonAsOfText}" />
+                        <ItemsControl ItemsSource="{Binding ComparisonRows}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,10,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding ColorHex}" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Label}" />
+                                        <TextBlock
+                                            Margin="6,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            Text="{Binding Value, StringFormat='{}{0:#,##0.##}'}" />
+                                        <TextBlock
+                                            Margin="5,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="{StaticResource Font.Size.Xs}"
+                                            Foreground="{Binding PercentBrush}"
+                                            Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
                 <!--  「＋比較」鈕 ＋ 搜尋 popup；疊在圖右上（與 chips 分開、仿 Google 工具列把「比較」獨立）。  -->
                 <StackPanel
                     Margin="0,2,6,0"
