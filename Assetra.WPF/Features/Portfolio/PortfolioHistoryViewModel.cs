@@ -237,6 +237,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
     private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
+    // Google 式 hover：每條線對應一個「單點」series；hover 時填入該線在游標 X 處的點 → 線上實心圓點。
+    private List<LineSeries<DateTimePoint>> _hoverMarkers = [];
 
     // 盤中壓縮：比較線在盤中（1D/5D）改用「合成連續時間」繪製（移除非交易空檔）；這份清單把合成時間映回真實
     // 時間（索引 = (合成 − SyntheticBase) 分鐘），供軸標籤／as-of 顯示。_comparisonIsIntraday 標示目前是否盤中。
@@ -254,7 +256,28 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// 下方清單依顯示日（hover 或期末）取值，故現值也會跟著 hover 變。</summary>
     private IReadOnlyDictionary<string, IReadOnlyList<DateTimePoint>> _comparisonAbsByToken = new Dictionary<string, IReadOnlyList<DateTimePoint>>();
 
-    partial void OnComparisonHoverDateChanged(DateTime? value) => UpdateComparisonRows();
+    partial void OnComparisonHoverDateChanged(DateTime? value)
+    {
+        UpdateComparisonRows();
+        UpdateHoverMarkers(value);
+    }
+
+    /// <summary>Google 式 hover：每條線在游標 X 處放一個實心圓點；無 hover（或離開圖表）時清空。</summary>
+    private void UpdateHoverMarkers(DateTime? hover)
+    {
+        for (int i = 0; i < _hoverMarkers.Count && i < _comparisonLines.Count; i++)
+        {
+            if (_hoverMarkers[i].Values is not System.Collections.ObjectModel.ObservableCollection<DateTimePoint> coll)
+                continue;
+            coll.Clear();
+            var pts = _comparisonLines[i].Points;
+            if (hover is { } d && pts.Count > 0)
+            {
+                var pt = pts.LastOrDefault(p => p.DateTime <= d) ?? pts[0];
+                coll.Add(new DateTimePoint(pt.DateTime, pt.Value));
+            }
+        }
+    }
 
     /// <summary>依目前顯示日（hover 或期末）重算下方清單每項的同期 %。</summary>
     private void UpdateComparisonRows()
@@ -1192,6 +1215,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
         var series = new List<ISeries>();
         var legend = new List<ComparisonLegendItem>();
+        var markers = new List<LineSeries<DateTimePoint>>(lines.Count);
         foreach (var (label, colorHex, removeToken, pts) in lines)
         {
             series.Add(new LineSeries<DateTimePoint>
@@ -1203,17 +1227,28 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 GeometrySize    = 0,
                 LineSmoothness  = 0,
                 AnimationsSpeed = TimeSpan.Zero,
-                // tooltip 顯示精確 %（+0.69%）而非 LiveCharts 預設的粗略 -1% / -0%。
-                YToolTipLabelFormatter = p =>
-                    (p.Coordinate.PrimaryValue >= 0 ? "+" : "")
-                    + (p.Coordinate.PrimaryValue * 100d).ToString("F2", CultureInfo.InvariantCulture) + "%",
+            });
+            // Google 式 hover 圓點：空的單點 series，hover 時由 UpdateHoverMarkers 填入該線在游標 X 處的點。
+            markers.Add(new LineSeries<DateTimePoint>
+            {
+                Values            = new System.Collections.ObjectModel.ObservableCollection<DateTimePoint>(),
+                Stroke            = null,
+                Fill              = null,
+                GeometrySize      = 11,
+                GeometryFill      = new SolidColorPaint(SKColor.Parse(colorHex)),
+                GeometryStroke    = new SolidColorPaint(SKColors.White, 2f),
+                IsHoverable       = false,
+                IsVisibleAtLegend = false,
+                AnimationsSpeed   = TimeSpan.Zero,
             });
             legend.Add(new ComparisonLegendItem(label, colorHex, removeToken));
         }
+        series.AddRange(markers); // 圓點 series 放在線之後 → 畫在線之上
 
         CompareSeries = [.. series];
         ComparisonLegend = legend;
         _comparisonLines = lines;
+        _hoverMarkers = markers;
         ComparisonHoverDate = null; // 重畫後預設顯示期末
         UpdateComparisonRows();
 

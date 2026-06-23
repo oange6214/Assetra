@@ -131,8 +131,7 @@
                     MouseLeave="CompareChart_MouseLeave"
                     MouseMove="CompareChart_MouseMove"
                     Series="{Binding CompareSeries}"
-                    TooltipPosition="Top"
-                    TooltipTextSize="12"
+                    TooltipPosition="Hidden"
                     Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
                     XAxes="{Binding CompareXAxes}"
                     YAxes="{Binding CompareYAxes}" />
