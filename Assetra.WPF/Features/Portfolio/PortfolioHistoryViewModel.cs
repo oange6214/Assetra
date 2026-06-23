@@ -1289,11 +1289,20 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             }
         ];
 
+        // 固定 Y 軸到資料 min/max（＋padding）。否則 hover marker（單點 series）進出時 LiveCharts 會重算 auto-scale，
+        // 滑鼠移出（marker 清空）就抽風把曲線壓平變直線；釘住範圍後 hover/移出都用同一刻度、穩定一致。
+        var allY = _comparisonLines.SelectMany(l => l.Points)
+            .Where(p => p.Value.HasValue).Select(p => p.Value!.Value).ToList();
+        double yMin = -0.01, yMax = 0.01;
+        if (allY.Count > 0) { yMin = allY.Min(); yMax = allY.Max(); }
+        var yPad = Math.Max((yMax - yMin) * 0.08, 0.002);
         CompareYAxes =
         [
             new Axis
             {
                 Position        = LiveChartsCore.Measure.AxisPosition.End,
+                MinLimit        = yMin - yPad,
+                MaxLimit        = yMax + yPad,
                 TextSize        = 10,
                 LabelsPaint     = new SolidColorPaint(labelColor),
                 SeparatorsPaint = new SolidColorPaint(separatorColor),
