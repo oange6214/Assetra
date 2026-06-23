@@ -316,13 +316,15 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d), value, startValue, value - startValue));
         }
         ComparisonRows = rows;
+        // 1天：只顯示時間（同一天、日期多餘）；5天：日期＋時間（跨日需區分是哪天）；日線期間：日期。
+        var asOfFmt = ActivePeriodKey == "1" ? "HH:mm" : "MM/dd HH:mm";
         ComparisonAsOfText = usedDate == default
             ? string.Empty
             : _intradayCompressed
                 ? IntradayGapCompressor.ToReal(usedDate, _intradayRealTimes)
-                    .ToString("MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)
+                    .ToString(asOfFmt, System.Globalization.CultureInfo.InvariantCulture)
                 : _comparisonIsIntraday
-                    ? usedDate.ToString("MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)
+                    ? usedDate.ToString(asOfFmt, System.Globalization.CultureInfo.InvariantCulture)
                     : usedDate.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 
