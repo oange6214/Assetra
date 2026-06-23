@@ -316,8 +316,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 Assetra.WPF.Infrastructure.PnlColorPalette.Pick(pct * 100d), value, startValue, value - startValue));
         }
         ComparisonRows = rows;
-        // 1天：只顯示時間（同一天、日期多餘）；5天：日期＋時間（跨日需區分是哪天）；日線期間：日期。
-        var asOfFmt = ActivePeriodKey == "1" ? "HH:mm" : "MM/dd HH:mm";
+        // 盤中（1天/5天）只顯示時間——日期已在 X 軸（5天標 MM/dd）＋ crosshair 上、不必重複；日線期間才顯示日期。
+        var asOfFmt = "HH:mm";
         ComparisonAsOfText = usedDate == default
             ? string.Empty
             : _intradayCompressed
