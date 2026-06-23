@@ -168,11 +168,12 @@
                             <DataTemplate>
                                 <Border
                                     Margin="0,0,6,0"
-                                    Padding="7,2"
+                                    Padding="10,5"
                                     VerticalAlignment="Center"
+                                    Background="{DynamicResource AppHover}"
                                     BorderBrush="{DynamicResource AppBorderLight}"
                                     BorderThickness="1"
-                                    CornerRadius="10">
+                                    CornerRadius="13">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center">
                                             <Ellipse.Fill>
@@ -182,7 +183,8 @@
                                         <TextBlock
                                             VerticalAlignment="Center"
                                             FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextSecondary}"
+                                            FontWeight="Medium"
+                                            Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding Label}" />
                                         <Button
                                             Width="14" Height="14"
@@ -449,7 +451,8 @@
                 <ItemsControl ItemsSource="{Binding ComparisonRows}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,3,0,3">
+                            <Border Padding="0,7" BorderBrush="{DynamicResource AppBorderLight}" BorderThickness="0,0,0,1">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="100" />
@@ -467,6 +470,7 @@
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource Font.Size.Sm}"
+                                        FontWeight="SemiBold"
                                         Foreground="{DynamicResource AppTextPrimary}"
                                         Text="{Binding Label}" />
                                 </StackPanel>
@@ -490,17 +494,27 @@
                                     Foreground="{Binding PercentBrush}"
                                     Text="{Binding AbsChange, StringFormat='+#,##0.##;-#,##0.##;0'}"
                                     Typography.NumeralAlignment="Tabular" />
-                                <!--  同期 %  -->
-                                <TextBlock
+                                <!--  同期 %（＋方向箭頭 ▲▼，漲紅跌綠）  -->
+                                <StackPanel
                                     Grid.Column="3"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource Font.Family.Numeric}"
-                                    FontSize="{StaticResource Font.Size.Sm}"
-                                    FontWeight="SemiBold"
-                                    Foreground="{Binding PercentBrush}"
-                                    Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}"
-                                    Typography.NumeralAlignment="Tabular" />
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,3,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="8"
+                                        Foreground="{Binding PercentBrush}"
+                                        Text="{Binding Arrow}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource Font.Family.Numeric}"
+                                        FontSize="{StaticResource Font.Size.Sm}"
+                                        FontWeight="SemiBold"
+                                        Foreground="{Binding PercentBrush}"
+                                        Text="{Binding Percent, StringFormat='+0.00%;-0.00%;0.00%'}"
+                                        Typography.NumeralAlignment="Tabular" />
+                                </StackPanel>
                                 <!--  期初（區間基準值）  -->
                                 <TextBlock
                                     Grid.Column="4"
@@ -512,6 +526,7 @@
                                     Text="{Binding StartValue, StringFormat='{}{0:#,##0.##}'}"
                                     Typography.NumeralAlignment="Tabular" />
                             </Grid>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

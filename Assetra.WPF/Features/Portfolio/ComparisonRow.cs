@@ -12,4 +12,8 @@ public sealed record ComparisonRow(
     System.Windows.Media.Brush PercentBrush,
     decimal Value,         // 現值 / 現價（顯示日的絕對值）
     decimal StartValue,    // 期初值（區間基準＝絕對序列首點）
-    decimal AbsChange);    // 漲跌＝Value − StartValue
+    decimal AbsChange)     // 漲跌＝Value − StartValue
+{
+    /// <summary>方向箭頭：漲 ▲ / 跌 ▼ / 平 空字串。配合 PercentBrush（漲紅跌綠）一起呈現方向。</summary>
+    public string Arrow => Percent > 0 ? "▲" : Percent < 0 ? "▼" : string.Empty;
+}
