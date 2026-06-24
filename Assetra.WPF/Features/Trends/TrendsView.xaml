@@ -25,9 +25,7 @@
             <RowDefinition Height="Auto" />
             <!--  period chip bar  -->
             <RowDefinition Height="*" />
-            <!--  main chart — 拿剩餘高度  -->
-            <RowDefinition Height="Auto" />
-            <!--  對標比較區  -->
+            <!--  比較模組（圖表＋對標清單合併成一張卡）— 拿剩餘高度  -->
             <RowDefinition Height="Auto" />
             <!--  footer hint  -->
         </Grid.RowDefinitions>
@@ -123,8 +121,14 @@
         </DockPanel>
 
         <!--  ── Chart / empty state — P3.6 migrated to AppCardSummary baseline ──  -->
+        <!--  ── 比較模組：圖表 ＋ 對標清單 合併在同一張卡（去掉中間空隙、讀起來是一個完整模組）。──  -->
         <Border Grid.Row="1" Style="{StaticResource AppCardSummary}">
-            <Grid Style="{StaticResource PageContentGrid}">
+          <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Style="{StaticResource PageContentGrid}">
                 <lvc:CartesianChart
                     x:Name="CompareChart"
                     Background="Transparent"
@@ -408,18 +412,12 @@
                     <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Trends.Empty}" />
                 </StackPanel>
             </Grid>
-        </Border>
-
-
-
-        <!--  ── 比較清單（Google 式）：每個比較項目 ＋ 截至顯示日的同期報酬 %（hover 圖表會更新那天的值）。──  -->
-        <Border
-            Grid.Row="2"
-            Margin="0,8,0,0"
-            Padding="16"
-            Style="{StaticResource AppCardSummary}"
-            Visibility="{Binding HasComparisonItems, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel>
+            <!--  ── 對標清單：與圖表合併在同一張卡，上方加分隔線分隔。──  -->
+            <StackPanel
+                Grid.Row="1"
+                Margin="0,16,0,0"
+                Visibility="{Binding HasComparisonItems, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Height="1" Margin="0,0,0,12" Background="{DynamicResource AppBorderLight}" />
                 <DockPanel Margin="0,0,0,6" LastChildFill="False">
                     <TextBlock
                         DockPanel.Dock="Left"
@@ -531,11 +529,12 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
+          </Grid>
         </Border>
 
         <!--  ── Footer hint — P5.1 修復可疑點工具列已移除（曲線改算真實淨值後 partial-price 假象問題不存在）  -->
         <TextBlock
-            Grid.Row="3"
+            Grid.Row="2"
             Margin="0,12,0,0"
             VerticalAlignment="Center"
             FontSize="{DynamicResource Font.Size.Xs}"
