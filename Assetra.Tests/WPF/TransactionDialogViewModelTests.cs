@@ -32,7 +32,8 @@ public class TransactionDialogViewModelTests
         IAutoCategorizationRuleRepository? ruleRepository = null,
         PortfolioGroupCatalog? groupCatalog = null,
         TransactionFxRateResolver? fxResolver = null,
-        Func<CashAccountRowViewModel?>? getDefaultCashAccount = null)
+        Func<CashAccountRowViewModel?>? getDefaultCashAccount = null,
+        ISellWorkflowService? sellWorkflow = null)
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
         addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
@@ -44,7 +45,7 @@ public class TransactionDialogViewModelTests
             Mock.Of<ITransactionWorkflowService>(),
             Mock.Of<ICreditCardMutationWorkflowService>());
         var sellPanel = new SellPanelViewModel(
-            Mock.Of<ISellWorkflowService>(),
+            sellWorkflow ?? Mock.Of<ISellWorkflowService>(),
             new PortfolioSellPanelController());
 
         var deps = new TransactionDialogDependencies(
@@ -1415,6 +1416,39 @@ public class TransactionDialogViewModelTests
 
         Assert.False(string.IsNullOrWhiteSpace(error));
         Assert.Equal(error, vm.SellPanelError);
+    }
+
+    [Fact]
+    public async Task ConfirmSellTx_TotalMode_DerivesUnitPriceFromTotalProceeds()
+    {
+        // 賣出「成交總額」模式採 GROSS：成交總額 1000 ÷ 股數 10 ⇒ 單價 100。
+        // 鎖定 ConfirmSellTxAsync 會「反推單價」餵給賣出工作流，而非沿用（總額模式下為空的）單價欄位 TxAmount。
+        // 此測試會在 GROSS 反推邏輯被改壞（例如誤用淨額、或除錯股數）時失敗 — 對齊 Rule 9「測意圖」。
+        SellWorkflowRequest? captured = null;
+        var workflow = new Mock<ISellWorkflowService>();
+        workflow.Setup(s => s.RecordAsync(
+                It.IsAny<SellWorkflowRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<SellWorkflowRequest, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(new SellWorkflowResult(CreateSellTrade(), 9));
+
+        var position = MakePosition();   // TWD、持倉 15,000 股
+        var vm = CreateVm(
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            sellWorkflow: workflow.Object);
+
+        vm.TxType = "sell";
+        vm.Sell.Position = position;
+        vm.Sell.Quantity = "10";
+        vm.Sell.PriceMode = "total";
+        vm.Sell.TotalProceeds = "1000";   // 故意不填 TxAmount（單價欄）
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.TxError);
+        Assert.NotNull(captured);
+        Assert.Equal(100m, captured!.SellPrice);
+        Assert.Equal(10, captured.SellQuantity);
     }
 
     private static PortfolioRowViewModel CreatePositionRow() => new()
