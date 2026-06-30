@@ -1451,6 +1451,20 @@ public class TransactionDialogViewModelTests
         Assert.Equal(10, captured.SellQuantity);
     }
 
+    [Fact]
+    public void Sell_CrossCurrency_AutoExpandsAdvancedSection()
+    {
+        // 跨幣別賣出時，結算金額/匯率等必填欄位收在「進階」內 —— 必須自動展開，
+        // 否則確認會因必填未填而報錯、但欄位卻藏在收合區裡，使用者無從補填（對齊 Buy）。
+        var sell = new Assetra.WPF.Features.Portfolio.SubViewModels.Tx.SellTxViewModel();
+        Assert.False(sell.IsAdvancedExpanded);
+
+        sell.CashAccountCurrency = "TWD";
+        sell.InstrumentCurrency = "USD";   // 跨幣別 → 應自動展開
+
+        Assert.True(sell.IsAdvancedExpanded);
+    }
+
     private static PortfolioRowViewModel CreatePositionRow() => new()
     {
         Id = Guid.NewGuid(),
