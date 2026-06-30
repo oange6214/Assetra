@@ -697,6 +697,36 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task ConfirmBuy_CrossCurrency_RateNotYetFetched_EnsuresRateOnConfirm()
+    {
+        // 競態守門:改日期觸發的自動抓匯率是 fire-and-forget。若使用者「設好日期就按確認」、
+        // 匯率還沒帶入,ConfirmBuyAsync 應在委派前先同步補抓當日匯率(而非卡「需要匯率」/用 1.0 反推)。
+        // 移除 ConfirmBuyAsync 開頭的補抓,本測試會失敗(清空後 FxRate 不再被填回)。
+        var tradeDate = new DateOnly(2026, 6, 21);
+        var history = new Mock<IFxRateHistoryService>();
+        history
+            .Setup(h => h.GetEntryAsync(It.IsAny<DateOnly>(), "USD", "TWD", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FxRateHistoryEntry(tradeDate, "USD", "TWD", 31.59m, "bot", DateTimeOffset.UtcNow));
+
+        var vm = CreateVm(fxResolver: new TransactionFxRateResolver(history.Object));
+        vm.TxType = "buy";
+        vm.Buy.InstrumentCurrency = "USD";
+        vm.Buy.SettlementCurrency = "TWD";
+        vm.TxDate = tradeDate.ToDateTime(TimeOnly.MinValue);
+        Assert.True(vm.Buy.IsCrossCurrency);
+
+        // 模擬「自動抓取(fire-and-forget)尚未回來」:確認當下匯率仍空白。
+        // 清空 FxRate 不會重觸抓取(FxRate-changed handler 不 re-queue),故能穩定模擬競態。
+        vm.Buy.FxRate = string.Empty;
+        Assert.True(string.IsNullOrWhiteSpace(vm.Buy.FxRate));
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        // 確認時已同步補抓 → 匯率回填(不再卡反推)。
+        Assert.Equal("31.59", vm.Buy.FxRate);
+    }
+
+    [Fact]
     public void EditTrade_CrossCurrencyBuy_RestoresFxSettlementMetadata()
     {
         var tradeId = Guid.NewGuid();

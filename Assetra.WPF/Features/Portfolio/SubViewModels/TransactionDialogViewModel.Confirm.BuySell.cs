@@ -11,6 +11,16 @@ public partial class TransactionDialogViewModel
 {
     private async Task ConfirmBuyAsync()
     {
+        // 跨幣別買入若匯率尚未帶入,確認前先同步補抓一次當日匯率。改日期觸發的自動抓取是
+        // fire-and-forget(QueueBuyFxRateRefresh),使用者「設好日期就按確認」時可能還沒回來;
+        // 不先補抓的話,反推單價會卡在「需要匯率」(舊版甚至退回 1.0 把台幣值當 USD 存)。
+        // 抓不到(例:該日無掛牌)才往下,由既有驗證以「查無此日期匯率/需要匯率」擋下。
+        // 手動匯率時 FxRate 非空,不會進來、也不會被覆蓋。
+        if (Buy.IsCrossCurrency && string.IsNullOrWhiteSpace(Buy.FxRate))
+        {
+            await RefreshBuyFxRateAsync(force: false).ConfigureAwait(true);
+        }
+
         // Delegate to the AddAssetDialog sub-VM's buy logic based on asset sub-type.
         // AddAssetType must match Buy.AssetType so ConfirmAdd routes to the correct add path.
         // The two dialogs are mutually exclusive in practice; this is an acceptable coupling.
