@@ -1264,6 +1264,55 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task ConfirmAdd_Stock_CrossCurrencyStatementMode_DerivesPriceFromActualCashUsingResolvedFxRate()
+    {
+        // 依帳戶明細 (statement) 模式：使用者只填「帳戶扣款金額」+ 股數、清空每股價，
+        // 仍應用「已解析匯率」(自動依交易日抓回或手填) 反推單價，而非卡在「跨幣別反推單價需要匯率」。
+        // 迴歸防護：先前 Mode-C 用 mode-gated 的 fxRate（statement 模式一律 null）→ 一律報錯、買入無法成立。
+        StockBuyRequest? captured = null;
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 100m));
+        addWorkflow
+            .Setup(w => w.ExecuteStockBuyAsync(It.IsAny<StockBuyRequest>(), It.IsAny<CancellationToken>()))
+            .Callback<StockBuyRequest, CancellationToken>((request, _) => captured = request)
+            .ReturnsAsync(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), "AAPL", "NASDAQ", Currency: "USD"),
+                Commission: 0m,
+                CommissionDiscountUsed: 1m,
+                CostPerShare: 100m));
+
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object,
+            Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(),
+            Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(
+                cashAccountId: Guid.NewGuid(),
+                cashAccountCurrency: "TWD",
+                useCashAccount: true,
+                settlementInputMode: "statement",
+                actualCashAmount: "32500",
+                fxRate: "32.5"),
+        };
+
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddSymbolCurrency = "USD";
+        vm.AddPrice = string.Empty;   // 清空每股價，期望由扣款金額 ÷ 股數 ÷ 匯率 反推
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);   // 不再卡「需要匯率」
+        Assert.NotNull(captured);
+        Assert.Equal(100m, captured!.Price);        // 32500 / 10 / 32.5 = 100
+    }
+
+    [Fact]
     public async Task ConfirmAdd_Stock_CrossCurrencyTypedSymbolUsesDirectoryCurrency()
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
