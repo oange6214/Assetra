@@ -50,11 +50,11 @@ public partial class PortfolioRowViewModel : ObservableObject
         AssetType.Bond or AssetType.PreciousMetal or AssetType.Crypto;
 
     /// <summary>
-    /// 數量顯示文字 — 股票整數（股不可拆分）；其他資產類型保留小數（基金、貴金屬、加密貨幣）。
+    /// 數量顯示文字 — 自動 trim 尾零：整數（含 ETF／整股）顯示整數、真的有小數的（基金／貴金屬／加密貨幣／
+    /// 碎股）才顯示小數（最多 4 位）。修正：ETF 等 badge 顯示「股」但 AssetType≠Stock 時，原本走 N4 會出現
+    /// 「200,000.0000」整數卻帶 4 位小數的怪顯示；用 trim-尾零 一致處理所有類型、也不再 (long) 截斷碎股。
     /// </summary>
-    public string QuantityDisplay => IsStock
-        ? ((long)Quantity).ToString("N0")
-        : Quantity.ToString("N4");
+    public string QuantityDisplay => Quantity.ToString("#,##0.####");
 
     /// <summary>True for Taiwan ETFs — affects sell-side transaction tax (0.1% vs 0.3%).</summary>
     public bool IsEtf { get; init; }
