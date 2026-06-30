@@ -171,4 +171,26 @@ public sealed record Trade(
     /// <c>= buy_cost_native × (sell_fx_rate - buy_fx_rate)</c>。
     /// 同幣別交易為 0。null = 無法計算（同 <see cref="RealizedMarketPnl"/>）。
     /// </summary>
-    decimal? RealizedFxPnl = null);
+    decimal? RealizedFxPnl = null)
+{
+    /// <summary>
+    /// 防呆正規化:同幣別交易(<see cref="InstrumentCurrency"/> == <see cref="SettlementCurrency"/>)
+    /// 一律清掉 FX 欄位 —— 依本型別約定「<see cref="FxRate"/>=null 代表同幣別 implicit 1.0」。
+    /// 任何寫入路徑(新增 / 編輯 / 匯入 / 同步)在持久化前呼叫,確保不會有同幣別交易帶著
+    /// ≠null 的匯率(那會污染現金流與已實現損益的 FX 拆分,例如 TWD 賣出卻被塞 fx=0.0765
+    /// 把實收金額縮成 1/13)。空幣別視為 "TWD";不更動 <see cref="CashAmount"/>(既有被污染的
+    /// 金額需另行修正)。跨幣別或已乾淨時回傳自身。
+    /// </summary>
+    public Trade WithSameCurrencyFxCleared()
+    {
+        var instrument = string.IsNullOrWhiteSpace(InstrumentCurrency)
+            ? "TWD" : InstrumentCurrency.Trim().ToUpperInvariant();
+        var settlement = string.IsNullOrWhiteSpace(SettlementCurrency)
+            ? "TWD" : SettlementCurrency.Trim().ToUpperInvariant();
+        if (!string.Equals(instrument, settlement, StringComparison.Ordinal))
+            return this;   // 跨幣別:保留 FX
+        if (FxRate is null && FxRateDate is null && FxSource is null)
+            return this;   // 已是同幣別的乾淨狀態
+        return this with { FxRate = null, FxRateDate = null, FxSource = null };
+    }
+}

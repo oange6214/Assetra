@@ -130,6 +130,10 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
+        // 防呆:同幣別交易一律清掉 FX(FxRate=null 代表 implicit 1.0)。這是所有寫入路徑
+        // (新增 / 編輯 / 匯入 / 同步)共用的綁定點,確保任何來源都無法把 ≠null 的匯率塞進
+        // 同幣別交易,避免再發生「TWD 交易卻帶 fx≠1 把現金流算錯」那類資料污染。
+        t = t.WithSameCurrencyFxCleared();
         cmd.Parameters.AddWithValue("$id", t.Id.ToString());
         cmd.Parameters.AddWithValue("$sym", t.Symbol);
         cmd.Parameters.AddWithValue("$ex", t.Exchange);
