@@ -638,13 +638,13 @@ public partial class AddAssetDialogViewModel : ObservableObject
             return;
         }
 
-        // P3 Mode C — 「只知道扣款金額 + 股數」快速輸入：當 Price 為空 + ActualCash 有填時，
-        // 從現金反推 Price。對同幣別交易直接除；對跨幣別則需要 FxRate（用 1.0 fallback
-        // 若兩個都沒填，避免靜默用錯匯率產生荒謬成本均價）。手續費粗估：留空時當 0
-        // （適用券商帳戶扣款已含手續費的多數情境，跟「金額已含手續費」的精神一致）。
+        // P3 Mode C — 「只知道扣款金額 + 股數」快速輸入：當 Price 為空 + ActualCash 有填時，從現金反推 Price。
+        // 對同幣別直接除；對跨幣別用「已解析匯率」parsedFxRate（＝自動依交易日抓回或使用者手填）反推——
+        // 不限 fx mode：statement mode（依帳戶明細）只要匯率已自動帶入也能反推單價（這正是先前卡「需要匯率」
+        // 的主因：原本用 mode-gated 的 fxRate，statement mode 一律為 null）。手續費留空當 0。
         if (!hasPrice && actualCashAmount is { } cash && qty > 0)
         {
-            if (isCrossCurrencyCash && fxRate is null)
+            if (isCrossCurrencyCash && parsedFxRate is null)
             {
                 AddError = "跨幣別反推單價需要匯率";
                 return;
@@ -656,7 +656,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
                 AddError = "帳戶扣款金額（實際扣款）不足以扣除手續費，請檢查";
                 return;
             }
-            var rateForPrice = fxRate ?? 1m;
+            var rateForPrice = parsedFxRate ?? 1m;
             if (rateForPrice <= 0)
             {
                 AddError = "跨幣別反推單價需要匯率";
