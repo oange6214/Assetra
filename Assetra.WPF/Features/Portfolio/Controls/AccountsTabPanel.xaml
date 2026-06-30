@@ -959,6 +959,7 @@
                                                         <ColumnDefinition Width="92" />
                                                         <ColumnDefinition Width="80" />
                                                         <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
                                                     <!--  日期  -->
                                                     <TextBlock
@@ -983,9 +984,20 @@
                                                             Foreground="{DynamicResource AppTextOnAccent}"
                                                             Text="{Binding Type, Converter={StaticResource TradeTypeConverter}}" />
                                                     </Border>
-                                                    <!--  價值 (TotalAmount 已含 sign)  -->
+                                                    <!--  資產:買入/賣出/股利顯示「名稱 (代號)」;現金流/收入/轉帳顯示描述。原本只能點進去才看得到。  -->
                                                     <TextBlock
                                                         Grid.Column="2"
+                                                        Margin="4,0,8,0"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource Font.Family.Base}"
+                                                        FontSize="{StaticResource Font.Size.Sm}"
+                                                        Foreground="{DynamicResource AppTextPrimary}"
+                                                        Text="{Binding DisplayAsset}"
+                                                        TextTrimming="CharacterEllipsis"
+                                                        ToolTip="{Binding DisplayAsset}" />
+                                                    <!--  價值 (TotalAmount 已含 sign)  -->
+                                                    <TextBlock
+                                                        Grid.Column="3"
                                                         HorizontalAlignment="Right"
                                                         VerticalAlignment="Center"
                                                         FontFamily="{StaticResource Font.Family.Base}"
