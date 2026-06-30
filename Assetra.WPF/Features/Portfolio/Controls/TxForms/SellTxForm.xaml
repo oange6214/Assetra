@@ -33,33 +33,94 @@
             Text="{Binding Sell.QuantityError}"
             Visibility="{Binding Sell.QuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
-        <!--
-            賣出價 + instrument-currency badge — non-TWD 才渲染。
-            MultiCurrency-Trade-Refactor P3.
-        -->
-        <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+        <!--  成交明細輸入模式：單價 / 成交總額（對齊買入）。總額採 GROSS：股數×單價。  -->
+        <TextBlock
+            Margin="0,0,0,6"
+            FontSize="{StaticResource Font.Size.Xs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{DynamicResource Portfolio.Tx.PriceMode}" />
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <RadioButton
+                Grid.Column="0"
+                Margin="0,0,3,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Content="{DynamicResource Portfolio.Tx.PriceModeUnit}"
+                GroupName="TxSellPriceMode"
+                IsChecked="{Binding Sell.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=unit, Mode=TwoWay}"
+                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                Style="{StaticResource SegmentBtn}" />
+            <RadioButton
+                Grid.Column="1"
+                Margin="3,0,0,0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Content="{DynamicResource Portfolio.Tx.PriceModeTotal}"
+                GroupName="TxSellPriceMode"
+                IsChecked="{Binding Sell.PriceMode, Converter={StaticResource EqualityConverter}, ConverterParameter=total, Mode=TwoWay}"
+                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                Style="{StaticResource SegmentBtn}" />
+        </Grid>
+
+        <!--  單價模式：賣出價（每股）＋ 幣別 badge。  -->
+        <StackPanel Visibility="{Binding Sell.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+                <TextBlock
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{DynamicResource Portfolio.Tx.SellPrice}" />
+                <TextBlock
+                    Margin="6,0,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppAccent}"
+                    Text="{Binding Sell.InstrumentCurrencyBadge}"
+                    Visibility="{Binding Sell.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+            </StackPanel>
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
+                Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding TxAmountError}"
+                Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+        </StackPanel>
+
+        <!--  總額模式：成交總額（gross＝股數×單價），確認時反推單價。  -->
+        <StackPanel Visibility="{Binding Sell.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock
+                Margin="0,0,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.SellPrice}" />
+                Text="{DynamicResource Portfolio.Tx.TotalAmountLabel}" />
+            <TextBox
+                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                IsEnabled="{Binding AreEconomicFieldsEditable}"
+                Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
+                Text="{Binding Sell.TotalProceeds, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock
-                Margin="6,0,0,0"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppAccent}"
-                Text="{Binding Sell.InstrumentCurrencyBadge}"
-                Visibility="{Binding Sell.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+                Margin="0,0,0,12"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding Sell.TotalProceedsError}"
+                Visibility="{Binding Sell.TotalProceedsError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
-        <TextBox
-            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-            IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
-            Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock
-            Margin="0,0,0,12"
-            Style="{StaticResource FormFieldError}"
-            Text="{Binding TxAmountError}"
-            Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+        <!--  進階（手續費折扣 / 費用預覽 / 手續費 / 帳戶 / 跨幣別）— 對齊買入收合。  -->
+        <Expander
+            Margin="0,4,0,0"
+            Header="{DynamicResource Portfolio.Tx.AdvancedSection}"
+            IsExpanded="{Binding Sell.IsAdvancedExpanded, Mode=TwoWay}"
+            Style="{StaticResource AppExpander}">
+        <StackPanel>
 
         <!--  手續費折扣 (和買入對稱)  -->
         <TextBlock
@@ -290,5 +351,7 @@
                 FetchFxRateCommand="{Binding DataContext.FetchSellFxRateCommand, ElementName=Root}"
                 GroupName="TxSellSettlementInputMode" />
         </StackPanel>
+        </StackPanel>
+        </Expander>
     </StackPanel>
 </UserControl>

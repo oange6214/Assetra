@@ -44,7 +44,16 @@ public partial class TransactionDialogViewModel
         if (sellQty > (int)Sell.Position.Quantity)
         { TxError = $"賣出數量 ({sellQty:N0}) 超過持倉 ({(int)Sell.Position.Quantity:N0}) 股"; return; }
 
-        if (!ParseHelpers.TryParseDecimal(TxAmount, out var sellPrice) || sellPrice <= 0)
+        // 總額模式（GROSS）：成交總額 = 股數 × 單價 ⇒ 單價 = 總額 / 股數（手續費/證交稅仍由 gross 計）；
+        // 單價模式直接用 TxAmount。
+        decimal sellPrice;
+        if (Sell.IsTotalMode)
+        {
+            if (!ParseHelpers.TryParseDecimal(Sell.TotalProceeds, out var sellTotal) || sellTotal <= 0)
+            { TxError = "成交總額無效"; return; }
+            sellPrice = sellTotal / sellQty;
+        }
+        else if (!ParseHelpers.TryParseDecimal(TxAmount, out sellPrice) || sellPrice <= 0)
         { TxError = "賣出價格無效"; return; }
 
         // P5.8b prereq — mode-aware settlement validation mirrors Buy's

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Assetra.WPF.Features.Portfolio.SubViewModels.Tx;
@@ -27,6 +28,20 @@ public sealed partial class SellTxViewModel : ObservableObject
     [ObservableProperty] private PortfolioRowViewModel? _position;
     [ObservableProperty] private string _quantity = string.Empty;
     [ObservableProperty] private string _quantityError = string.Empty;
+
+    // ── 成交明細輸入模式（對齊 Buy）：單價 vs 成交總額。成交總額採 GROSS 語意＝股數×單價（不含手續費/證交稅）；
+    //    單價由「成交總額 ÷ 股數」反推。手續費/稅仍照既有 preview 由 gross 計算，故無 Buy 所沒有的循環問題。──
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnitMode))]
+    [NotifyPropertyChangedFor(nameof(IsTotalMode))]
+    private string _priceMode = "unit";
+
+    /// <summary>「總額」模式下使用者輸入的成交總額（gross＝股數×單價）。</summary>
+    [ObservableProperty] private string _totalProceeds = string.Empty;
+    [ObservableProperty] private string _totalProceedsError = string.Empty;
+
+    /// <summary>True 時「進階」區塊展開。</summary>
+    [ObservableProperty] private bool _isAdvancedExpanded;
 
     // Preview — parallel to buy's AddGrossAmount / AddCommission / AddTotalCost,
     // but also shows TransactionTax + NetAmount since sell has two deductions.
@@ -168,6 +183,20 @@ public sealed partial class SellTxViewModel : ObservableObject
     public bool IsStatementSettlementMode => SettlementInputMode == "statement";
     public bool IsFxSettlementMode => SettlementInputMode == "fx";
 
+    public bool IsUnitMode => PriceMode == "unit";
+    public bool IsTotalMode => PriceMode == "total";
+
+    /// <summary>總計顯示：總額模式 → 使用者輸入的成交總額；單價模式 → 股數 × 單價（caller 提供文字）。</summary>
+    public string ComputeTotalDisplay(string priceText, string quantityText)
+    {
+        if (IsTotalMode && ParseHelpers.TryParseDecimal(TotalProceeds, out var t) && t > 0)
+            return t.ToString("N0");
+        if (ParseHelpers.TryParseDecimal(priceText, out var p) && p > 0 &&
+            ParseHelpers.TryParseInt(quantityText, out var q) && q > 0)
+            return (p * q).ToString("N0");
+        return "0";
+    }
+
     public bool HasPreview => GrossAmount > 0;
 
     /// <summary>Suppress auto-fill of TxAmount when Position is set programmatically (Edit mode).</summary>
@@ -188,6 +217,10 @@ public sealed partial class SellTxViewModel : ObservableObject
         Position = null;
         Quantity = string.Empty;
         QuantityError = string.Empty;
+        PriceMode = "unit";
+        TotalProceeds = string.Empty;
+        TotalProceedsError = string.Empty;
+        IsAdvancedExpanded = false;
         IsEtf = false;
         IsBondEtf = false;
         ActualCashAmount = string.Empty;
