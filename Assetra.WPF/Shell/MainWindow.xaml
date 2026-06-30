@@ -1275,10 +1275,56 @@
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{DynamicResource Portfolio.Watchlist.Symbol}" />
                         <TextBox
-                            Margin="0,0,0,12"
+                            Margin="0,0,0,2"
                             FontFamily="{StaticResource Font.Family.Base}"
                             Style="{StaticResource AppTextBox}"
                             Text="{Binding WatchlistSymbol, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!--  代號自動完成建議：輸入時即時查（台股＋美股）；點選帶入代號/名稱/幣別/類型。空查詢 → 清單為空 → 不佔位。  -->
+                        <ItemsControl Margin="0,0,0,12" ItemsSource="{Binding WatchlistSuggestions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Padding="8,5"
+                                        HorizontalContentAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding DataContext.SelectWatchlistSuggestionCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Cursor="Hand">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="72"
+                                                VerticalAlignment="Center"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AppTextPrimary}"
+                                                Text="{Binding Symbol}" />
+                                            <StackPanel>
+                                                <TextBlock
+                                                    Foreground="{DynamicResource AppTextPrimary}"
+                                                    Text="{Binding Name}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Margin="0,1,0,0" Orientation="Horizontal">
+                                                    <TextBlock
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Exchange}" />
+                                                    <TextBlock
+                                                        Margin="4,0"
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="·" />
+                                                    <TextBlock
+                                                        FontSize="{StaticResource Font.Size.Xs}"
+                                                        Foreground="{DynamicResource AppTextMuted}"
+                                                        Text="{Binding Currency}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <!--  名稱  -->
                         <TextBlock

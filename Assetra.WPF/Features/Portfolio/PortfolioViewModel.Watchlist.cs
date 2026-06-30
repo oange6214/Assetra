@@ -29,8 +29,33 @@ public partial class PortfolioViewModel
     /// </summary>
     [ObservableProperty] private string? _watchlistNotice;
 
-    /// <summary>代號輸入框變動時即時重算提示（cheap，純記憶體判定，不打網路）。</summary>
-    partial void OnWatchlistSymbolChanged(string value) => RefreshWatchlistNotice();
+    /// <summary>代號自動完成建議（台股＋美股，主來源 ISymbolDirectory、fallback 台股 CSV）。</summary>
+    [ObservableProperty] private IReadOnlyList<StockSearchResult> _watchlistSuggestions = [];
+
+    /// <summary>代號輸入框變動時即時重算提示（cheap，純記憶體判定）＋更新自動完成建議。</summary>
+    partial void OnWatchlistSymbolChanged(string value)
+    {
+        RefreshWatchlistNotice();
+        var q = (value ?? string.Empty).Trim();
+        WatchlistSuggestions = string.IsNullOrWhiteSpace(q)
+            ? []
+            : (_symbolDirectory?.Search(q) ?? _search.Search(q) ?? []).Take(8).ToList();
+    }
+
+    /// <summary>點選建議：帶入代號、名稱、幣別（若在選項內）、類型（ETF/股），並清空建議清單。</summary>
+    [RelayCommand]
+    private void SelectWatchlistSuggestion(StockSearchResult? r)
+    {
+        if (r is null)
+            return;
+        WatchlistAssetType = r.IsEtf ? AssetType.Etf : AssetType.Stock;
+        if (!string.IsNullOrWhiteSpace(r.Name))
+            WatchlistName = r.Name;
+        if (WatchlistCurrencyOptions.Contains(r.Currency))
+            WatchlistCurrency = r.Currency;
+        WatchlistSymbol = r.Symbol;   // 設 symbol 會重觸 OnWatchlistSymbolChanged 重查；下一行再清掉建議
+        WatchlistSuggestions = [];
+    }
 
     /// <summary>對話框「類型」ComboBox 的選項；對齊 <see cref="AssetType"/> 全部成員。</summary>
     public IReadOnlyList<AssetType> WatchlistAssetTypeOptions { get; } = new[]

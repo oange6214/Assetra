@@ -30,6 +30,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
     Contracts.IPortfolioPositionFeed, Contracts.IDashboardNavigation
 {
     private readonly IStockSearchService _search;
+    private readonly ISymbolDirectory? _symbolDirectory;   // 新增標的「代號」自動完成主來源（composite：台股＋美股）
     private readonly IStockService _stockService;
     private readonly IAppSettingsService? _settingsService;
     /// <summary>One-shot guard: persisted UI prefs are restored only on the first LoadAsync,
@@ -387,6 +388,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         Liabilities = new ReadOnlyObservableCollection<LiabilityRowViewModel>(_liabilities);
 
         _search = services.Search;
+        _symbolDirectory = services.SymbolDirectory;
         _snackbar = ui.Snackbar;
         _settingsService = ui.Settings;
         _currencyService = services.Currency;
