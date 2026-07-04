@@ -1042,6 +1042,11 @@
     <sys:String x:Key="FinancialOverview.Hero.GoalLabel">目標</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.NoGoal">尚未設定目標</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.NoGoalCta">點此設定 →</sys:String>
+    <!--  首頁空狀態「從這裡開始」onboarding hero  -->
+    <sys:String x:Key="Overview.Empty.Title">先加一筆持股，這裡就會長出你的資產總覽。</sys:String>
+    <sys:String x:Key="Overview.Empty.PrimaryCta">加第一筆持股</sys:String>
+    <sys:String x:Key="Overview.Empty.QuickCash">串現金帳戶</sys:String>
+    <sys:String x:Key="Overview.Empty.QuickExpense">記一筆收支</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Heading">資產組成</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Empty">尚無資產資料</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Liability">負債</sys:String>

@@ -1039,6 +1039,11 @@
     <sys:String x:Key="FinancialOverview.Hero.GoalLabel">Goal</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.NoGoal">No goal set</sys:String>
     <sys:String x:Key="FinancialOverview.Hero.NoGoalCta">Set one →</sys:String>
+    <!--  Home empty-state「Start here」onboarding hero  -->
+    <sys:String x:Key="Overview.Empty.Title">Add a holding to see your net-worth overview here.</sys:String>
+    <sys:String x:Key="Overview.Empty.PrimaryCta">Add first holding</sys:String>
+    <sys:String x:Key="Overview.Empty.QuickCash">Add a cash account</sys:String>
+    <sys:String x:Key="Overview.Empty.QuickExpense">Log income/expense</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Heading">Asset composition</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Empty">No asset data</sys:String>
     <sys:String x:Key="FinancialOverview.Composition.Liability">Liabilities</sys:String>

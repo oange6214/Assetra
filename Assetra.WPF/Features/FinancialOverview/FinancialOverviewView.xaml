@@ -22,7 +22,11 @@
     -->
     <Grid Style="{StaticResource PageRootGrid}">
         <ScrollViewer Margin="0" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
+            <!--
+                IsEmpty=True（全新使用者、尚無任何資產/負債）時整段儀表板隱藏，
+                改由下方「從這裡開始」onboarding hero 接手（見 root Grid 尾端）。
+            -->
+            <StackPanel Visibility="{Binding IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
 
                 <!--
                     ═══ ❶ HERO card (v2 redesign 2026-05-13) ═══
@@ -591,6 +595,46 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        <!--
+            ═══ 「從這裡開始」onboarding hero（全新使用者空狀態） ═══
+            IsEmpty=True 時覆蓋整頁、置中顯示。golden action =「加第一筆持股」
+            (→ Portfolio)；兩個 secondary quick-start =「串現金帳戶」(→ CashAccounts)
+            /「記一筆收支」(→ Categories)。CTA 全走既有 ShellNavigationEvents
+            RequestNavigateTo（NavigateToXxxCommand），跟其他 widget 導覽同一機制。
+            使用共用 AppEmptyState* 樣式，視覺跟各頁空狀態一致。
+        -->
+        <StackPanel
+            Style="{StaticResource AppEmptyState}"
+            Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="Rocket24" />
+            <TextBlock Style="{StaticResource AppEmptyStateTitle}" Text="{DynamicResource Overview.Empty.Title}" />
+            <StackPanel Style="{StaticResource AppEmptyStateActionBar}">
+                <!--  Golden action：加第一筆持股 → 投資組合  -->
+                <Button
+                    Command="{Binding NavigateToPortfolioCommand}"
+                    Style="{StaticResource AppEmptyStatePrimaryAction}">
+                    <StackPanel Style="{StaticResource AppButtonContent}">
+                        <ds:AppIcon Style="{StaticResource AppButtonLeadingIcon}" Symbol="Add24" />
+                        <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Overview.Empty.PrimaryCta}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <!--  Secondary quick-starts — 並排，次要視覺權重  -->
+            <StackPanel HorizontalAlignment="Center" Margin="0,10,0,0" Orientation="Horizontal">
+                <Button
+                    Margin="0,0,8,0"
+                    Command="{Binding NavigateToCashAccountsCommand}"
+                    Style="{StaticResource AppEmptyStateSecondaryAction}">
+                    <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Overview.Empty.QuickCash}" />
+                </Button>
+                <Button
+                    Command="{Binding NavigateToCategoriesCommand}"
+                    Style="{StaticResource AppEmptyStateSecondaryAction}">
+                    <TextBlock Style="{StaticResource AppButtonText}" Text="{DynamicResource Overview.Empty.QuickExpense}" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
 
         <!--  ── KPI selector dialog ──────────────────────────────────────  -->
         <Grid behaviors:EscapeKeyCommandBehavior.Command="{Binding CloseKpiEditorCommand}" Visibility="{Binding IsKpiEditorOpen, Converter={StaticResource BooleanToVisibilityConverter}}">

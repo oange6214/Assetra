@@ -426,6 +426,68 @@ public sealed class FinancialOverviewViewModelTests
         Assert.Equal(string.Empty, card.SecondaryValueDisplay);
     }
 
+    // ── Empty-state (從這裡開始 hero) ────────────────────────────────────────
+    //
+    // WHY: a brand-new user with no portfolio / cash / liability data used to see
+    // blank widgets. IsEmpty drives the friendly onboarding hero (visible) vs the
+    // normal dashboard (hidden). It must read the SAME balance-sheet base the Hero
+    // and 公式列 already use — BalanceSheetTotalAssets (投資+現金+不動產+退休+實物)
+    // plus TotalLiabilities — so「有資料」的判定跟畫面上顯示的金額一致，不會出現
+    // 顯示 800k 淨資產卻還掛著空狀態 hero 的矛盾。
+
+    [Fact]
+    public void IsEmpty_TrueByDefault_WhenNoDataPresent()
+    {
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed());
+
+        Assert.True(vm.IsEmpty);
+    }
+
+    [Fact]
+    public void IsEmpty_FalseWhenInvestmentsPresent()
+    {
+        // No focus widgets ⇒ BalanceSheetTotalAssets collapses to TotalInvestments.
+        var vm = BuildVmWithTotals(totalInvestments: 800_000m, totalAssets: 0m, totalLiabilities: 0m);
+
+        Assert.False(vm.IsEmpty);
+    }
+
+    [Fact]
+    public void IsEmpty_FalseWhenOnlyLiabilitiesPresent()
+    {
+        // A user who has only recorded a loan (no assets yet) still has data — the
+        // hero must step aside so the 公式列 can show the liability.
+        var vm = BuildVmWithTotals(totalInvestments: 0m, totalAssets: 0m, totalLiabilities: 100_000m);
+
+        Assert.False(vm.IsEmpty);
+    }
+
+    [Fact]
+    public void IsEmpty_RaisesChangeNotification_WhenTotalsChange()
+    {
+        // The hero/dashboard visibility flips live as the first holding lands. IsEmpty
+        // must re-raise when the underlying totals change (it rides the existing
+        // RaiseCompositionChanged fan-out), otherwise the hero would linger until the
+        // page is revisited.
+        var vm = new FinancialOverviewViewModel(
+            new Mock<IFinancialOverviewQueryService>().Object,
+            new StubFeed());
+
+        var raised = false;
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(vm.IsEmpty))
+                raised = true;
+        };
+
+        typeof(FinancialOverviewViewModel).GetProperty("TotalInvestments")!.SetValue(vm, 500_000m);
+
+        Assert.True(raised);
+        Assert.False(vm.IsEmpty);
+    }
+
     [Fact]
     public void TotalAssetsAndNetWorth_SurfaceTheFullBalanceSheetBase_NotTheUndercount()
     {

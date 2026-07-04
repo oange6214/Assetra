@@ -278,6 +278,15 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     public string BalanceSheetNetWorthDisplay =>
         MoneyFormatter.Format(BalanceSheetNetWorth, BaseCurrency);
 
+    /// <summary>
+    /// True 當使用者沒有任何財務資料 — 投資 / 現金 / 不動產 / 退休 / 實物全為 0
+    /// 且無負債。控制首頁「從這裡開始」onboarding hero（顯示）vs 正常儀表板（隱藏）。
+    /// 用 BalanceSheetTotalAssets（含所有資產類的 balance-sheet 全額）+ TotalLiabilities
+    /// 作判定，跟 Hero / 公式列顯示的金額同源，避免「畫面有數字卻仍掛空狀態」的矛盾。
+    /// 隨 RaiseCompositionChanged 一起 re-raise（見該方法），故首筆持股落地時即時翻轉。
+    /// </summary>
+    public bool IsEmpty => BalanceSheetTotalAssets <= 0m && TotalLiabilities <= 0m;
+
     /// <summary>負債佔總資產的比例（0–100% string，例「14.7%」）— 顯示在負債獨立 bar 旁。
     /// 用 BalanceSheetTotalAssets（含不動產/退休/實物）作分母，與 Hero/公式列一致。</summary>
     public string LiabilityShareDisplay
@@ -357,6 +366,7 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         OnPropertyChanged(nameof(BalanceSheetTotalAssetsDisplay));
         OnPropertyChanged(nameof(BalanceSheetNetWorth));
         OnPropertyChanged(nameof(BalanceSheetNetWorthDisplay));
+        OnPropertyChanged(nameof(IsEmpty));
         OnPropertyChanged(nameof(HeroGoalProgressValue));
         OnPropertyChanged(nameof(HeroGoalProgressDisplay));
         OnPropertyChanged(nameof(HeroGoalTargetDisplay));
@@ -770,6 +780,11 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToCashAccounts() =>
         Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("CashAccounts");
+
+    /// <summary>空狀態 hero 的「記一筆收支」quick-start → 跳收支分類頁。</summary>
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void NavigateToCategories() =>
+        Assetra.WPF.Infrastructure.ShellNavigationEvents.RequestNavigateTo("Categories");
 
     [CommunityToolkit.Mvvm.Input.RelayCommand]
     private void NavigateToLiabilities() =>
