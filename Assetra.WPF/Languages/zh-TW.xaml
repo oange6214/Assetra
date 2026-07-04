@@ -1591,6 +1591,14 @@
     <sys:String x:Key="Goals.Title">財務目標</sys:String>
     <sys:String x:Key="Goals.Empty">尚未建立任何目標</sys:String>
     <sys:String x:Key="Goals.Empty.Hint">建立旅遊、購屋、退休或 FIRE 等目標後，這裡會追蹤進度與剩餘金額。</sys:String>
+
+    <!--  頁面空狀態導引  -->
+    <sys:String x:Key="Empty.Categories.Title">還沒有收支分類</sys:String>
+    <sys:String x:Key="Empty.Categories.Hint">建立分類，記帳時就能把每筆歸類、看月結。</sys:String>
+    <sys:String x:Key="Empty.Categories.Cta">新增分類</sys:String>
+    <sys:String x:Key="Empty.TxLog.Title">還沒有交易紀錄</sys:String>
+    <sys:String x:Key="Empty.TxLog.Hint">你的買入、賣出、收支都會列在這裡。</sys:String>
+    <sys:String x:Key="Empty.TxLog.Cta">新增交易</sys:String>
     <sys:String x:Key="Goals.Count">目標數</sys:String>
     <sys:String x:Key="Goals.Remaining">剩餘金額</sys:String>
     <sys:String x:Key="Goals.OverallProgress">整體進度</sys:String>

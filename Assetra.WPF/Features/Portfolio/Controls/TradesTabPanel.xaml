@@ -910,19 +910,31 @@
             </DataGrid>
 
             <!--
-                P2.17 T11 — Empty state migrated to AppEmptyState design system style.
-                原本 hand-rolled Opacity=0.4 + 自己定 font size，現在跟其他頁面 (Goals /
-                Fire / MonteCarlo 等已用) 一致的「居中 panel + 圖示 + 標題」標準。
+                空狀態 — 尚無交易紀錄時的導引。用 DS 標準 panel（圖示 + 標題 + 說明 +
+                主要動作），CTA 直接開啟新增交易對話框，跟 Goals / 收支分類等頁一致。
             -->
             <Border Visibility="{Binding HasNoTrades, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <StackPanel Style="{StaticResource AppEmptyState}">
-                    <TextBlock
-                        Margin="0,0,0,8"
+                <StackPanel Style="{StaticResource EmptyStatePanel}">
+                    <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="DocumentBulletList24" />
+                    <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Empty.TxLog.Title}" />
+                    <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Empty.TxLog.Hint}" />
+                    <Button
+                        Command="{Binding AddRecordCommand}"
                         HorizontalAlignment="Center"
-                        FontSize="{StaticResource Font.Size.2xl}"
-                        Text="&#x1F4CB;" />
-                    <TextBlock Style="{StaticResource AppEmptyStateTitle}"
-                               Text="{DynamicResource Portfolio.TradeHistory.Empty}" />
+                        Style="{StaticResource AppEmptyStatePrimaryAction}">
+                        <StackPanel Style="{StaticResource AppButtonContent}">
+                            <ds:AppIcon
+                                Style="{StaticResource AppButtonLeadingIcon}"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Symbol="Add24" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{DynamicResource Empty.TxLog.Cta}" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

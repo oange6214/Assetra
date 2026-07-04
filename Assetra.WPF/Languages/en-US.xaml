@@ -1587,6 +1587,14 @@
     <sys:String x:Key="Goals.Title">Financial Goals</sys:String>
     <sys:String x:Key="Goals.Empty">No goals yet</sys:String>
     <sys:String x:Key="Goals.Empty.Hint">Create goals for travel, home buying, retirement, or FIRE to track progress and remaining amount.</sys:String>
+
+    <!-- Page empty-state guidance -->
+    <sys:String x:Key="Empty.Categories.Title">No categories yet</sys:String>
+    <sys:String x:Key="Empty.Categories.Hint">Create categories to organize your income &amp; expenses.</sys:String>
+    <sys:String x:Key="Empty.Categories.Cta">Add category</sys:String>
+    <sys:String x:Key="Empty.TxLog.Title">No transactions yet</sys:String>
+    <sys:String x:Key="Empty.TxLog.Hint">Your buys, sells, income &amp; expenses appear here.</sys:String>
+    <sys:String x:Key="Empty.TxLog.Cta">Add transaction</sys:String>
     <sys:String x:Key="Goals.Count">Goals</sys:String>
     <sys:String x:Key="Goals.Remaining">Remaining</sys:String>
     <sys:String x:Key="Goals.OverallProgress">Overall progress</sys:String>

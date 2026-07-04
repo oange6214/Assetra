@@ -187,6 +187,8 @@ public partial class CategoriesViewModel : ObservableObject
     // Empty-state predicates per tab
     public bool HasNoExpense => Categories.Count(c => c.Kind == CategoryKind.Expense && (ShowArchived || !c.IsArchived)) == 0;
     public bool HasNoIncome => Categories.Count(c => c.Kind == CategoryKind.Income && (ShowArchived || !c.IsArchived)) == 0;
+    /// <summary>整個「收支分類」tab 都沒有分類 — 顯示全頁空狀態導引。</summary>
+    public bool HasNoCategories => HasNoExpense && HasNoIncome;
     public bool HasNoRules => Rules.Count == 0;
     public bool HasRules => Rules.Count > 0;
     public bool HasNoBudgets => Budgets.Count == 0;
@@ -348,6 +350,7 @@ public partial class CategoriesViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasNoExpense));
         OnPropertyChanged(nameof(HasNoIncome));
+        OnPropertyChanged(nameof(HasNoCategories));
         OnPropertyChanged(nameof(HasNoRules));
         OnPropertyChanged(nameof(HasRules));
         OnPropertyChanged(nameof(HasNoBudgets));

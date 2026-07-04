@@ -532,8 +532,9 @@
                         </Button>
                     </DockPanel>
 
-                    <!--  Two-column list  -->
-                    <Grid Grid.Row="1">
+                    <!--  Two-column list — 有分類時顯示；HasNoCategories 時整段隱藏，改顯示下方空狀態導引  -->
+                    <Grid Grid.Row="1"
+                          Visibility="{Binding HasNoCategories, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
@@ -704,6 +705,34 @@
                             </Grid>
                         </Border>
                     </Grid>
+
+                    <!--  全頁空狀態 — 尚未建立任何收支分類時的導引（DS 標準 panel + 主要動作）  -->
+                    <StackPanel
+                        Grid.Row="1"
+                        Style="{StaticResource EmptyStatePanel}"
+                        Visibility="{Binding HasNoCategories, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ds:AppIcon Style="{StaticResource EmptyStateIcon}" Symbol="Tag24" />
+                        <TextBlock Style="{StaticResource EmptyStateTitle}" Text="{DynamicResource Empty.Categories.Title}" />
+                        <TextBlock Style="{StaticResource EmptyStateHint}" Text="{DynamicResource Empty.Categories.Hint}" />
+                        <Button
+                            Command="{Binding OpenAddCategoryCommand}"
+                            HorizontalAlignment="Center"
+                            Style="{StaticResource AppEmptyStatePrimaryAction}"
+                            Visibility="{Binding IsAddCategoryOpen, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <StackPanel Style="{StaticResource AppButtonContent}">
+                                <ds:AppIcon
+                                    Style="{StaticResource AppButtonLeadingIcon}"
+                                    VerticalAlignment="Center"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                    Symbol="Add24" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                    Text="{DynamicResource Empty.Categories.Cta}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
 
                 </Grid>
             </TabItem>
