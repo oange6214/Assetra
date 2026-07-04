@@ -1,0 +1,93 @@
+<UserControl
+    x:Class="Assetra.WPF.Shell.WelcomeOverlayView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shell="clr-namespace:Assetra.WPF.Shell"
+    d:DataContext="{d:DesignInstance Type={x:Type shell:WelcomeGateViewModel}, IsDesignTimeCreatable=False}"
+    d:DesignHeight="600"
+    d:DesignWidth="900"
+    Visibility="{Binding ShowWelcome, Converter={StaticResource BooleanToVisibilityConverter}}"
+    mc:Ignorable="d">
+
+    <!--  Full-bleed scrim + centered welcome card. Sits at top z-order in the shell.  -->
+    <Grid Background="#99000000">
+        <Border
+            Width="440"
+            Padding="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{DynamicResource AppSurface}"
+            BorderBrush="{DynamicResource AppBorderLight}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource Radius.Lg}">
+            <Grid Margin="28,24,28,28">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  Top-right dismiss ✕  -->
+                <Button
+                    Grid.Row="0"
+                    Width="28"
+                    Height="28"
+                    Margin="0,-6,-8,0"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Command="{Binding DismissWelcomeCommand}"
+                    Style="{StaticResource AppIconButton}"
+                    ToolTip="{DynamicResource Onboarding.Welcome.Skip}">
+                    <ds:AppIcon
+                        FontSize="12"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Dismiss24" />
+                </Button>
+
+                <!--  Title  -->
+                <TextBlock
+                    Grid.Row="0"
+                    Margin="0,4,32,0"
+                    FontFamily="{StaticResource Font.Family.Display}"
+                    FontSize="{StaticResource Font.Size.Xl}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextPrimary}"
+                    Text="{DynamicResource Onboarding.Welcome.Title}"
+                    TextWrapping="Wrap" />
+
+                <!--  Subtitle  -->
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,10,0,0"
+                    FontSize="{StaticResource Font.Size.Sm}"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    LineHeight="20"
+                    Text="{DynamicResource Onboarding.Welcome.Subtitle}"
+                    TextWrapping="Wrap" />
+
+                <!--  Primary CTA  -->
+                <Button
+                    Grid.Row="2"
+                    Margin="0,24,0,0"
+                    HorizontalAlignment="Stretch"
+                    Command="{Binding StartAddFirstHoldingCommand}"
+                    Content="{DynamicResource Onboarding.Welcome.PrimaryCta}"
+                    Style="{StaticResource AppPrimaryButton}" />
+
+                <!--  Secondary "explore on my own" text button  -->
+                <Button
+                    Grid.Row="3"
+                    Margin="0,10,0,0"
+                    HorizontalAlignment="Center"
+                    Command="{Binding DismissWelcomeCommand}"
+                    Content="{DynamicResource Onboarding.Welcome.Skip}"
+                    Style="{StaticResource AppGhostButton}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

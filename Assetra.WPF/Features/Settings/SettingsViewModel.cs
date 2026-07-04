@@ -1107,6 +1107,28 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
     }
 
+    /// <summary>
+    /// 重看上手引導 — 把 HasShownWelcomeBanner 重設為 false，下次啟動會再顯示首次歡迎引導。
+    /// raiseChanged: false（純記帳旗標，不驅動全域重載，避免 settings-changed 回饋迴圈）。
+    /// </summary>
+    [RelayCommand]
+    private async Task ReplayOnboardingAsync()
+    {
+        try
+        {
+            await _settings.SaveAsync(
+                _settings.Current with { HasShownWelcomeBanner = false },
+                raiseChanged: false).ConfigureAwait(true);
+            _snackbar?.Success(_localization.Get(
+                "Settings.ReplayOnboarding.Done", "下次啟動會再顯示引導"));
+        }
+        catch (Exception ex)
+        {
+            _snackbar?.Error(_localization.Get(
+                "Settings.SaveFailed", "設定儲存失敗") + " " + ex.Message);
+        }
+    }
+
     [RelayCommand]
     private void OpenFugleHelp() => IsFugleHelpOpen = true;
 

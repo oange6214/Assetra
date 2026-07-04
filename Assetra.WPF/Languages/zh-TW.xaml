@@ -1067,6 +1067,11 @@
     <sys:String x:Key="Nav.FinancialOverview">財務概覽</sys:String>
     <sys:String x:Key="Onboarding.Banner.Title">歡迎使用 Assetra</sys:String>
     <sys:String x:Key="Onboarding.Banner.Steps">① 新增持倉  →  ② 查看配置分析  →  ③ 設定價格警示</sys:String>
+    <!--  ── 首次啟動歡迎引導（welcome overlay）──  -->
+    <sys:String x:Key="Onboarding.Welcome.Title">歡迎使用 Assetra</sys:String>
+    <sys:String x:Key="Onboarding.Welcome.Subtitle">把你的投資、現金、負債整合在一起看。從加入第一筆持股開始吧。</sys:String>
+    <sys:String x:Key="Onboarding.Welcome.PrimaryCta">加我的第一筆持股</sys:String>
+    <sys:String x:Key="Onboarding.Welcome.Skip">先自己逛逛</sys:String>
     <sys:String x:Key="Settings.Title">設定</sys:String>
     <!--  ── 左側分類導覽標籤 ──  -->
     <sys:String x:Key="Settings.Category.Appearance">外觀</sys:String>
@@ -1081,6 +1086,9 @@
     <!--  ── 分類面板內標題（資料來源 / 資料與維護為新增；其餘沿用既有 Section key）──  -->
     <sys:String x:Key="Settings.Section.DataSources">資料來源</sys:String>
     <sys:String x:Key="Settings.Section.DataMaintenance">資料與維護</sys:String>
+    <sys:String x:Key="Settings.ReplayOnboarding">重看上手引導</sys:String>
+    <sys:String x:Key="Settings.ReplayOnboarding.Hint">重設首次歡迎引導，下次啟動應用程式時會再顯示一次。</sys:String>
+    <sys:String x:Key="Settings.ReplayOnboarding.Done">下次啟動會再顯示引導</sys:String>
     <sys:String x:Key="Settings.Section.Appearance">外觀</sys:String>
     <sys:String x:Key="Settings.DarkTheme">深色主題</sys:String>
     <sys:String x:Key="Settings.ColorScheme.Taiwan">台灣（紅漲綠跌）</sys:String>

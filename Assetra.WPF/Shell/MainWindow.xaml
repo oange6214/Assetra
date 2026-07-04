@@ -2593,5 +2593,16 @@
             </Border>
         </Grid>
 
+        <!--
+            First-run welcome overlay — top z-order so its scrim dims the whole
+            shell (NavRail + title bar). Visibility is self-managed by the gate VM
+            (ShowWelcome); DataContext points at MainViewModel.Welcome.
+        -->
+        <shell:WelcomeOverlayView
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Panel.ZIndex="230"
+            DataContext="{Binding Welcome}" />
+
     </Grid>
 </Window>

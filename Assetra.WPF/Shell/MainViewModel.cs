@@ -59,6 +59,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public Features.Assistant.AssistantViewModel Assistant { get; }
     public Features.AuditLog.AuditLogViewModel AuditLog { get; }
 
+    /// <summary>
+    /// First-run welcome overlay gate. Owns <see cref="WelcomeGateViewModel.ShowWelcome"/>
+    /// and the dismiss / add-first-holding commands; the WelcomeOverlayView in the shell
+    /// binds its DataContext to this.
+    /// </summary>
+    public WelcomeGateViewModel Welcome { get; }
+
     // Title bar search / command palette
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchOpen;
@@ -278,7 +285,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Features.AuditLog.AuditLogViewModel auditLog,
         IThemeService themeService,
         IStockSearchService searchService,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        IAppSettingsService appSettings)
     {
         NavRail = navRail;
         StatusBar = statusBar;
@@ -309,6 +317,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _searchService = searchService;
         CurrentTheme = themeService.CurrentTheme;
         SearchResults = new ReadOnlyObservableCollection<StockSearchResult>(_searchResults);
+
+        // First-run welcome overlay — golden CTA navigates to the Portfolio section
+        // (where the prominent「＋ 新增交易」entry lives). Nav is injected as a callback
+        // so the gate VM stays shell-agnostic and unit-testable.
+        Welcome = new WelcomeGateViewModel(appSettings, section => NavRail.NavigateTo(section));
 
         Portfolio.AttachTabViewModels(Dashboard, Allocation);
 

@@ -45,6 +45,25 @@
                         Text="{Binding AppVersion}" />
                 </StackPanel>
 
+                <!--  重看上手引導 — 重設 HasShownWelcomeBanner，下次啟動再顯示首次歡迎引導。  -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        FontWeight="SemiBold"
+                        Text="{DynamicResource Settings.ReplayOnboarding}" />
+                    <TextBlock
+                        Margin="0,4,0,8"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Settings.ReplayOnboarding.Hint}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        HorizontalAlignment="Left"
+                        Command="{Binding ReplayOnboardingCommand}"
+                        Content="{DynamicResource Settings.ReplayOnboarding}"
+                        Style="{StaticResource AppSecondaryButton}" />
+                </StackPanel>
+
                 <!--  匯率歷史回填——由「資料來源」搬到此，與快照重建同屬「對本機歷史資料的回填/重建動作」。  -->
                 <StackPanel Margin="0,0,0,14">
                     <TextBlock
