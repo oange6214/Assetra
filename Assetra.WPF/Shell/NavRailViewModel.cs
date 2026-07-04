@@ -68,6 +68,7 @@ public partial class NavRailViewModel : ObservableObject
             {
                 TitleResourceKey = "Nav.Analysis",
                 GroupIconSymbol = "DataPie24",
+                IsExpanded = true,
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.FinancialOverview, LabelResourceKey = "FinancialOverview.Nav.Label", IconSymbol = "DataPie24",            ToolTipResourceKey = "FinancialOverview.Nav.Label" },
@@ -77,31 +78,45 @@ public partial class NavRailViewModel : ObservableObject
                     new NavLeafVm { Section = NavSection.Assistant,         LabelResourceKey = "Nav.Assistant",               IconSymbol = "Sparkle24",            ToolTipResourceKey = "Nav.Assistant" },
                 },
             },
+            // 「資產」核心群組：新手最常用的三類（投資 / 現金 / 負債），預設展開。
             new NavGroupVm
             {
                 TitleResourceKey = "Nav.Assets",
                 GroupIconSymbol = "Wallet24",
+                IsExpanded = true,
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.Portfolio,     LabelResourceKey = "Nav.Portfolio",     IconSymbol = "Briefcase24",   ToolTipResourceKey = "Nav.Portfolio" },
                     new NavLeafVm { Section = NavSection.CashAccounts,  LabelResourceKey = "Nav.CashAccounts",  IconSymbol = "Money24",       ToolTipResourceKey = "Nav.CashAccounts" },
                     new NavLeafVm { Section = NavSection.Liabilities,   LabelResourceKey = "Nav.Liabilities",   IconSymbol = "Cut24",         ToolTipResourceKey = "Nav.Liabilities" },
-                    new NavLeafVm { Section = NavSection.RealEstate,    LabelResourceKey = "RealEstate.Title",  IconSymbol = "Home24",        ToolTipResourceKey = "RealEstate.Title" },
-                    new NavLeafVm { Section = NavSection.Insurance,     LabelResourceKey = "Insurance.Title",   IconSymbol = "Shield24",      ToolTipResourceKey = "Insurance.Title" },
-                    new NavLeafVm { Section = NavSection.Retirement,    LabelResourceKey = "Retirement.Title",  IconSymbol = "PersonClock24", ToolTipResourceKey = "Retirement.Title" },
-                    new NavLeafVm { Section = NavSection.PhysicalAsset, LabelResourceKey = "PhysicalAsset.Title", IconSymbol = "Box24",       ToolTipResourceKey = "PhysicalAsset.Title" },
                 },
             },
             new NavGroupVm
             {
                 TitleResourceKey = "Nav.Cashflow",
                 GroupIconSymbol = "ArrowSwap24",
+                IsExpanded = true,
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.Categories,     LabelResourceKey = "Nav.Categories",     IconSymbol = "Tag24",                ToolTipResourceKey = "Nav.Categories" },
                     new NavLeafVm { Section = NavSection.Recurring,      LabelResourceKey = "Nav.Recurring",      IconSymbol = "CalendarLtr24",        ToolTipResourceKey = "Nav.Recurring",      BadgeKind = "Recurring" },
                     new NavLeafVm { Section = NavSection.TransactionLog, LabelResourceKey = "Nav.TransactionLog", IconSymbol = "DocumentBulletList24", ToolTipResourceKey = "Nav.TransactionLog" },
                     new NavLeafVm { Section = NavSection.Alerts,         LabelResourceKey = "Nav.Alerts",         IconSymbol = "Alert24",              ToolTipResourceKey = "Nav.Alerts.Tooltip", BadgeKind = "Alerts" },
+                },
+            },
+            // 「其他資產」群組：進階資產類別（不動產 / 保險 / 退休 / 實物），
+            // 預設收合，避免首次使用者被大量選項淹沒。
+            new NavGroupVm
+            {
+                TitleResourceKey = "Nav.MoreAssets",
+                GroupIconSymbol = "Wallet24",
+                IsExpanded = false,
+                Items = new[]
+                {
+                    new NavLeafVm { Section = NavSection.RealEstate,    LabelResourceKey = "RealEstate.Title",  IconSymbol = "Home24",        ToolTipResourceKey = "RealEstate.Title" },
+                    new NavLeafVm { Section = NavSection.Insurance,     LabelResourceKey = "Insurance.Title",   IconSymbol = "Shield24",      ToolTipResourceKey = "Insurance.Title" },
+                    new NavLeafVm { Section = NavSection.Retirement,    LabelResourceKey = "Retirement.Title",  IconSymbol = "PersonClock24", ToolTipResourceKey = "Retirement.Title" },
+                    new NavLeafVm { Section = NavSection.PhysicalAsset, LabelResourceKey = "PhysicalAsset.Title", IconSymbol = "Box24",       ToolTipResourceKey = "PhysicalAsset.Title" },
                 },
             },
             new NavGroupVm
@@ -111,6 +126,7 @@ public partial class NavRailViewModel : ObservableObject
                 // 工具群組用 Wrench24，兩個 icon 看起來會混淆）。換 Rocket24 強調
                 // 「規劃 / 前瞻」語意，跟工具的扳手清楚區隔。
                 GroupIconSymbol = "Rocket24",
+                IsExpanded = false,
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.Goals,      LabelResourceKey = "Nav.Goals",       IconSymbol = "Target24",     ToolTipResourceKey = "Nav.Goals" },
@@ -124,6 +140,7 @@ public partial class NavRailViewModel : ObservableObject
             {
                 TitleResourceKey = "Nav.Tools",
                 GroupIconSymbol = "Wrench24",
+                IsExpanded = false,
                 Items = new[]
                 {
                     new NavLeafVm { Section = NavSection.AuditLog, LabelResourceKey = "Nav.AuditLog", IconSymbol = "History24", ToolTipResourceKey = "Nav.AuditLog" },

@@ -45,6 +45,7 @@
     <sys:String x:Key="Nav.Analysis">ANALYSIS</sys:String>
     <sys:String x:Key="Nav.Tools">TOOLS</sys:String>
     <sys:String x:Key="Nav.Assets">ASSETS</sys:String>
+    <sys:String x:Key="Nav.MoreAssets">More assets</sys:String>
     <sys:String x:Key="Nav.TransactionLog">Transaction Log</sys:String>
     <sys:String x:Key="Nav.CashAccounts">Funds Accounts</sys:String>
     <sys:String x:Key="Nav.Liabilities">Liabilities</sys:String>

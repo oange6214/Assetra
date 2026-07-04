@@ -6,6 +6,27 @@ namespace Assetra.Tests.WPF;
 public sealed class NavRailViewModelTests
 {
     [Fact]
+    public void Groups_SplitCoreAndAdvanced_WithDefaultExpansion()
+    {
+        var vm = new NavRailViewModel();
+
+        Assert.Collection(vm.Groups,
+            g => AssertGroup(g, "Nav.Analysis",   true,  NavSection.FinancialOverview, NavSection.Reports, NavSection.Assistant),
+            g => AssertGroup(g, "Nav.Assets",     true,  NavSection.Portfolio, NavSection.CashAccounts, NavSection.Liabilities),
+            g => AssertGroup(g, "Nav.Cashflow",   true,  NavSection.Categories, NavSection.Recurring, NavSection.TransactionLog, NavSection.Alerts),
+            g => AssertGroup(g, "Nav.MoreAssets", false, NavSection.RealEstate, NavSection.Insurance, NavSection.Retirement, NavSection.PhysicalAsset),
+            g => AssertGroup(g, "Nav.Planning",   false, NavSection.Goals, NavSection.Fire, NavSection.MonteCarlo, NavSection.Calculators),
+            g => AssertGroup(g, "Nav.Tools",      false, NavSection.AuditLog));
+    }
+
+    private static void AssertGroup(NavGroupVm g, string titleKey, bool expanded, params NavSection[] sections)
+    {
+        Assert.Equal(titleKey, g.TitleResourceKey);
+        Assert.Equal(expanded, g.IsExpanded);
+        Assert.Equal(sections, g.Items.Select(i => i.Section).ToArray());
+    }
+
+    [Fact]
     public void ActiveSection_DefaultsToFinancialOverview()
     {
         var vm = new NavRailViewModel();

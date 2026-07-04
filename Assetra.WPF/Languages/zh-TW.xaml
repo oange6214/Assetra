@@ -39,6 +39,7 @@
     <sys:String x:Key="Nav.Analysis">分析</sys:String>
     <sys:String x:Key="Nav.Tools">工具</sys:String>
     <sys:String x:Key="Nav.Assets">資產</sys:String>
+    <sys:String x:Key="Nav.MoreAssets">其他資產</sys:String>
     <sys:String x:Key="Nav.TransactionLog">交易記錄</sys:String>
     <sys:String x:Key="Nav.CashAccounts">資金帳戶</sys:String>
     <sys:String x:Key="Nav.Liabilities">負債</sys:String>
