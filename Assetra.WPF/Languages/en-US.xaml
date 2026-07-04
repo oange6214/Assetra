@@ -20,6 +20,28 @@
     <!--  Navigation  -->
     <sys:String x:Key="TitleBar.Search.Hint">Type a stock symbol or name to search</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">Search stocks...</sys:String>
+    <!--  Nav plain-language descriptions (hover tooltip)  -->
+    <sys:String x:Key="Nav.FinancialOverview.Tip">Your whole financial picture at a glance</sys:String>
+    <sys:String x:Key="Nav.Reports.Tip">Monthly income / expense / net summary</sys:String>
+    <sys:String x:Key="Nav.Assistant.Tip">Ask questions about your finances</sys:String>
+    <sys:String x:Key="Nav.Portfolio.Tip">Holdings, P&amp;L and performance</sys:String>
+    <sys:String x:Key="Nav.CashAccounts.Tip">Cash account balances &amp; flows</sys:String>
+    <sys:String x:Key="Nav.Liabilities.Tip">Loans &amp; debt tracking</sys:String>
+    <sys:String x:Key="Nav.Categories.Tip">Income/expense categories &amp; budgets</sys:String>
+    <sys:String x:Key="Nav.Recurring.Tip">Subscriptions &amp; recurring entries</sys:String>
+    <sys:String x:Key="Nav.TransactionLog.Tip">Full log of every transaction</sys:String>
+    <sys:String x:Key="Nav.Alerts.Tip">Price &amp; condition alerts</sys:String>
+    <sys:String x:Key="Nav.RealEstate.Tip">Real-estate value &amp; mortgage</sys:String>
+    <sys:String x:Key="Nav.Insurance.Tip">Policies &amp; premium tracking</sys:String>
+    <sys:String x:Key="Nav.Retirement.Tip">Retirement accounts &amp; contributions</sys:String>
+    <sys:String x:Key="Nav.PhysicalAsset.Tip">Physical assets (gold, collectibles…)</sys:String>
+    <sys:String x:Key="Nav.Goals.Tip">Set goals &amp; track progress</sys:String>
+    <sys:String x:Key="Nav.Fire.Tip">Financial independence / early-retirement projection</sys:String>
+    <sys:String x:Key="Nav.MonteCarlo.Tip">Retirement withdrawal success-rate simulation</sys:String>
+    <sys:String x:Key="Nav.Calculators.Tip">Loan, rent-vs-buy &amp; other calculators</sys:String>
+    <sys:String x:Key="Nav.AuditLog.Tip">Audit log of data changes</sys:String>
+    <sys:String x:Key="Nav.Import.Tip">Import statements (CSV / Excel / PDF)</sys:String>
+    <sys:String x:Key="Nav.Settings.Tip">Data sources, FX, sync, preferences</sys:String>
 <sys:String x:Key="Nav.Reports">Reports</sys:String>
     <sys:String x:Key="Nav.Assistant">Assistant</sys:String>
     <sys:String x:Key="Assistant.Title">AI Financial Assistant</sys:String>

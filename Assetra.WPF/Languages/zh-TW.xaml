@@ -20,6 +20,28 @@
     <!--  Navigation  -->
     <sys:String x:Key="TitleBar.Search.Hint">輸入股票代號或名稱搜尋</sys:String>
     <sys:String x:Key="TitleBar.Search.Placeholder">搜尋股票...</sys:String>
+    <!--  Nav 導覽項白話說明（hover tooltip）  -->
+    <sys:String x:Key="Nav.FinancialOverview.Tip">一眼看你的整體財務與資產趨勢</sys:String>
+    <sys:String x:Key="Nav.Reports.Tip">每月收入／支出／淨額月結</sys:String>
+    <sys:String x:Key="Nav.Assistant.Tip">用對話問你的財務問題</sys:String>
+    <sys:String x:Key="Nav.Portfolio.Tip">持股、損益與績效</sys:String>
+    <sys:String x:Key="Nav.CashAccounts.Tip">現金帳戶餘額與收支流水</sys:String>
+    <sys:String x:Key="Nav.Liabilities.Tip">貸款與負債追蹤</sys:String>
+    <sys:String x:Key="Nav.Categories.Tip">收支分類與預算</sys:String>
+    <sys:String x:Key="Nav.Recurring.Tip">訂閱與固定收支自動產生</sys:String>
+    <sys:String x:Key="Nav.TransactionLog.Tip">所有交易的完整紀錄</sys:String>
+    <sys:String x:Key="Nav.Alerts.Tip">價格到價與條件提醒</sys:String>
+    <sys:String x:Key="Nav.RealEstate.Tip">不動產估值與貸款</sys:String>
+    <sys:String x:Key="Nav.Insurance.Tip">保單與保費追蹤</sys:String>
+    <sys:String x:Key="Nav.Retirement.Tip">退休專戶與提撥</sys:String>
+    <sys:String x:Key="Nav.PhysicalAsset.Tip">實物資產（黃金、收藏…）</sys:String>
+    <sys:String x:Key="Nav.Goals.Tip">設定目標並追蹤進度</sys:String>
+    <sys:String x:Key="Nav.Fire.Tip">財務自由／提早退休試算</sys:String>
+    <sys:String x:Key="Nav.MonteCarlo.Tip">退休提領成功率模擬</sys:String>
+    <sys:String x:Key="Nav.Calculators.Tip">貸款、租買等理財試算</sys:String>
+    <sys:String x:Key="Nav.AuditLog.Tip">資料變更的稽核紀錄</sys:String>
+    <sys:String x:Key="Nav.Import.Tip">匯入對帳單（CSV／Excel／PDF）</sys:String>
+    <sys:String x:Key="Nav.Settings.Tip">資料來源、匯率、同步、偏好</sys:String>
     <sys:String x:Key="Nav.Reports">月結報告</sys:String>
     <sys:String x:Key="Nav.Assistant">財務助手</sys:String>
     <sys:String x:Key="Assistant.Title">AI 財務助手</sys:String>
