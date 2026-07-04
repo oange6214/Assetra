@@ -270,7 +270,14 @@ public sealed record AppSettings(
     bool CalendarYearView = false,
 
     /// <summary>FIRE 路徑分頁（FirePathTab enum 名："Wealth" / "Drawdown"）。空字串 = Wealth。</summary>
-    string FirePathTab = "")
+    string FirePathTab = "",
+
+    /// <summary>
+    /// 導覽列各群組的展開偏好 — 以逗號分隔「展開中」群組的 <c>TitleResourceKey</c>
+    /// （例：<c>"Nav.Analysis,Nav.Assets"</c>）。空字串 = 沿用 BuildGroups() 的程式碼預設
+    /// （核心群展開、進階群收合）。使用者手動展開／收合後持久化，下次啟動還原。
+    /// </summary>
+    string NavExpandedGroups = "")
 {
     /// <summary>「最近使用的資產」分組顯示上限。超過時 LRU 砍尾。</summary>
     public const int MaxRecentlyUsedAssets = 6;

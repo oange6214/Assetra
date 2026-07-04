@@ -1,3 +1,5 @@
+using Assetra.Core.Interfaces;
+using Assetra.Core.Models;
 using Assetra.WPF.Shell;
 using Xunit;
 
@@ -5,6 +7,52 @@ namespace Assetra.Tests.WPF;
 
 public sealed class NavRailViewModelTests
 {
+    [Fact]
+    public void Groups_RestoreExpansionFromSettings()
+    {
+        var settings = new FakeSettings(new AppSettings(NavExpandedGroups: "Nav.Analysis,Nav.Tools"));
+        var vm = new NavRailViewModel(settings);
+
+        Assert.True(GroupByKey(vm, "Nav.Analysis").IsExpanded);
+        Assert.True(GroupByKey(vm, "Nav.Tools").IsExpanded);
+        Assert.False(GroupByKey(vm, "Nav.Assets").IsExpanded);
+        Assert.False(GroupByKey(vm, "Nav.Planning").IsExpanded);
+    }
+
+    [Fact]
+    public void TogglingGroup_PersistsExpandedSet()
+    {
+        var settings = new FakeSettings(new AppSettings());
+        var vm = new NavRailViewModel(settings);
+        var planning = GroupByKey(vm, "Nav.Planning"); // default collapsed
+
+        planning.ToggleExpandedCommand.Execute(null);
+
+        Assert.Contains("Nav.Planning", settings.Current.NavExpandedGroups.Split(','));
+    }
+
+    private static NavGroupVm GroupByKey(NavRailViewModel vm, string key)
+        => vm.Groups.First(g => g.TitleResourceKey == key);
+
+    /// <summary>
+    /// Minimal in-file fake mirroring the real service: <see cref="Current"/> holds the
+    /// seeded record and <see cref="SaveAsync"/> applies the mutation in place, honouring
+    /// <paramref name="raiseChanged"/> (bookkeeping saves pass false → no Changed).
+    /// </summary>
+    private sealed class FakeSettings(AppSettings initial) : IAppSettingsService
+    {
+        public AppSettings Current { get; private set; } = initial;
+        public event Action? Changed;
+
+        public Task SaveAsync(AppSettings settings, bool raiseChanged = true)
+        {
+            Current = settings;
+            if (raiseChanged)
+                Changed?.Invoke();
+            return Task.CompletedTask;
+        }
+    }
+
     [Fact]
     public void Groups_SplitCoreAndAdvanced_WithDefaultExpansion()
     {

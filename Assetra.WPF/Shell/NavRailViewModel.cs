@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Assetra.Core.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,6 +10,7 @@ public partial class NavRailViewModel : ObservableObject
     private readonly Stack<NavSection> _backStack = new();
     private readonly Stack<NavSection> _forwardStack = new();
     private readonly ILocalizationService? _localization;
+    private readonly IAppSettingsService? _settings;
     private bool _isHistoryNavigation;
 
     /// <summary>Parameterless ctor preserved for tests + design-time.</summary>
@@ -29,12 +31,17 @@ public partial class NavRailViewModel : ObservableObject
     /// </summary>
     public NavRailViewModel(IAppSettingsService settings, ILocalizationService? localization = null)
     {
+        _settings = settings;
         _activeSection = ResolveInitialSection(settings.Current.DefaultHomeSection);
         _localization = localization;
         Groups = BuildGroups();
         BottomItems = BuildBottomItems();
+        RestoreGroupExpansion();
         SyncActiveLeaf();
         RefreshLocalizedLabels();
+        // Subscribe AFTER restore + SyncActiveLeaf so neither the persisted-state
+        // restore nor the initial active-group auto-expand feed back as saves.
+        SubscribeGroupExpansionPersistence();
         if (localization is not null)
             localization.LanguageChanged += (_, _) => RefreshLocalizedLabels();
 
@@ -154,6 +161,71 @@ public partial class NavRailViewModel : ObservableObject
         new NavLeafVm { Section = NavSection.Import,   LabelResourceKey = "Nav.Import",   IconSymbol = "DocumentArrowDown24", ToolTipResourceKey = "Nav.Import" },
         new NavLeafVm { Section = NavSection.Settings, LabelResourceKey = "Nav.Settings", IconSymbol = "Settings24",          ToolTipResourceKey = "Nav.Settings" },
     };
+
+    // ─── Group expansion persistence (remembers expand/collapse per user) ───
+
+    /// <summary>
+    /// Applies the persisted <see cref="AppSettings.NavExpandedGroups"/> set onto the
+    /// freshly-built groups. Empty setting = leave the BuildGroups() code defaults
+    /// untouched (nothing UI-visible changes on first run). Only called from the DI ctor.
+    /// </summary>
+    private void RestoreGroupExpansion()
+    {
+        var raw = _settings?.Current.NavExpandedGroups;
+        if (string.IsNullOrEmpty(raw))
+            return;
+        var expanded = raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                          .ToHashSet();
+        foreach (var g in Groups)
+            g.IsExpanded = expanded.Contains(g.TitleResourceKey);
+    }
+
+    /// <summary>
+    /// Subscribes to each group's PropertyChanged so a later expand/collapse recomputes
+    /// and persists the expanded-set string. Must run AFTER RestoreGroupExpansion() +
+    /// SyncActiveLeaf() so construction-time expansion changes don't self-trigger saves.
+    /// </summary>
+    private void SubscribeGroupExpansionPersistence()
+    {
+        if (_settings is null)
+            return;
+        foreach (var g in Groups)
+            g.PropertyChanged += OnGroupPropertyChanged;
+    }
+
+    private void OnGroupPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(NavGroupVm.IsExpanded))
+            return;
+        PersistGroupExpansion();
+    }
+
+    /// <summary>
+    /// Recomputes the comma-joined expanded-group set and persists it. raiseChanged: false
+    /// —— pure UI bookkeeping, must NOT drive the app-wide IAppSettingsService.Changed
+    /// reload (見 settings-changed 回饋迴圈). Mirrors PortfolioViewModel.PersistUiPreferenceAsync.
+    /// </summary>
+    private void PersistGroupExpansion()
+    {
+        if (_settings is null)
+            return;
+        var expanded = string.Join(',', Groups.Where(g => g.IsExpanded).Select(g => g.TitleResourceKey));
+        _ = PersistExpandedSetAsync(expanded);
+    }
+
+    private async Task PersistExpandedSetAsync(string expanded)
+    {
+        try
+        {
+            await _settings!.SaveAsync(
+                _settings.Current with { NavExpandedGroups = expanded },
+                raiseChanged: false);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "[Nav] 持久化群組展開偏好失敗");
+        }
+    }
 
     private void SyncActiveLeaf()
     {
