@@ -23,7 +23,7 @@ public partial class PortfolioViewModel
             return;
 
         var rows = Positions
-            .Where(p => p.IsStock && !string.IsNullOrEmpty(p.Symbol))
+            .Where(IsSparklineEligible)
             .ToList();
         if (rows.Count == 0)
             return;
@@ -31,6 +31,16 @@ public partial class PortfolioViewModel
         _sparklinesQueued = true;
         _ = LoadSparklinesAsync(rows);
     }
+
+    /// <summary>
+    /// 哪些部位要載入 sparkline —— 進而決定「投資組合走勢圖」會不會把它算進去。
+    /// 用 <see cref="PortfolioRowViewModel.IsTradeableSecurity"/>（所有可交易標的：股票／ETF／
+    /// 基金／債券／貴金屬／加密貨幣），不是只有 <c>IsStock</c>（AssetType.Stock）。
+    /// 原本用 IsStock 會漏掉 ETF 等——例如台股 ETF 00988A（AssetType.Etf）就沒 sparkline，
+    /// 選群組看走勢時整檔被漏算、金額嚴重短計（使用者實例：柏翰只畫出 DRAM、漏了 00988A）。
+    /// </summary>
+    internal static bool IsSparklineEligible(PortfolioRowViewModel row) =>
+        row.IsTradeableSecurity && !string.IsNullOrEmpty(row.Symbol);
 
     private async Task LoadSparklinesAsync(IReadOnlyList<PortfolioRowViewModel> rows)
     {
