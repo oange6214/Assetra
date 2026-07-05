@@ -39,12 +39,16 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
             return null;
 
         // 改變持倉的交易（買 +、賣 −、配股 +）；依日期升冪。日期含期初前（pre-period 持倉算進起始值）。
+        // 日期一律走 PerformancePeriod.ToPeriodDate（UTC→本地日），與下方現金流
+        // （PerformanceFlowBuilder 也用 ToPeriodDate）同一套。若這裡改用 DateOnly.FromDateTime（UTC 日），
+        // 交易存成本地午夜（如台灣 = 16:00Z）時，持倉會落在前一天、現金流落在當天 → 買進的現金流比持倉
+        // 晚一天被扣掉 → segReturn≈-1 → 整條 TWR 線暴跌 -100%（實例：柏翰）。
         var holdingMoves = groupTrades
             .Where(t => t.Type is TradeType.Buy or TradeType.Sell or TradeType.StockDividend)
             .Select(t => (
                 t.Symbol,
                 t.Exchange,
-                Date: DateOnly.FromDateTime(t.TradeDate),
+                Date: PerformancePeriod.ToPeriodDate(t.TradeDate),
                 Signed: t.Type == TradeType.Sell ? -t.Quantity : t.Quantity))
             .OrderBy(m => m.Date)
             .ToList();

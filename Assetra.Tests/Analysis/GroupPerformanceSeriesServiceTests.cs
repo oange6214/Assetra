@@ -64,6 +64,41 @@ public sealed class GroupPerformanceSeriesServiceTests
     }
 
     [Fact]
+    public async Task UtcTradeCrossingLocalMidnight_AlignsHoldingAndFlowDates_NoSpuriousCrash()
+    {
+        // WHY: 交易時間以 UTC 存（如台灣午夜 00:00 = 前一日 16:00Z）。持倉日期原本用
+        // DateOnly.FromDateTime（取 UTC 日）、現金流用 PerformancePeriod.ToPeriodDate（轉本地日）
+        // → 兩者差一天：買進的現金流比持倉晚一天被扣 → segReturn≈-1 → 整條線暴跌 -100%
+        // （使用者實例：柏翰）。修法：持倉也走 ToPeriodDate，與現金流同一套日期。
+        // 全平價（10）→ 買進持有真實報酬應為 0%，絕不能出現 -100% 崩線。
+        // 註：此錯位只在本地時區非 UTC（如 UTC+8）時重現；UTC 機器上兩者相等，測試仍會通過。
+        var localMidnight = new DateTime(2026, 5, 2, 0, 0, 0, DateTimeKind.Local);
+        var buy = new Trade(Guid.NewGuid(), "AAA", "TWSE", "AAA", TradeType.Buy,
+            localMidnight.ToUniversalTime(), 10m, 100, null, null, PortfolioGroupId: GroupId);
+
+        var flat = new (DateOnly, decimal)[]
+        {
+            (new DateOnly(2026, 5, 1), 10m),
+            (new DateOnly(2026, 5, 2), 10m),
+            (new DateOnly(2026, 5, 3), 10m),
+            (new DateOnly(2026, 5, 5), 10m),
+        };
+        var repo = new Mock<ITradeRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new[] { buy });
+        var svc = new GroupPerformanceSeriesService(
+            repo.Object, new FakeHistory(flat), new TimeWeightedReturnCalculator());
+
+        var series = await svc.ComputeGroupSeriesAsync(GroupId, Window);
+
+        Assert.NotNull(series);
+        // 全平價 → 每點累積 TWR 應 ≈ 0；絕不能出現 -100% 崩線（錯位 bug 的指紋）。
+        Assert.All(series!, p => Assert.True(p.PercentFromStart > -0.5m,
+            $"date {p.Date:yyyy-MM-dd} TWR={p.PercentFromStart} 疑似日期錯位崩線"));
+        Assert.True(Math.Abs(series![^1].PercentFromStart) < 0.001m,
+            $"平價買進持有 TWR 應≈0，實得 {series[^1].PercentFromStart}");
+    }
+
+    [Fact]
     public async Task NoTradesInGroup_ReturnsNull()
     {
         // 不同群組的交易不算進來。
