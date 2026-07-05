@@ -488,6 +488,35 @@ public sealed class FinancialOverviewViewModelTests
         Assert.False(vm.IsEmpty);
     }
 
+    // ── FX regression：概覽「投資」必須用已換匯的 base 市值，不能用 native 原幣 ──────
+    //
+    // WHY: 財務概覽的投資彙總原本傳 native MarketValue + Currency，靠 query service 依
+    // 「當日」歷史匯率換算。查無當日匯率時它靜默回傳原幣金額（ConvertToBaseAsync 的
+    // `?? amount`）→ 美股 US$121,260 被當成 NT$121,260，概覽淨值比投組頁少算數百萬
+    // （使用者實際踩到：DRAM）。改吃投組已算好的 MarketValueBase（單一真相）並標記 base
+    // 幣別，query service 不再重算。這條測試鎖住「用 base 市值、不用 native」的意圖：
+    // 若有人改回 p.MarketValue / p.Currency，CurrentValue 會變回 121,260、Currency 變回
+    // USD，測試即紅。
+    [Fact]
+    public void ToInvestmentItem_UsesBaseConvertedMarketValue_NotNativeForeignAmount()
+    {
+        var row = new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            AssetType = AssetType.Etf,
+        };
+        row.Name = "DRAM";
+        row.Currency = "USD";
+        row.MarketValue = 121_260m;         // native（美元計價）
+        row.BaseCurrency = "TWD";
+        row.MarketValueBase = 3_858_493m;   // 投組已換算成台幣的市值
+
+        var item = FinancialOverviewViewModel.ToInvestmentItem(row);
+
+        Assert.Equal(3_858_493m, item.CurrentValue);   // base，不是 121,260
+        Assert.Equal("TWD", item.Currency);            // 標記 base → query service 視同幣別、不再當美元重算
+    }
+
     [Fact]
     public void TotalAssetsAndNetWorth_SurfaceTheFullBalanceSheetBase_NotTheUndercount()
     {

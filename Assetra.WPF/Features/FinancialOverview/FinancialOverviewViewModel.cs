@@ -5,6 +5,7 @@ using Assetra.Application.Portfolio.Contracts;
 using Assetra.Application.Portfolio.Dtos;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
+using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.Contracts;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -921,16 +922,26 @@ public sealed partial class FinancialOverviewViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 把投組部位映成 <see cref="FinancialOverviewInvestmentItem"/> 給概覽彙總。
+    ///
+    /// 關鍵：用已換匯的 <see cref="PortfolioRowViewModel.MarketValueBase"/>（投組估值管線
+    /// 依即時／設定匯率算好的 base 幣別市值），而非 native 的
+    /// <see cref="PortfolioRowViewModel.MarketValue"/>。早期版本傳 native MarketValue +
+    /// Currency，靠 query service 依「當日」歷史匯率再換算；但查無當日匯率時
+    /// <c>FinancialOverviewQueryService.ConvertToBaseAsync</c> 會靜默回傳原幣金額
+    /// （那句 <c>?? amount</c>），導致美股（如 DRAM US$121,260）被當成台幣 NT$121,260、
+    /// 概覽淨值嚴重短計。直接吃投組已算好的 base 市值＝單一真相，也不再依賴當日匯率是否回填；
+    /// 標記 <see cref="PortfolioRowViewModel.BaseCurrency"/> 讓 query service 視為同幣別、不再重算。
+    /// </summary>
+    internal static FinancialOverviewInvestmentItem ToInvestmentItem(PortfolioRowViewModel p) =>
+        new(p.Id, p.Name, p.BaseCurrency, p.MarketValueBase, p.AssetType);
+
     private async Task LoadInternalAsync()
     {
         var result = await _queryService.BuildAsync(
             _portfolio.Positions
-                .Select(p => new FinancialOverviewInvestmentItem(
-                    p.Id,
-                    p.Name,
-                    p.Currency,
-                    p.MarketValue,
-                    p.AssetType))
+                .Select(ToInvestmentItem)
                 .ToList())
             .ConfigureAwait(true);
 
