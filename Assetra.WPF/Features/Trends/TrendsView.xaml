@@ -177,13 +177,36 @@
                                     Background="{DynamicResource AppHover}"
                                     BorderBrush="{DynamicResource AppBorderLight}"
                                     BorderThickness="1"
-                                    CornerRadius="13">
+                                    CornerRadius="13"
+                                    ToolTip="{Binding UnavailableReason}">
+                                    <!--  IsUnavailable：已加入卻畫不出的項目 → 整顆 chip 淡化，hover 看 UnavailableReason  -->
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsUnavailable}" Value="True">
+                                                    <Setter Property="Opacity" Value="0.72" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center">
+                                        <!--  正常：彩色圓點；無法顯示：改用 ⚠ 灰色圖示  -->
+                                        <Ellipse
+                                            Width="8" Height="8"
+                                            Margin="0,0,5,0"
+                                            VerticalAlignment="Center"
+                                            Visibility="{Binding IsUnavailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                             <Ellipse.Fill>
                                                 <SolidColorBrush Color="{Binding ColorHex}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
+                                        <ds:AppIcon
+                                            Margin="0,0,4,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource AppTextMuted}"
+                                            Symbol="Warning24"
+                                            Visibility="{Binding IsUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <TextBlock
                                             VerticalAlignment="Center"
                                             FontSize="{StaticResource Font.Size.Xs}"

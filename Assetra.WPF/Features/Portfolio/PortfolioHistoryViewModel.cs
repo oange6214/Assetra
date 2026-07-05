@@ -237,6 +237,10 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
 
     /// <summary>各比較線的點資料（供下方清單依 hover 日取值）。</summary>
     private IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> _comparisonLines = [];
+    // 已加入比較清單、但這個區間畫不出線的項目（買賣不成對、查無價格、盤中不適用…）。
+    // BuildComparisonLinesAsync 逐項記錄原因，BuildComparePercentChart 據此補上灰色 ⚠ chip，
+    // 讓「有加進去卻沒有線」的項目不再靜默消失。
+    private IReadOnlyList<(string Label, string RemoveToken, string Reason)> _comparisonUnavailable = [];
     // Google 式 hover：每條線對應一個「單點」series；hover 時填入該線在游標 X 處的點 → 線上實心圓點。
     private List<LineSeries<DateTimePoint>> _hoverMarkers = [];
 
@@ -590,6 +594,7 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         // 走網路抓取（有延遲）→ 抓取期間秀「更新中…」(IsRefreshingComparison)，使用者才知道在動而非當機。
         // 不 ConfigureAwait(false)：BuildChart / BuildComparePercentChart 需回 UI thread 設 series。
         IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> compareLines = [];
+        _comparisonUnavailable = []; // 清掉上一輪殘留；下方 BuildComparisonLinesAsync 有跑才會重填（移除全部項目時不留幽靈 chip）
         if (ComputeComparisonPeriod() is { } comparePeriod
             && CurrentComparisonItems.Any(t => !string.IsNullOrWhiteSpace(t)))
         {
@@ -1047,9 +1052,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         var items = CurrentComparisonItems.Where(t => !string.IsNullOrWhiteSpace(t)).Take(6).ToList();
         var lines = new List<(string, string, string, IReadOnlyList<DateTimePoint>)>();
         var abs = new Dictionary<string, IReadOnlyList<DateTimePoint>>(StringComparer.OrdinalIgnoreCase); // token → 現值序列
+        // 已加入、但這個區間畫不出線的項目 → 記原因，稍後補灰色 ⚠ chip（不再靜默消失）。
+        var unavailable = new List<(string Label, string RemoveToken, string Reason)>();
+        void MarkUnavailable(string tk, string reason) => unavailable.Add((ChipLabel(tk), tk, reason));
         if (items.Count == 0)
         {
             _comparisonAbsByToken = abs;
+            _comparisonUnavailable = unavailable;
             return lines;
         }
 
@@ -1085,7 +1094,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             // 盤中（1D/5D）只畫 benchmark 個股/指數；@我的投組/@組合是日線快照、無盤中資料 → 盤中時跳過不畫
             // （否則日線點與盤中點混在同圖會錯位）。日線期間照常顯示這些線。
             if (_comparisonIsIntraday && token.StartsWith('@'))
+            {
+                MarkUnavailable(token, GetString(
+                    "Portfolio.History.Unavailable.IntradayDaily",
+                    "此區間用盤中資料；投組／群組報酬請切換到日線區間（1個月以上）。"));
                 continue;
+            }
 
             if (string.Equals(token, PortfolioItemToken, StringComparison.OrdinalIgnoreCase))
             {
@@ -1094,6 +1108,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                     lines.Add((GetString("Portfolio.History.MeLabel", "我的投組"), ComparisonPalette[0], token, mePts));
                     abs[token] = meAbs;
                 }
+                else
+                {
+                    MarkUnavailable(token, GetString(
+                        "Portfolio.History.Unavailable.PortfolioInsufficient",
+                        "投組快照不足，無法計算報酬。"));
+                }
                 continue;
             }
 
@@ -1101,13 +1121,22 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             if (token.StartsWith(GroupTokenPrefix, StringComparison.Ordinal)
                 && Guid.TryParse(token[GroupTokenPrefix.Length..], out var gid))
             {
+                var groupReason = GetString(
+                    "Portfolio.History.Unavailable.Group",
+                    "此群組買賣不成對或缺價格資料，無法計算報酬。請把同一標的的買進與賣出放進同一群組。");
                 if (_groupPerformance is null)
+                {
+                    MarkUnavailable(token, groupReason);
                     continue;
+                }
                 try
                 {
                     var gseries = await _groupPerformance.ComputeGroupSeriesAsync(gid, period).ConfigureAwait(false);
                     if (gseries is null || gseries.Count < 2)
+                    {
+                        MarkUnavailable(token, groupReason);
                         continue;
+                    }
                     var gpts = gseries
                         .Select(p => new DateTimePoint(p.Date, (double)p.PercentFromStart))
                         .ToList();
@@ -1120,18 +1149,27 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    // 群組重建失敗 → 略過該條
+                    // 群組重建失敗 → 灰色 chip 說明原因（不靜默消失）
+                    MarkUnavailable(token, groupReason);
                 }
                 continue;
             }
 
             if (_benchmark is null)
+            {
+                MarkUnavailable(token, GetString(
+                    "Portfolio.History.Unavailable.FetchFailed", "抓取失敗，稍後再試。"));
                 continue;
+            }
             try
             {
                 var series = await _benchmark.ComputeBenchmarkSeriesAsync(token, period, intradayRange).ConfigureAwait(false);
                 if (series is null || series.Count < 2)
+                {
+                    MarkUnavailable(token, GetString(
+                        "Portfolio.History.Unavailable.Benchmark", "查無此代號的價格資料。"));
                     continue;
+                }
                 var pts = series
                     .Select(p => new DateTimePoint(p.Date, (double)p.PercentFromStart))
                     .ToList();
@@ -1142,10 +1180,13 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                // 單一項目抓取失敗 → 略過該條
+                // 單一項目抓取失敗 → 灰色 chip 說明原因
+                MarkUnavailable(token, GetString(
+                    "Portfolio.History.Unavailable.FetchFailed", "抓取失敗，稍後再試。"));
             }
         }
         _comparisonAbsByToken = abs;
+        _comparisonUnavailable = unavailable;
         return lines;
     }
 
@@ -1154,6 +1195,18 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         string.Equals(token, BenchmarkOverlaySymbol, StringComparison.OrdinalIgnoreCase)
             ? GetString("Portfolio.History.BenchmarkTaiex", "加權指數")
             : token;
+
+    /// <summary>任一比較 token（我的投組／群組／benchmark）的顯示名稱，供「無法顯示」灰色 chip 用。</summary>
+    private string ChipLabel(string token)
+    {
+        if (string.Equals(token, PortfolioItemToken, StringComparison.OrdinalIgnoreCase))
+            return GetString("Portfolio.History.MeLabel", "我的投組");
+        if (token.StartsWith(GroupTokenPrefix, StringComparison.Ordinal)
+            && Guid.TryParse(token[GroupTokenPrefix.Length..], out var gid))
+            return _groupCatalog?.FindById(gid)?.Name
+                ?? GetString("Portfolio.History.GroupFallback", "組合");
+        return LabelForToken(token);
+    }
 
     /// <summary>
     /// 比較項目是否跨市場（同時有台股與美股/海外 benchmark）。盤中時：單市場 → 壓縮空檔；跨市場 → 不壓縮、
@@ -1177,18 +1230,31 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
         return hasTw && hasForeign;
     }
 
+    /// <summary>「加了卻畫不出」項目的 chip 底色（灰）：讓它明顯有別於正常比較線。</summary>
+    private const string UnavailableChipColorHex = "#9AA0A6";
+
+    /// <summary>把 <see cref="_comparisonUnavailable"/> 轉成灰色 ⚠ chip（可移除、hover 顯示原因）。</summary>
+    private List<ComparisonLegendItem> BuildUnavailableChips() =>
+        _comparisonUnavailable
+            .Select(u => new ComparisonLegendItem(
+                u.Label, UnavailableChipColorHex, u.RemoveToken,
+                IsUnavailable: true, UnavailableReason: u.Reason))
+            .ToList();
+
     /// <summary>
     /// 比較圖：把使用者選的每個項目各畫一條 % 線（我的投組 TWR ＋ 大盤 ＋ 股票），全部可移除。
-    /// 空清單 → 清空 series ＋ HasComparisonItems=false（XAML 顯示提示）。
+    /// 空清單 → 清空 series ＋ HasComparisonItems=false（XAML 顯示提示）。「加了卻畫不出」的項目
+    /// 會以灰色 ⚠ chip 補在圖例末端（BuildUnavailableChips），不再靜默消失。
     /// </summary>
     private void BuildComparePercentChart(
         IReadOnlyList<(string Label, string ColorHex, string RemoveToken, IReadOnlyList<DateTimePoint> Points)> lines)
     {
-        HasComparisonItems = lines.Count > 0;
+        // 有畫得出的線、或有「加了卻畫不出」的項目 → 都算「有比較項目」（隱藏空清單提示；後者顯示灰色 ⚠ chip）。
+        HasComparisonItems = lines.Count > 0 || _comparisonUnavailable.Count > 0;
         if (lines.Count == 0)
         {
             CompareSeries = [];
-            ComparisonLegend = [];
+            ComparisonLegend = BuildUnavailableChips();
             _comparisonLines = [];
             UpdateComparisonRows();
             return;
@@ -1246,6 +1312,9 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
             legend.Add(new ComparisonLegendItem(label, colorHex, removeToken));
         }
         series.AddRange(markers); // 圓點 series 放在線之後 → 畫在線之上
+
+        // 畫得出的線 chip 之後，補上「加了卻畫不出」的灰色 ⚠ chip（可移除、hover 看原因）。
+        legend.AddRange(BuildUnavailableChips());
 
         CompareSeries = [.. series];
         ComparisonLegend = legend;

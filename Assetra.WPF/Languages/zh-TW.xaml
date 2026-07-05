@@ -205,6 +205,12 @@
     <sys:String x:Key="Portfolio.History.RemoveComparison">移除</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">我的投組</sys:String>
     <sys:String x:Key="Portfolio.History.BenchmarkTaiex">加權指數</sys:String>
+    <!--  比較項目「已加入卻畫不出」的灰色 ⚠ chip tooltip 原因  -->
+    <sys:String x:Key="Portfolio.History.Unavailable.Group">此群組買賣不成對或缺價格資料，無法計算報酬。請把同一標的的買進與賣出放進同一群組。</sys:String>
+    <sys:String x:Key="Portfolio.History.Unavailable.PortfolioInsufficient">投組快照不足，無法計算報酬。</sys:String>
+    <sys:String x:Key="Portfolio.History.Unavailable.Benchmark">查無此代號的價格資料。</sys:String>
+    <sys:String x:Key="Portfolio.History.Unavailable.FetchFailed">抓取失敗，稍後再試。</sys:String>
+    <sys:String x:Key="Portfolio.History.Unavailable.IntradayDaily">此區間用盤中資料；投組／群組報酬請切換到日線區間（1個月以上）。</sys:String>
     <sys:String x:Key="Portfolio.Symbol">代號</sys:String>
     <sys:String x:Key="Portfolio.Shares">數量</sys:String>
     <sys:String x:Key="Portfolio.CostPerShare">成本均價</sys:String>

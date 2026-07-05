@@ -463,4 +463,77 @@ public sealed class PortfolioHistoryViewModelTests
         Assert.Equal(3, values.Count);
         Assert.Equal(1_000_000d, values[0]);
     }
+
+    // ── 「加了卻畫不出」的比較項目 → 灰色 ⚠ chip（不再靜默消失）─────────────────
+    //
+    // WHY: 使用者把自建群組（如「柏翰」）加入比較，但該群組買賣不成對／缺價格
+    // → ComputeGroupSeriesAsync 回 null。舊行為：token 靜默存進設定卻無 chip、無線，
+    // 看起來「根本加不進去」。新行為：補一顆「可移除、hover 看原因」的灰色 ⚠ chip，
+    // 並讓 HasComparisonItems=true（隱藏「點＋比較」空提示）。若有人把失敗項改回靜默
+    // 略過（原本的 `continue`），這條測試就會紅——正是要鎖住的意圖。
+    [Fact]
+    public async Task GroupComparison_WhenSeriesCannotCompute_ShowsRemovableUnavailableChip()
+    {
+        var token = PortfolioHistoryViewModel.GroupTokenPrefix + Guid.NewGuid();
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(today.AddDays(-20), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(today, 0m, 1_100m, 0m, 1),
+        };
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            settings: new FakeSettings(new AppSettings(BaseCurrency: "TWD", ComparisonItems: [token])),
+            groupPerformance: new StubGroupPerf(series: null)); // 群組序列算不出來
+        vm.SelectedDays = 0; // "All" → 日線區間（非盤中）→ 真的會去算群組序列
+
+        await vm.LoadAsync();
+
+        var chip = Assert.Single(vm.ComparisonLegend);
+        Assert.True(chip.IsUnavailable);
+        Assert.Equal(token, chip.RemoveSymbol);                          // 仍可移除（✕）
+        Assert.False(string.IsNullOrWhiteSpace(chip.UnavailableReason)); // hover 有原因
+        Assert.True(vm.HasComparisonItems);                             // 不再顯示空提示
+        Assert.Empty(vm.CompareSeries);                                 // 沒有可畫的線
+    }
+
+    // 移除最後一個比較項目後，上一輪的「無法顯示」灰色 chip 不可殘留（幽靈 chip）。
+    // BuildComparisonLinesAsync 只在有項目時才跑，故 refresh 時必須主動清空 _comparisonUnavailable，
+    // 否則清單已空、卻還掛著一顆 ⚠ chip、HasComparisonItems 還是 true。
+    [Fact]
+    public async Task RemovingLastComparisonItem_ClearsUnavailableChip_NoGhost()
+    {
+        var token = PortfolioHistoryViewModel.GroupTokenPrefix + Guid.NewGuid();
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var snapshots = new[]
+        {
+            new PortfolioDailySnapshot(today.AddDays(-20), 0m, 1_000m, 0m, 1),
+            new PortfolioDailySnapshot(today, 0m, 1_100m, 0m, 1),
+        };
+        var settings = new FakeSettings(new AppSettings(BaseCurrency: "TWD", ComparisonItems: [token]));
+        var vm = new PortfolioHistoryViewModel(
+            new StubHistoryQuery(snapshots),
+            settings: settings,
+            groupPerformance: new StubGroupPerf(series: null));
+        vm.SelectedDays = 0;
+
+        await vm.LoadAsync();
+        Assert.Single(vm.ComparisonLegend); // 先有一顆 ⚠ chip
+        Assert.True(vm.HasComparisonItems);
+
+        // 移除最後一個項目 → 再 refresh
+        await settings.SaveAsync(settings.Current with { ComparisonItems = [] }, raiseChanged: false);
+        await vm.LoadAsync();
+
+        Assert.Empty(vm.ComparisonLegend);       // 幽靈 chip 已清
+        Assert.False(vm.HasComparisonItems);     // 回到「點＋比較」空提示
+    }
+
+    private sealed class StubGroupPerf(IReadOnlyList<BenchmarkSeriesPoint>? series)
+        : IGroupPerformanceSeriesService
+    {
+        public Task<IReadOnlyList<BenchmarkSeriesPoint>?> ComputeGroupSeriesAsync(
+            Guid groupId, PerformancePeriod period, CancellationToken ct = default)
+            => Task.FromResult(series);
+    }
 }
