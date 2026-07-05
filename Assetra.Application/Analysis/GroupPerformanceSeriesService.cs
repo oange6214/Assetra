@@ -9,8 +9,9 @@ namespace Assetra.Application.Analysis;
 /// 群組同期 % TWR 序列：用群組的交易逐日重建持倉（買 +、賣 −、配股 +）× 歷史收盤 → 群組每日市值，
 /// 再以 TWR 除掉買賣現金流，與 benchmark / 我的投組同基準。重建來源是「交易」（含已售出/已平倉的部位、
 /// 且 PortfolioGroupId 直接帶在交易上），而非 active-only 的持倉表。
-/// <para><b>v1 限制</b>：不做 FX（假設群組標的為 base 幣別；多幣別群組的 % 形狀會略不準）、不調整分割（split）。
-/// 某日有持倉但缺收盤價 → all-or-nothing 跳過該日（同快照重建引擎的紀律）。</para>
+/// <para><b>FX</b>：市值與現金流都用交易上的 <c>InstrumentCurrency</c> + <c>FxRate</c> 換成 base 幣別
+/// （假設扣款幣＝base；同幣別交易 FxRate=null → 視為 1），故多幣別群組（含美股）也算得對。
+/// <b>限制</b>：不調整分割（split）；某日有持倉但缺收盤價 → all-or-nothing 跳過該日（同快照重建引擎的紀律）。</para>
 /// </summary>
 public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesService
 {
@@ -54,6 +55,20 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
             .ToList();
         if (holdingMoves.Count == 0)
             return null;
+
+        // ── FX：把各標的的市值與現金流換成 base 幣別 ────────────────────────────────
+        // 用交易上存的 InstrumentCurrency + FxRate（1 InstrumentCcy = FxRate 扣款幣；此 App 扣款幣＝base
+        // TWD）。同幣別交易 FxRate=null → 視為 1。沒這步的話，多幣別群組（如柏翰含美股 DRAM）會把 USD
+        // 原數當 TWD 直接相加 → 現值嚴重短計、% 的權重也被壓低（實例：柏翰 現值 8.1M 被算成 ~4.4M）。
+        var currencyRate = groupTrades
+            .Where(t => t.FxRate is > 0m && !string.IsNullOrWhiteSpace(t.InstrumentCurrency))
+            .GroupBy(t => t.InstrumentCurrency, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Average(t => t.FxRate!.Value), StringComparer.OrdinalIgnoreCase);
+        decimal RateFor(string? ccy) =>
+            !string.IsNullOrWhiteSpace(ccy) && currencyRate.TryGetValue(ccy, out var r) ? r : 1m;
+        var symbolCurrency = groupTrades
+            .GroupBy(t => t.Symbol, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().InstrumentCurrency, StringComparer.OrdinalIgnoreCase);
 
         // 各 symbol 的歷史收盤（in-range）。
         var span = period.End.DayNumber - period.Start.DayNumber + 1;
@@ -108,7 +123,7 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
                     continue;
                 if (lastPrice.TryGetValue(sym, out var p))
                 {
-                    value += p * qty;
+                    value += p * qty * RateFor(symbolCurrency.GetValueOrDefault(sym));
                     anyPriced = true;
                 }
             }
@@ -118,10 +133,16 @@ public sealed class GroupPerformanceSeriesService : IGroupPerformanceSeriesServi
         if (values.Count < 2)
             return null;
 
-        // 群組買賣現金流（投組角度 negate，與 PortfolioHistoryViewModel 的我的投組 TWR 同慣例）。
-        var rawFlows = PerformanceFlowBuilder.BuildPerformanceFlows(groupTrades, period);
+        // 群組買賣現金流（投組角度 negate，與我的投組 TWR 同慣例）；一併換成 base 幣別（與市值同一套 FX）。
+        // 傳 entryCurrency 讓每筆 flow 帶 InstrumentCurrency，再乘 RateFor 換算——value 與 flow 必須同幣別，
+        // 否則 TWR 會錯（外幣 flow 用原數、value 用 base → segReturn 爆掉）。
+        var entryCurrency = groupTrades
+            .Where(t => t.PortfolioEntryId is not null && !string.IsNullOrWhiteSpace(t.InstrumentCurrency))
+            .GroupBy(t => t.PortfolioEntryId!.Value)
+            .ToDictionary(g => g.Key, g => g.First().InstrumentCurrency);
+        var rawFlows = PerformanceFlowBuilder.BuildPerformanceFlows(groupTrades, period, entryCurrency);
         var flows = rawFlows
-            .Select(f => new CashFlow(f.Date, -f.Amount, f.Currency))
+            .Select(f => new CashFlow(f.Date, -f.Amount * RateFor(f.Currency), f.Currency))
             .ToList();
 
         var twrSeries = _twr.ComputeSeries(values, flows);

@@ -99,6 +99,39 @@ public sealed class GroupPerformanceSeriesServiceTests
     }
 
     [Fact]
+    public async Task MultiCurrencyGroup_ConvertsForeignHoldingsToBase_ViaTradeFxRate()
+    {
+        // WHY: 群組市值原本把外幣（如美股 US$）原數當 base（TWD）直接相加 → 多幣別群組
+        // 現值嚴重短計、% 權重被壓低（使用者實例：柏翰 現值 8.1M 被算成 ~4.4M）。改用交易上的
+        // InstrumentCurrency + FxRate 換成 base。此測：TWD 標的 100 股 + USD 標的 10 股（FxRate=30），
+        // 收盤都 10 → 每日市值應為 100×10×1 + 10×10×30 = 4000（不是沒換匯的 1100）。
+        var twd = new Trade(Guid.NewGuid(), "TWD1", "TWSE", "TWD1", TradeType.Buy,
+            new DateOnly(2026, 4, 30).ToDateTime(TimeOnly.MinValue), 10m, 100, null, null,
+            PortfolioGroupId: GroupId, PortfolioEntryId: Guid.NewGuid(), InstrumentCurrency: "TWD");
+        var usd = new Trade(Guid.NewGuid(), "USD1", "BATS", "USD1", TradeType.Buy,
+            new DateOnly(2026, 4, 30).ToDateTime(TimeOnly.MinValue), 10m, 10, null, null,
+            PortfolioGroupId: GroupId, PortfolioEntryId: Guid.NewGuid(),
+            InstrumentCurrency: "USD", FxRate: 30m);
+
+        var flat = new (DateOnly, decimal)[]
+        {
+            (new DateOnly(2026, 5, 1), 10m),
+            (new DateOnly(2026, 5, 3), 10m),
+            (new DateOnly(2026, 5, 5), 10m),
+        };
+        var repo = new Mock<ITradeRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new[] { twd, usd });
+        var svc = new GroupPerformanceSeriesService(
+            repo.Object, new FakeHistory(flat), new TimeWeightedReturnCalculator());
+
+        var series = await svc.ComputeGroupSeriesAsync(GroupId, Window);
+
+        Assert.NotNull(series);
+        // 每日市值 = 1000（TWD）+ 3000（USD×30）= 4000；沒換匯的話會是 1100。
+        Assert.All(series!, p => Assert.Equal(4000m, p.Value));
+    }
+
+    [Fact]
     public async Task NoTradesInGroup_ReturnsNull()
     {
         // 不同群組的交易不算進來。
