@@ -495,6 +495,8 @@ public sealed class PortfolioHistoryViewModelTests
         Assert.False(string.IsNullOrWhiteSpace(chip.UnavailableReason)); // hover 有原因
         Assert.True(vm.HasComparisonItems);                             // 不再顯示空提示
         Assert.Empty(vm.CompareSeries);                                 // 沒有可畫的線
+        Assert.False(vm.HasComparableLines);                           // 收起空白格線圖
+        Assert.True(vm.ShowComparisonUnavailableState);                // 圖區改顯示「無法比較」說明
     }
 
     // 移除最後一個比較項目後，上一輪的「無法顯示」灰色 chip 不可殘留（幽靈 chip）。
@@ -527,6 +529,7 @@ public sealed class PortfolioHistoryViewModelTests
 
         Assert.Empty(vm.ComparisonLegend);       // 幽靈 chip 已清
         Assert.False(vm.HasComparisonItems);     // 回到「點＋比較」空提示
+        Assert.False(vm.ShowComparisonUnavailableState); // 也不再顯示「無法比較」說明
     }
 
     private sealed class StubGroupPerf(IReadOnlyList<BenchmarkSeriesPoint>? series)

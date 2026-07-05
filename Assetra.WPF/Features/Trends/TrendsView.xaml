@@ -136,9 +136,30 @@
                     MouseMove="CompareChart_MouseMove"
                     Series="{Binding CompareSeries}"
                     TooltipPosition="Hidden"
-                    Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Visibility="{Binding HasComparableLines, Converter={StaticResource BooleanToVisibilityConverter}}"
                     XAxes="{Binding CompareXAxes}"
                     YAxes="{Binding CompareYAxes}" />
+
+                <!--  所選項目全都畫不出（如買賣不成對的群組）→ 清楚說明，取代空白格線圖  -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding ShowComparisonUnavailableState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ds:AppIcon
+                        HorizontalAlignment="Center"
+                        FontSize="28"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Warning24" />
+                    <TextBlock
+                        MaxWidth="360"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Text="{DynamicResource Portfolio.History.CompareAllUnavailable}"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                </StackPanel>
 
                 <!--  載入指示：benchmark/盤中抓取期間顯示「更新中…」，讓使用者知道在抓資料（非當機）。  -->
                 <Border

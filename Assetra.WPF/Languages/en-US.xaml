@@ -209,6 +209,7 @@
     <sys:String x:Key="Portfolio.History.RemoveComparison">Remove</sys:String>
     <sys:String x:Key="Portfolio.History.MeLabel">My portfolio</sys:String>
     <sys:String x:Key="Portfolio.History.BenchmarkTaiex">TAIEX</sys:String>
+    <sys:String x:Key="Portfolio.History.CompareAllUnavailable">None of the selected items can be compared right now — hover the ⚠ chips above to see why.</sys:String>
     <!--  Reason tooltips for the muted ⚠ chip shown when a comparison item was added but can't be drawn  -->
     <sys:String x:Key="Portfolio.History.Unavailable.Group">This group's buys and sells are split (or price data is missing), so its return can't be computed. Put each symbol's buys and sells in the same group.</sys:String>
     <sys:String x:Key="Portfolio.History.Unavailable.PortfolioInsufficient">Not enough portfolio snapshots to compute a return.</sys:String>

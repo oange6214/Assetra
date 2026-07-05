@@ -226,6 +226,12 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     /// <summary>是否有任何比較項目；false 時資產趨勢圖顯示「點 ＋比較 選擇要比較的項目」提示。</summary>
     [ObservableProperty] private bool _hasComparisonItems;
 
+    /// <summary>是否有「畫得出來的」比較線。false（含只有 ⚠ 無法顯示項目時）→ 收起空白格線圖。</summary>
+    [ObservableProperty] private bool _hasComparableLines;
+
+    /// <summary>所選比較項目全都畫不出（如買賣不成對的群組）→ 圖區改顯示「無法比較」說明，取代空白格線。</summary>
+    [ObservableProperty] private bool _showComparisonUnavailableState;
+
     /// <summary>下方比較清單：每項 ＋ 截至顯示日的同期報酬 %（自區間起點起算）。隨滑鼠 hover 更新。</summary>
     [ObservableProperty] private IReadOnlyList<ComparisonRow> _comparisonRows = [];
 
@@ -1251,6 +1257,8 @@ public sealed partial class PortfolioHistoryViewModel : ObservableObject
     {
         // 有畫得出的線、或有「加了卻畫不出」的項目 → 都算「有比較項目」（隱藏空清單提示；後者顯示灰色 ⚠ chip）。
         HasComparisonItems = lines.Count > 0 || _comparisonUnavailable.Count > 0;
+        HasComparableLines = lines.Count > 0; // 有線才顯示格線圖，否則收起（避免空白格線＋怪軸）
+        ShowComparisonUnavailableState = lines.Count == 0 && _comparisonUnavailable.Count > 0; // 全都畫不出 → 圖區顯示說明
         if (lines.Count == 0)
         {
             CompareSeries = [];
