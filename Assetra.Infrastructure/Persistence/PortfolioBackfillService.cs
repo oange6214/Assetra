@@ -12,7 +12,8 @@ namespace Assetra.Infrastructure.Persistence;
 /// Algorithm:
 ///   1. Find weekdays with no snapshot between the earliest log entry and yesterday.
 ///   2. For each missing date, find active positions (latest log entry ≤ date, qty > 0).
-///   3. Look up the closing price for that date from price history.
+///   3. Look up the closing price for that date (falling back to the most recent close within a
+///      small window when the exact-day close hasn't arrived yet — forward-fill) from price history.
 ///   4. Write a backfilled snapshot via <see cref="IPortfolioSnapshotRepository.UpsertAsync"/>.
 ///
 /// Runs fire-and-forget; failures are silently swallowed so they cannot affect the main flow.
@@ -23,6 +24,12 @@ public sealed class PortfolioBackfillService
     private readonly IPortfolioSnapshotRepository _snapshotRepo;
     private readonly IStockHistoryProvider _historyProvider;
     private readonly ILogger<PortfolioBackfillService> _logger;
+
+    /// <summary>
+    /// Forward-fill 窗：某檔在目標日缺收盤時，往前找最近一筆收盤的最大天數。足以涵蓋週末＋一般假日
+    /// （含農曆年連假）＋資料來源晚到幾天；超過此窗（太久沒價）就視為無價 → 該天留白，不用過期的價。
+    /// </summary>
+    private const int ForwardFillWindowDays = 14;
 
     public PortfolioBackfillService(
         IPortfolioPositionLogRepository logRepo,
@@ -103,7 +110,11 @@ public sealed class PortfolioBackfillService
             {
                 if (!prices.TryGetValue(pos.Symbol, out var byDate))
                     continue;
-                if (!byDate.TryGetValue(date, out var close))
+                // Forward-fill：某檔在 date 當天沒收盤（來源尚未出、或當天休市/假日）時，用「date 之前
+                // 最近一筆、且不超過 ForwardFillWindowDays 天」的收盤價往前補。這樣不同市場（台股/美股）
+                // 交易日／資料新舊不一致時，不會因為一檔晚到就整天留白（使用者實例：00988A 收盤只到
+                // 07-03、DRAM 到 07-07 → 07-06/07 原本被跳過）。窗外（太久沒價）才視為無價。
+                if (PriceAsOf(byDate, date, ForwardFillWindowDays) is not { } close)
                     continue;
 
                 totalCost += pos.BuyPrice * pos.Quantity;
@@ -111,11 +122,10 @@ public sealed class PortfolioBackfillService
                 priced++;
             }
 
-            // Only write a snapshot when EVERY reconstructed position was priced.
-            // A partial sum (some positions unpriced) understates total market value and
-            // produces garbage daily-return deltas in the calendar/trends (e.g. a day that
-            // recorded market_value≈0 while neighbours are ~11.5M). Better to leave the day
-            // blank than to persist a partial-口徑 value.
+            // Only write a snapshot when EVERY reconstructed position was priced (含 forward-fill）。
+            // 仍保留「全有或全無」：某檔連 window 內都沒有任何收盤（全新標的/長期無資料）→ 該天留白，
+            // 不寫入部分口徑。partial sum 會低估市值、在日曆/走勢做出假的當日報酬暴跌（如某天 market_value≈0
+            // 而鄰日 ~11.5M）——forward-fill 用的是真實近日收盤（非 0），故不會造成那種 garbage。
             if (priced < positions.Count)
                 continue;
 
@@ -163,7 +173,7 @@ public sealed class PortfolioBackfillService
             return false;
 
         var symbols = positions.Select(p => (p.Symbol, p.Exchange)).Distinct().ToList();
-        var prices = new Dictionary<string, decimal>();
+        var prices = new Dictionary<string, Dictionary<DateOnly, decimal>>();
         foreach (var (symbol, exchange) in symbols)
         {
             if (ct.IsCancellationRequested)
@@ -172,9 +182,7 @@ public sealed class PortfolioBackfillService
             {
                 var history = await _historyProvider.GetHistoryAsync(
                     symbol, exchange, ChartPeriod.TwoYears, ct);
-                var match = history.FirstOrDefault(h => h.Date == date);
-                if (match != default)
-                    prices[symbol] = match.Close;
+                prices[symbol] = history.ToDictionary(h => h.Date, h => h.Close);
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
             {
@@ -186,7 +194,9 @@ public sealed class PortfolioBackfillService
         int priced = 0;
         foreach (var pos in positions)
         {
-            if (!prices.TryGetValue(pos.Symbol, out var close))
+            // 與 BackfillAsync 同：當天缺價則用 window 內最近一筆收盤 forward-fill。
+            if (!prices.TryGetValue(pos.Symbol, out var byDate)
+                || PriceAsOf(byDate, date, ForwardFillWindowDays) is not { } close)
                 continue;
             totalCost += pos.BuyPrice * pos.Quantity;
             totalMarketValue += close * pos.Quantity;
@@ -236,6 +246,24 @@ public sealed class PortfolioBackfillService
             .Select(g => g.Last())
             .Where(l => l.Quantity > 0)
             .ToList();
+
+    /// <summary>
+    /// 取 <paramref name="date"/> 當天收盤；缺當天時，回傳「date 之前、且在 <paramref name="maxStaleDays"/>
+    /// 天內」最近一筆收盤（forward-fill）。窗內完全沒有任何收盤 → null（視為無價）。
+    /// </summary>
+    private static decimal? PriceAsOf(
+        IReadOnlyDictionary<DateOnly, decimal> byDate, DateOnly date, int maxStaleDays)
+    {
+        if (byDate.TryGetValue(date, out var exact))
+            return exact;
+
+        var floor = date.AddDays(-maxStaleDays);
+        DateOnly? best = null;
+        foreach (var d in byDate.Keys)
+            if (d < date && d >= floor && (best is null || d > best.Value))
+                best = d;
+        return best is { } b ? byDate[b] : null;
+    }
 
     /// <summary>Enumerates every Monday–Friday between <paramref name="from"/> and <paramref name="to"/> inclusive.</summary>
     private static IEnumerable<DateOnly> Weekdays(DateOnly from, DateOnly to)

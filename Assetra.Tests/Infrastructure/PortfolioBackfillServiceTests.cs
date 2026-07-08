@@ -61,7 +61,8 @@ public sealed class PortfolioBackfillServiceTests
         var written = await service.BackfillAsync();
 
         var snapshot = Assert.Single(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
-        Assert.Equal(1, written);
+        // forward-fill 會把最後一筆收盤往後補至 window 天，故 written 可能 > 1；這裡只確認 TargetDate 當天有寫入。
+        Assert.True(written >= 1);
         // MarketValue must be the FULL sum across every position, not a partial one.
         Assert.Equal((600m * 10) + (120m * 20), snapshot.MarketValue);
         Assert.Equal((500m * 10) + (100m * 20), snapshot.TotalCost);
@@ -83,7 +84,8 @@ public sealed class PortfolioBackfillServiceTests
         var written = await service.BackfillAsync();
 
         var snapshot = Assert.Single(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
-        Assert.Equal(1, written);
+        // forward-fill 會把最後一筆收盤往後補至 window 天，故 written 可能 > 1；這裡只確認 TargetDate 當天有寫入。
+        Assert.True(written >= 1);
         Assert.Equal(600m * 10, snapshot.MarketValue);
         Assert.Equal(1, snapshot.PositionCount);
     }
@@ -153,10 +155,55 @@ public sealed class PortfolioBackfillServiceTests
         var written = await service.BackfillAsync();
 
         var snapshot = Assert.Single(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
-        Assert.Equal(1, written);
+        // forward-fill 會把最後一筆收盤往後補至 window 天，故 written 可能 > 1；這裡只確認 TargetDate 當天有寫入。
+        Assert.True(written >= 1);
         // Sold-out 3231 excluded → only the held 2330 counts (old code: 2 positions, MV +3.2M).
         Assert.Equal(1, snapshot.PositionCount);
         Assert.Equal(600m * 10, snapshot.MarketValue);
+    }
+
+    [Fact]
+    public async Task BackfillAsync_ForwardFillsRecentClose_WhenExactDayCloseMissing()
+    {
+        // 使用者實例：某檔（如台股 00988A）收盤只到前幾天、另一檔（美股 DRAM）到當天 → 原本因為
+        // 缺一檔當日價、整天被跳過留白。Forward-fill：缺當日價時用 window 內最近一筆收盤補上，兩檔
+        // 都定價 → 該天照常寫入（不再因一檔晚到就整天空白）。
+        var logRepo = new FakeLogRepository(
+            Log("2330", "TWSE", 10, 500m),
+            Log("2317", "TWSE", 20, 100m));
+        var snapshotRepo = new RecordingSnapshotRepository();
+        var history = new FakeHistoryProvider();
+        history.Add("2330", TargetDate, close: 600m);              // 當天有價
+        history.Add("2317", TargetDate.AddDays(-2), close: 120m);  // 只有兩天前 → forward-fill
+
+        var service = new PortfolioBackfillService(logRepo, snapshotRepo, history);
+
+        await service.BackfillAsync();
+
+        var snapshot = Assert.Single(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
+        // 2317 用兩天前收盤 (120) 補；2330 用當天 (600)。
+        Assert.Equal((600m * 10) + (120m * 20), snapshot.MarketValue);
+        Assert.Equal(2, snapshot.PositionCount);
+    }
+
+    [Fact]
+    public async Task BackfillAsync_ForwardFillBeyondWindow_LeavesDayBlank()
+    {
+        // 保留「全有或全無」：某檔連 window 內都沒有任何收盤（過期太久 / 全新標的）→ 該天仍留白，
+        // 不寫入部分口徑。這裡 2317 收盤落在 window(14 天) 外 → TargetDate 不得寫入。
+        var logRepo = new FakeLogRepository(
+            Log("2330", "TWSE", 10, 500m),
+            Log("2317", "TWSE", 20, 100m));
+        var snapshotRepo = new RecordingSnapshotRepository();
+        var history = new FakeHistoryProvider();
+        history.Add("2330", TargetDate, close: 600m);
+        history.Add("2317", TargetDate.AddDays(-40), close: 120m); // window 外 → 視為無價
+
+        var service = new PortfolioBackfillService(logRepo, snapshotRepo, history);
+
+        await service.BackfillAsync();
+
+        Assert.DoesNotContain(snapshotRepo.Writes, s => s.SnapshotDate == TargetDate);
     }
 
     private static PortfolioPositionLog Log(string symbol, string exchange, int qty, decimal buyPrice) =>
