@@ -36,7 +36,6 @@
                         MaxWidth="320"
                         Margin="0,8,0,0"
                         HorizontalAlignment="Stretch"
-                        DisplayMemberPath="Display"
                         ItemsSource="{x:Static vm:SettingsViewModel.SupportedLlmProviders}"
                         SelectedValue="{Binding LlmProvider, Mode=TwoWay}"
                         SelectedValuePath="Code" />

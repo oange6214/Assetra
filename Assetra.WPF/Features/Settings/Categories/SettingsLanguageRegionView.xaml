@@ -28,7 +28,6 @@
                         MaxWidth="320"
                         Margin="0,8,0,0"
                         HorizontalAlignment="Stretch"
-                        DisplayMemberPath="Display"
                         ItemsSource="{x:Static vm:SettingsViewModel.SupportedLanguages}"
                         SelectedValue="{Binding Language}"
                         SelectedValuePath="Code" />

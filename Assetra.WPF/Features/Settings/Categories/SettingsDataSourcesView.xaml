@@ -30,7 +30,6 @@
                         MaxWidth="320"
                         Margin="0,8,0,0"
                         HorizontalAlignment="Stretch"
-                        DisplayMemberPath="Display"
                         ItemsSource="{x:Static vm:SettingsViewModel.SupportedQuoteProviders}"
                         SelectedValue="{Binding QuoteProvider}"
                         SelectedValuePath="Code" />
@@ -43,7 +42,6 @@
                         MaxWidth="320"
                         Margin="0,8,0,0"
                         HorizontalAlignment="Stretch"
-                        DisplayMemberPath="Display"
                         ItemsSource="{x:Static vm:SettingsViewModel.SupportedHistoryProviders}"
                         SelectedValue="{Binding HistoryProvider}"
                         SelectedValuePath="Code" />

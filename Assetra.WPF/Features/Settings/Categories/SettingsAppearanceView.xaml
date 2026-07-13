@@ -111,7 +111,6 @@
                         MaxWidth="320"
                         HorizontalAlignment="Left"
                         Style="{StaticResource AppComboBox}"
-                        DisplayMemberPath="Display"
                         ItemsSource="{Binding SupportedHomeSections}"
                         SelectedValuePath="Code"
                         SelectedValue="{Binding DefaultHomeSection, Mode=TwoWay}" />
