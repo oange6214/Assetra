@@ -216,11 +216,8 @@
                                             Width="8" Height="8"
                                             Margin="0,0,5,0"
                                             VerticalAlignment="Center"
-                                            Visibility="{Binding IsUnavailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                            <Ellipse.Fill>
-                                                <SolidColorBrush Color="{Binding ColorHex}" />
-                                            </Ellipse.Fill>
-                                        </Ellipse>
+                                            Fill="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}"
+                                            Visibility="{Binding IsUnavailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                         <ds:AppIcon
                                             Margin="0,0,4,0"
                                             VerticalAlignment="Center"
@@ -293,11 +290,8 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,10,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center">
-                                            <Ellipse.Fill>
-                                                <SolidColorBrush Color="{Binding ColorHex}" />
-                                            </Ellipse.Fill>
-                                        </Ellipse>
+                                        <Ellipse Width="8" Height="8" Margin="0,0,5,0" VerticalAlignment="Center"
+                                                 Fill="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}" />
                                         <TextBlock
                                             VerticalAlignment="Center"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -504,11 +498,8 @@
                                 </Grid.ColumnDefinitions>
                                 <!--  項目：色點 ＋ 名稱  -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Ellipse Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center">
-                                        <Ellipse.Fill>
-                                            <SolidColorBrush Color="{Binding ColorHex}" />
-                                        </Ellipse.Fill>
-                                    </Ellipse>
+                                    <Ellipse Width="9" Height="9" Margin="0,0,8,0" VerticalAlignment="Center"
+                                             Fill="{Binding ColorHex, Converter={StaticResource HexToBrushConverter}}" />
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         FontSize="{StaticResource Font.Size.Sm}"
