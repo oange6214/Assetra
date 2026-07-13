@@ -37,6 +37,11 @@ public sealed class CurrencyService : ICurrencyService
     private readonly ILogger<CurrencyService> _logger;
     private volatile IReadOnlyDictionary<string, decimal> _exchangeRates;
 
+    // 啟動初期網路/DNS 常還沒就緒 → 首次抓匯率會失敗、退回快取/預設值（每次開機都這樣）。
+    // 重試幾次（遞增退避）讓網路就緒後補上。可注入（測試傳 Zero delay 以免拖慢）。
+    private readonly int _fxMaxAttempts;
+    private readonly TimeSpan _fxRetryBaseDelay;
+
     public string Currency { get; private set; }
 
     public decimal UsdTwdRate =>
@@ -49,11 +54,14 @@ public sealed class CurrencyService : ICurrencyService
     public event Action? CurrencyChanged;
 
     public CurrencyService(IAppSettingsService settings, HttpClient http,
-        ILogger<CurrencyService>? logger = null)
+        ILogger<CurrencyService>? logger = null,
+        int fxMaxAttempts = 3, TimeSpan? fxRetryBaseDelay = null)
     {
         _settings = settings;
         _http = http;
         _logger = logger ?? NullLogger<CurrencyService>.Instance;
+        _fxMaxAttempts = Math.Max(1, fxMaxAttempts);
+        _fxRetryBaseDelay = fxRetryBaseDelay ?? TimeSpan.FromSeconds(2);
         Currency = settings.Current.PreferredCurrency;
         _exchangeRates = BuildRates(settings.Current);
     }
@@ -68,47 +76,65 @@ public sealed class CurrencyService : ICurrencyService
 
     public async Task RefreshRatesAsync(CancellationToken ct = default)
     {
-        try
+        // 重試 _fxMaxAttempts 次（遞增退避）：啟動初期網路/DNS 常還沒就緒，首次會失敗；等一下重試就成。
+        // 成功即 return；用完次數才退回快取/預設值。呼叫端主動取消（ct）則不重試、直接拋。
+        for (var attempt = 1; attempt <= _fxMaxAttempts; attempt++)
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(10));
-
-            // 台灣銀行當日匯率：一檔 CSV 含全部幣別，採「即期買入」（spot-buy）。
-            // 台幣為基準，BOT 直接報「1 外幣 = N 台幣」，毋須再做交叉匯率換算。
-            var spotBuy = await FetchBotSpotBuyAsync(cts.Token).ConfigureAwait(false);
-
-            // USD 為關鍵基準匯率：抓取失敗或缺 USD 時不寫入，保留現有/預設值。
-            if (spotBuy is null || !spotBuy.TryGetValue("USD", out var usd) || usd <= 0m)
+            try
             {
-                _logger.LogWarning("Bank of Taiwan spot-buy rate unavailable; using cached/default rates");
-                return;
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+                // 台灣銀行當日匯率：一檔 CSV 含全部幣別，採「即期買入」（spot-buy）。
+                // 台幣為基準，BOT 直接報「1 外幣 = N 台幣」，毋須再做交叉匯率換算。
+                var spotBuy = await FetchBotSpotBuyAsync(cts.Token).ConfigureAwait(false);
+
+                if (spotBuy is not null && spotBuy.TryGetValue("USD", out var usd) && usd > 0m)
+                {
+                    // 以現有匯率為底，覆蓋成功解析（> 0）的幣別，缺的維持原值。
+                    var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
+                    foreach (var code in _fetchedCurrencies)
+                        if (spotBuy.TryGetValue(code, out var rate) && rate > 0m)
+                            newRates[code] = rate;
+
+                    _exchangeRates = newRates;
+
+                    var updated = _settings.Current with
+                    {
+                        UsdTwdRate = newRates["USD"],
+                        ExchangeRates = newRates,
+                        LastFxRefreshUtc = DateTime.UtcNow.ToString("O"),
+                    };
+                    await _settings.SaveAsync(updated).ConfigureAwait(false);
+                    CurrencyChanged?.Invoke();
+                    return; // 成功
+                }
+
+                // 抓取／解析失敗或缺 USD（不寫入、保留現有值）→ 還有次數就退避重試。
+                if (attempt >= _fxMaxAttempts)
+                {
+                    _logger.LogWarning(
+                        "Bank of Taiwan spot-buy rate unavailable after {Attempts} attempt(s); using cached/default rates",
+                        _fxMaxAttempts);
+                    return;
+                }
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // 呼叫端主動取消 → 不吞、不重試
+            }
+            catch (Exception ex)
+            {
+                if (attempt >= _fxMaxAttempts)
+                {
+                    _logger.LogWarning(ex, "Exchange rate refresh failed after {Attempts} attempt(s); using cached/default rates", _fxMaxAttempts);
+                    return;
+                }
+                _logger.LogDebug(ex, "Exchange rate refresh attempt {Attempt} failed; retrying", attempt);
             }
 
-            // 以現有匯率為底，覆蓋成功解析（> 0）的幣別，缺的維持原值。
-            var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
-            foreach (var code in _fetchedCurrencies)
-                if (spotBuy.TryGetValue(code, out var rate) && rate > 0m)
-                    newRates[code] = rate;
-
-            _exchangeRates = newRates;
-
-            var updated = _settings.Current with
-            {
-                UsdTwdRate = newRates["USD"],
-                ExchangeRates = newRates,
-                LastFxRefreshUtc = DateTime.UtcNow.ToString("O"),
-            };
-            await _settings.SaveAsync(updated).ConfigureAwait(false);
-            CurrencyChanged?.Invoke();
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            // Caller cancelled — propagate rather than swallow
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Exchange rate refresh failed; using cached/default rates");
+            // 走到這＝還要重試 → 遞增退避（base×attempt），等網路就緒。
+            await Task.Delay(_fxRetryBaseDelay * attempt, ct).ConfigureAwait(false);
         }
     }
 

@@ -48,7 +48,8 @@ public class CurrencyServiceTests
         settings.Setup(s => s.SaveAsync(It.IsAny<AppSettings>(), It.IsAny<bool>()))
             .Returns(Task.CompletedTask);
         http ??= new HttpClient();
-        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance);
+        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance,
+            fxRetryBaseDelay: TimeSpan.Zero); // 測試不等退避
     }
 
     // ── SupportedCurrencies ────────────────────────────────────────────────
@@ -298,6 +299,44 @@ public class CurrencyServiceTests
         Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]); // absent in CSV → keep prior
     }
 
+    [Fact]
+    public async Task RefreshRatesAsync_RetriesTransientFailure_ThenSucceeds()
+    {
+        // 前兩次失敗（模擬啟動初期網路/DNS 還沒就緒），第三次回正常 CSV → 應重試到成功、匯率更新。
+        // （這正是每次開機都看到 "spot-buy rate unavailable" + FX 沒刷新的根因修法。）
+        var handler = new FailThenSucceedHandler(failCount: 2, successBody: BotDailyCsv);
+        var http = new HttpClient(handler);
+        AppSettings? saved = null;
+        var svc = CreateCapturing(out var capture, rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+        capture.Saved += s => saved = s;
+        bool fired = false;
+        svc.CurrencyChanged += () => fired = true;
+
+        await svc.RefreshRatesAsync();
+
+        Assert.Equal(3, handler.Calls);                  // 1 失敗 + 2 失敗 + 3 成功
+        Assert.Equal(31.555m, svc.ExchangeRates["USD"]); // 重試後成功更新
+        Assert.True(fired, "CurrencyChanged should fire once a retry succeeds");
+        Assert.NotNull(saved);
+    }
+
+    [Fact]
+    public async Task RefreshRatesAsync_AllAttemptsFail_KeepsCachedRates()
+    {
+        // 每次都 500（連 max 次都失敗）→ 不覆寫、退回快取/預設值、不觸發事件。
+        var handler = new FailThenSucceedHandler(failCount: int.MaxValue, successBody: BotDailyCsv);
+        var http = new HttpClient(handler);
+        var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
+        bool fired = false;
+        svc.CurrencyChanged += () => fired = true;
+
+        await svc.RefreshRatesAsync();
+
+        Assert.Equal(3, handler.Calls);                        // 重試到用完（預設 3 次）
+        Assert.Equal(DefaultRates["USD"], svc.ExchangeRates["USD"]);
+        Assert.False(fired);
+    }
+
     // ── ParseBotDailyCsv (unit) ────────────────────────────────────────────
 
     [Fact]
@@ -341,7 +380,8 @@ public class CurrencyServiceTests
             .Returns((AppSettings s, bool _) => { cap.Raise(s); return Task.CompletedTask; });
         http ??= new HttpClient();
         capture = cap;
-        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance);
+        return new CurrencyService(settings.Object, http, NullLogger<CurrencyService>.Instance,
+            fxRetryBaseDelay: TimeSpan.Zero); // 測試不等退避
     }
 
     private sealed class SaveCapture
@@ -386,6 +426,22 @@ public class CurrencyServiceTests
             {
                 Content = new ByteArrayContent(Encoding.UTF8.GetBytes(responseBody)),
             });
+        }
+    }
+
+    /// <summary>前 <paramref name="failCount"/> 次回 500，之後回 200＋<paramref name="successBody"/>。用來測重試。</summary>
+    private sealed class FailThenSucceedHandler(int failCount, string successBody) : HttpMessageHandler
+    {
+        public int Calls { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            Calls++;
+            return Task.FromResult(Calls <= failCount
+                ? new HttpResponseMessage(HttpStatusCode.InternalServerError) { Content = new StringContent(string.Empty) }
+                : new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Encoding.UTF8.GetBytes(successBody)) });
         }
     }
 }
