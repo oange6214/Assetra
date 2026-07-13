@@ -103,17 +103,22 @@ public sealed partial class GoalsViewModel : ObservableObject
     /// </summary>
     [ObservableProperty] private string _addLinkedAssetClass = string.Empty;
 
-    /// <summary>Dropdown 用：(displayKey, value) — value 對應 FinancialGoal.LinkedAssetClass。</summary>
-    public IReadOnlyList<(string LabelKey, string Value)> LinkedAssetClassOptions { get; } =
+    /// <summary>
+    /// Dropdown 用：(displayKey, value) — value 對應 FinancialGoal.LinkedAssetClass。
+    /// 用 record（屬性）而非 ValueTuple：tuple 的 LabelKey/Value 是「欄位」（編譯後為 Item1/Item2），
+    /// WPF 綁定只認屬性 → ComboBox 的 SelectedValuePath="Value"／Text="{Binding LabelKey}" 對每個
+    /// 下拉項都噴 System.Windows.Data Error 40（property not found on ValueTuple`2），選取值也對不上。
+    /// </summary>
+    public IReadOnlyList<LinkedAssetClassOption> LinkedAssetClassOptions { get; } =
     [
-        ("Goals.LinkedAssetClass.Manual",     ""),
-        ("Goals.LinkedAssetClass.NetWorth",   "NetWorth"),
-        ("Goals.LinkedAssetClass.TotalAssets","TotalAssets"),
-        ("Goals.LinkedAssetClass.Investments","Investments"),
-        ("Goals.LinkedAssetClass.Cash",       "Cash"),
-        ("Goals.LinkedAssetClass.RealEstate", "RealEstate"),
-        ("Goals.LinkedAssetClass.Retirement", "Retirement"),
-        ("Goals.LinkedAssetClass.Physical",   "Physical"),
+        new("Goals.LinkedAssetClass.Manual",     ""),
+        new("Goals.LinkedAssetClass.NetWorth",   "NetWorth"),
+        new("Goals.LinkedAssetClass.TotalAssets","TotalAssets"),
+        new("Goals.LinkedAssetClass.Investments","Investments"),
+        new("Goals.LinkedAssetClass.Cash",       "Cash"),
+        new("Goals.LinkedAssetClass.RealEstate", "RealEstate"),
+        new("Goals.LinkedAssetClass.Retirement", "Retirement"),
+        new("Goals.LinkedAssetClass.Physical",   "Physical"),
     ];
 
     [ObservableProperty]
@@ -1098,3 +1103,9 @@ public sealed partial class GoalsViewModel : ObservableObject
     private string L(string key, string fallback) =>
         _localization?.Get(key, fallback) ?? fallback;
 }
+
+/// <summary>
+/// 目標「連結資產類別」下拉的單一選項。record 屬性（非 ValueTuple 欄位）→ WPF 可綁定
+/// <c>LabelKey</c>（顯示字串資源 key）與 <c>Value</c>（存進 FinancialGoal.LinkedAssetClass 的值）。
+/// </summary>
+public sealed record LinkedAssetClassOption(string LabelKey, string Value);

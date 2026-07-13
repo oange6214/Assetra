@@ -15,6 +15,7 @@
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/RadioButton.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/PasswordBox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/ScrollBar.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/ListBoxItem.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/ProgressBar.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Slider.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Assetra.WPF;component/DesignSystem/Controls/Menu.xaml" />

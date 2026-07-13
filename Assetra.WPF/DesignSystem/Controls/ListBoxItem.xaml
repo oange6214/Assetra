@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ════════════════════════════════════════════════════════════
+        ListBoxItem — implicit style（消除主題預設樣式的綁定噪音）
+        ════════════════════════════════════════════════════════════
+        WHY: Aero2 主題的 ListBoxItem 預設樣式用 RelativeSource FindAncestor
+        ItemsControl 綁 Horizontal/VerticalContentAlignment。容器被丟棄
+        （清單清空／重建、每次自動完成打字）時，WPF 會清掉 ItemContainerStyle、
+        回落到主題樣式重新評估——此時容器已脫離視覺樹，FindAncestor 必失敗 →
+        每顆丟棄容器噴一對 System.Windows.Data Error 4（XAML Binding Failures
+        面板的 HorizontalContentAlignment / VerticalContentAlignment ×N）。
+
+        修法：app 層放隱式樣式蓋過主題樣式，同樣的綁定補 FallbackValue——
+        找得到 ancestor 時行為與主題完全相同（跟著 ItemsControl 的對齊走），
+        脫離樹時靜默用 fallback，不再噴錯。各清單自己的 ItemContainerStyle
+        優先權更高，顯示不受影響。
+    -->
+    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Setter Property="HorizontalContentAlignment"
+                Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}, FallbackValue=Left}" />
+        <Setter Property="VerticalContentAlignment"
+                Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}, FallbackValue=Top}" />
+    </Style>
+
+</ResourceDictionary>

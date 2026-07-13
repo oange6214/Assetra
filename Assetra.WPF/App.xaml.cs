@@ -29,12 +29,34 @@ public partial class App : System.Windows.Application
 {
     private IHost _host = null!;
     private bool _startupCompleted;
+
+    // 單一實例防護：兩份 Assetra（如安裝版＋開發版）同時跑會互搶同一顆 SQLite DB（寫入
+    // BUSY/BUSY_SNAPSHOT 例外風暴）與 settings.json（IOException「being used by another
+    // process」、Serilog 滾出 _001 分身檔）。用具名 Mutex 擋第二份。
+    private System.Threading.Mutex? _singleInstanceMutex;
+    private bool _ownsSingleInstance;
+
     private static string StartupMarkerPath =>
         Path.Combine(AppRuntimePaths.Resolve().DataDir, "startup.pending");
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         VelopackApp.Build().Run();
+
+        // Velopack 先跑（安裝/更新 hook 可能直接結束程序），再做單一實例檢查。
+        _singleInstanceMutex = new System.Threading.Mutex(
+            initiallyOwned: true, @"Local\Assetra.SingleInstance", out _ownsSingleInstance);
+        if (!_ownsSingleInstance)
+        {
+            MessageBox.Show(
+                "Assetra 已在執行中，請改用已開啟的視窗。\n（兩份同時開啟會互搶資料庫與設定檔，可能造成資料錯誤。）",
+                "Assetra",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            Shutdown(0);
+            return;
+        }
+
         base.OnStartup(e);
         DispatcherUnhandledException += OnDispatcherUnhandledException;
 
@@ -241,6 +263,11 @@ public partial class App : System.Windows.Application
 
         if (_startupCompleted)
             ClearStartupMarker();
+
+        // 只有真正持有（第一份）才 Release；第二份（未取得）Release 會丟例外。
+        if (_ownsSingleInstance)
+            _singleInstanceMutex?.ReleaseMutex();
+        _singleInstanceMutex?.Dispose();
 
         base.OnExit(e);
     }
