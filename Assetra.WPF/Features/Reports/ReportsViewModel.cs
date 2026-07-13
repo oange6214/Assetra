@@ -327,12 +327,16 @@ public sealed partial class ReportsViewModel : ObservableObject
         using var slowCts = new System.Threading.CancellationTokenSource();
         var slowTimer = Task.Run(async () =>
         {
+            // 5 秒後若還沒載完 → 顯示「慢載入」橫幅。用「無 token 的 Delay ＋ 旗標檢查」，不再靠
+            // 「取消計時器 → TaskCanceledException」當控制流程——那會讓每次快速載入都在 debug
+            // Output 閃一筆 first-chance 例外（也違反「不拿例外當流程」）。
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), slowCts.Token).ConfigureAwait(false);
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => IsSlowLoad = true);
+                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                if (!slowCts.IsCancellationRequested)
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => IsSlowLoad = true);
             }
-            catch (TaskCanceledException) { /* finished in time, no banner */ }
+            catch (Exception) { /* 橫幅為 best-effort；關閉/處置時的例外忽略 */ }
         });
 
         try
