@@ -1881,7 +1881,7 @@
     <sys:String x:Key="Settings.Fx.LastRefreshed">Last refreshed:</sys:String>
     <sys:String x:Key="Settings.Fx.NeverRefreshed">Never refreshed (using default rates — click Refresh below)</sys:String>
     <sys:String x:Key="Settings.Fx.Refresh">Refresh now</sys:String>
-    <sys:String x:Key="Settings.Fx.Source">Source: https://rate.bot.com.tw; the app also tries to refresh once at startup.</sys:String>
+    <sys:String x:Key="Settings.Fx.Source">Source: Yahoo Finance; the app also tries to refresh once at startup.</sys:String>
     <sys:String x:Key="Import.PdfPreview.Title">PDF page text preview (verify OCR output)</sys:String>
     <sys:String x:Key="Import.PdfPreview.EmptyPage">No text extracted from this page (likely an image-only page with OCR disabled or no recognised content).</sys:String>
     <sys:String x:Key="Reports.Performance.Title">Performance</sys:String>

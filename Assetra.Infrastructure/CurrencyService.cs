@@ -1,5 +1,5 @@
 using System.Globalization;
-using System.Text;
+using System.Text.Json;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -16,11 +16,11 @@ public sealed class CurrencyService : ICurrencyService
     private static readonly IReadOnlyList<string> _supportedCurrencies =
         ["TWD", "USD", "JPY", "EUR", "HKD"];
 
-    // 透過台灣銀行抓的外幣（TWD 為基準，不需自抓）。
+    // 需向 Yahoo 抓即時匯率的外幣（TWD 為基準，不需自抓）。
     private static readonly IReadOnlyList<string> _fetchedCurrencies =
         ["USD", "JPY", "EUR", "HKD"];
 
-    // 硬碼預設匯率（當 AppSettings.ExchangeRates 為 null 且台灣銀行尚未回應時使用）
+    // 硬碼預設匯率（當 AppSettings.ExchangeRates 為 null 且尚未取得即時匯率時使用）
     private static readonly Dictionary<string, decimal> _hardcodedDefaults = new()
     {
         ["USD"] = 32.0m,
@@ -29,8 +29,11 @@ public sealed class CurrencyService : ICurrencyService
         ["HKD"] = 4.1m,
     };
 
-    // 台灣銀行即時匯率（當日，所有幣別一檔 CSV）。每列一個幣別，即期買入 = 第 3 欄。
-    private const string BotDailyCsvUrl = "https://rate.bot.com.tw/xrt/flcsv/0/day";
+    // Yahoo Finance 即時匯率端點：每個外幣對台幣一檔（{CODE}TWD=X）。
+    // meta.regularMarketPrice 即「1 外幣 = N 台幣」，與台幣基準一致，毋須交叉換算。
+    // （原台灣銀行當日 CSV 端點已被套上反爬蟲挑戰頁，一律回 HTML 解不出，故改走 Yahoo。）
+    private const string YahooChartUrlFormat =
+        "https://query1.finance.yahoo.com/v8/finance/chart/{0}TWD=X?interval=1d&range=1d";
 
     private readonly IAppSettingsService _settings;
     private readonly HttpClient _http;
@@ -85,16 +88,16 @@ public sealed class CurrencyService : ICurrencyService
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-                // 台灣銀行當日匯率：一檔 CSV 含全部幣別，採「即期買入」（spot-buy）。
-                // 台幣為基準，BOT 直接報「1 外幣 = N 台幣」，毋須再做交叉匯率換算。
-                var spotBuy = await FetchBotSpotBuyAsync(cts.Token).ConfigureAwait(false);
+                // Yahoo 即時匯率：逐一抓 {CODE}TWD=X，取 regularMarketPrice。
+                // 台幣為基準，Yahoo 直接報「1 外幣 = N 台幣」，毋須再做交叉匯率換算。
+                var spotRates = await FetchYahooSpotRatesAsync(cts.Token).ConfigureAwait(false);
 
-                if (spotBuy is not null && spotBuy.TryGetValue("USD", out var usd) && usd > 0m)
+                if (spotRates is not null && spotRates.TryGetValue("USD", out var usd) && usd > 0m)
                 {
                     // 以現有匯率為底，覆蓋成功解析（> 0）的幣別，缺的維持原值。
                     var newRates = _exchangeRates.ToDictionary(kv => kv.Key, kv => kv.Value);
                     foreach (var code in _fetchedCurrencies)
-                        if (spotBuy.TryGetValue(code, out var rate) && rate > 0m)
+                        if (spotRates.TryGetValue(code, out var rate) && rate > 0m)
                             newRates[code] = rate;
 
                     _exchangeRates = newRates;
@@ -114,7 +117,7 @@ public sealed class CurrencyService : ICurrencyService
                 if (attempt >= _fxMaxAttempts)
                 {
                     _logger.LogWarning(
-                        "Bank of Taiwan spot-buy rate unavailable after {Attempts} attempt(s); using cached/default rates",
+                        "Yahoo FX rate unavailable after {Attempts} attempt(s); using cached/default rates",
                         _fxMaxAttempts);
                     return;
                 }
@@ -139,56 +142,61 @@ public sealed class CurrencyService : ICurrencyService
     }
 
     /// <summary>
-    /// 抓取台灣銀行當日匯率 CSV 並解析出各幣別的即期買入價。
-    /// 回傳 null 代表抓取／解析整體失敗（呼叫端保留現有/預設匯率）。
+    /// 逐一從 Yahoo Finance 抓各外幣對台幣的即時匯率（{CODE}TWD=X）。
+    /// 單一幣別抓取／解析失敗只略過該幣別；全部皆失敗才回 null（呼叫端保留現有/預設匯率）。
     /// </summary>
-    private async Task<IReadOnlyDictionary<string, decimal>?> FetchBotSpotBuyAsync(CancellationToken ct)
+    private async Task<IReadOnlyDictionary<string, decimal>?> FetchYahooSpotRatesAsync(CancellationToken ct)
     {
-        try
+        var rates = new Dictionary<string, decimal>(StringComparer.Ordinal);
+        foreach (var code in _fetchedCurrencies)
         {
-            var bytes = await _http.GetByteArrayAsync(BotDailyCsvUrl, ct).ConfigureAwait(false);
-            var csv = Encoding.UTF8.GetString(bytes);
-            return ParseBotDailyCsv(csv);
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var url = string.Format(CultureInfo.InvariantCulture, YahooChartUrlFormat, code);
+                var json = await _http.GetStringAsync(url, ct).ConfigureAwait(false);
+                if (ParseYahooChartPrice(json) is { } rate && rate > 0m)
+                    rates[code] = rate;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // 呼叫端主動取消 → 不吞
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Yahoo FX fetch failed for {Code}TWD", code);
+            }
         }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Bank of Taiwan daily CSV fetch failed");
-            return null;
-        }
+        return rates.Count > 0 ? rates : null;
     }
 
     /// <summary>
-    /// 解析台灣銀行「當日」匯率 CSV（<c>/xrt/flcsv/0/day</c>）為 code→即期買入 字典。
-    /// <para>欄位（0-indexed）：[0]=幣別代碼, [1]="本行買入", [2]=現金買入,
-    /// [3]=即期買入, …, [11]="本行賣出", …。即期買入 = col[3]。</para>
-    /// <para>第一列為標題（首欄含 BOM），略過；即期買入非數字／≤ 0 的幣別跳過。
-    /// BOT 每一幣別皆以「1 單位 = N 台幣」報價（USD≈31.5、JPY≈0.21、EUR≈36.5、HKD≈4.0）。</para>
+    /// 從 Yahoo chart JSON 取即時匯率：<c>chart.result[0].meta.regularMarketPrice</c>。
+    /// 缺欄位／格式錯／值 ≤ 0 一律回 null（呼叫端視為此幣別無報價）。
     /// </summary>
-    internal static Dictionary<string, decimal> ParseBotDailyCsv(string csv)
+    internal static decimal? ParseYahooChartPrice(string json)
     {
-        var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
-        if (string.IsNullOrEmpty(csv))
-            return result;
-
-        var lines = csv.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        // 第 0 列為標題列（幣別,匯率,現金,即期,…），略過。
-        for (int i = 1; i < lines.Length; i++)
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+        try
         {
-            var cols = lines[i].Split(',');
-            if (cols.Length <= 3)
-                continue;
-            var code = cols[0].Trim().ToUpperInvariant();
-            if (code.Length == 0)
-                continue;
-            if (decimal.TryParse(cols[3].Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var spotBuy)
-                && spotBuy > 0m)
-                result[code] = spotBuy;
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("chart", out var chart)
+                && chart.TryGetProperty("result", out var result)
+                && result.ValueKind == JsonValueKind.Array
+                && result.GetArrayLength() > 0
+                && result[0].TryGetProperty("meta", out var meta)
+                && meta.TryGetProperty("regularMarketPrice", out var price)
+                && price.ValueKind == JsonValueKind.Number
+                && price.TryGetDecimal(out var rate)
+                && rate > 0m)
+                return rate;
         }
-        return result;
+        catch (JsonException)
+        {
+            // 非 JSON（如反爬蟲 HTML 頁）→ 視為無報價
+        }
+        return null;
     }
 
     // ── Formatting ──────────────────────────────────────────────────────────

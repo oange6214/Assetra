@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using Assetra.Core.Interfaces;
 using Assetra.Core.Models;
 using Assetra.Infrastructure;
@@ -21,17 +21,36 @@ public class CurrencyServiceTests
     };
 
     /// <summary>
-    /// A realistic Bank of Taiwan daily CSV (/xrt/flcsv/0/day). First line is the
-    /// header (with a leading BOM as the live endpoint serves). Each currency is
-    /// one line; 即期買入 = col[3]. BOT quotes "1 foreign = N TWD" directly
-    /// (USD≈31.5, JPY≈0.21, EUR≈36.5, HKD≈4.0 — NOT per-100).
+    /// Yahoo live quotes for each {CODE}TWD=X pair, deliberately distinct from
+    /// <see cref="DefaultRates"/> so a successful refresh is observable. Yahoo quotes
+    /// "1 foreign = N TWD" directly (USD≈31.5, JPY≈0.196, EUR≈36.7, HKD≈4.05 — per-1-unit,
+    /// NOT per-100), matching the TWD base with no cross-rate division.
     /// </summary>
-    private const string BotDailyCsv =
-        "﻿幣別,匯率,現金,即期,遠期10天,遠期30天,遠期60天,遠期90天,遠期120天,遠期150天,遠期180天,本行賣出,現金,即期,遠期10天,遠期30天,遠期60天,遠期90天,遠期120天,遠期150天,遠期180天\n" +
-        "USD,本行買入,31.23000,31.55500,31.56700,0,0,0,0,0,0,本行賣出,31.90000,31.65500,0,0,0,0,0,0,0\n" +
-        "JPY,本行買入,0.2050,0.2100,0,0,0,0,0,0,0,本行賣出,0.2180,0.2150,0,0,0,0,0,0,0\n" +
-        "EUR,本行買入,35.80000,36.50000,0,0,0,0,0,0,0,本行賣出,37.50000,36.90000,0,0,0,0,0,0,0\n" +
-        "HKD,本行買入,3.85000,4.03000,0,0,0,0,0,0,0,本行賣出,4.25000,4.12000,0,0,0,0,0,0,0\n";
+    private static readonly Dictionary<string, decimal> YahooRates = new()
+    {
+        ["USD"] = 31.5m,
+        ["JPY"] = 0.196m,
+        ["EUR"] = 36.72m,
+        ["HKD"] = 4.05m,
+    };
+
+    /// <summary>A minimal Yahoo chart response carrying <c>meta.regularMarketPrice</c>.</summary>
+    private static string YahooChartJson(decimal price) =>
+        "{\"chart\":{\"result\":[{\"meta\":{\"regularMarketPrice\":"
+        + price.ToString(CultureInfo.InvariantCulture)
+        + "}}],\"error\":null}}";
+
+    /// <summary>Pull the currency code out of a <c>.../chart/{CODE}TWD=X?...</c> URL.</summary>
+    private static string? ExtractPairCode(string url)
+    {
+        const string marker = "/chart/";
+        var i = url.IndexOf(marker, StringComparison.Ordinal);
+        if (i < 0)
+            return null;
+        var rest = url[(i + marker.Length)..];
+        var j = rest.IndexOf("TWD=X", StringComparison.Ordinal);
+        return j > 0 ? rest[..j] : null;
+    }
 
     private static CurrencyService Create(
         string currency = "TWD",
@@ -188,14 +207,14 @@ public class CurrencyServiceTests
         Assert.True(fired);
     }
 
-    // ── RefreshRatesAsync: Bank of Taiwan 即期買入 (spot-buy) ───────────────
+    // ── RefreshRatesAsync: Yahoo regularMarketPrice ────────────────────────
 
     [Fact]
-    public async Task RefreshRatesAsync_UsesBotSpotBuy_DirectTwdRates()
+    public async Task RefreshRatesAsync_UsesYahooRegularMarketPrice_DirectTwdRates()
     {
-        // BOT daily CSV → 即期買入 (col[3]) used directly as "1 foreign = N TWD",
+        // Each {CODE}TWD=X's meta.regularMarketPrice is used directly as "1 foreign = N TWD",
         // NO cross-rate division.
-        var http = CreateHttpClient(BotDailyCsv);
+        var http = new HttpClient(new YahooStubHandler(YahooRates));
         AppSettings? saved = null;
         var svc = CreateCapturing(
             out var capture,
@@ -207,42 +226,45 @@ public class CurrencyServiceTests
 
         await svc.RefreshRatesAsync();
 
-        // Each rate is the CSV's 即期買入 column verbatim (no division).
-        Assert.Equal(31.555m, svc.ExchangeRates["USD"]);
-        Assert.Equal(0.2100m, svc.ExchangeRates["JPY"]);
-        Assert.Equal(36.50000m, svc.ExchangeRates["EUR"]);
-        Assert.Equal(4.03000m, svc.ExchangeRates["HKD"]);
-        // JPY magnitude sanity-check: ~0.21, NOT ~21 (BOT is per-1-unit, not per-100).
+        // Each rate is the pair's regularMarketPrice verbatim (no division).
+        Assert.Equal(31.5m, svc.ExchangeRates["USD"]);
+        Assert.Equal(0.196m, svc.ExchangeRates["JPY"]);
+        Assert.Equal(36.72m, svc.ExchangeRates["EUR"]);
+        Assert.Equal(4.05m, svc.ExchangeRates["HKD"]);
+        // JPY magnitude sanity-check: ~0.2, NOT ~20 (Yahoo is per-1-unit, not per-100).
         Assert.InRange(svc.ExchangeRates["JPY"], 0.15m, 0.30m);
         Assert.True(fired, "CurrencyChanged should fire on a successful refresh");
 
         // Persisted with the new rates + a non-null refresh timestamp.
         Assert.NotNull(saved);
-        Assert.Equal(31.555m, saved!.UsdTwdRate);
-        Assert.Equal(31.555m, saved.ExchangeRates!["USD"]);
-        Assert.Equal(0.2100m, saved.ExchangeRates!["JPY"]);
+        Assert.Equal(31.5m, saved!.UsdTwdRate);
+        Assert.Equal(31.5m, saved.ExchangeRates!["USD"]);
+        Assert.Equal(0.196m, saved.ExchangeRates!["JPY"]);
         Assert.False(string.IsNullOrEmpty(saved.LastFxRefreshUtc));
     }
 
     [Fact]
-    public async Task RefreshRatesAsync_RequestsBotDailyCsvEndpoint()
+    public async Task RefreshRatesAsync_RequestsYahooChartEndpointPerCurrency()
     {
-        var handler = new RecordingHandler(BotDailyCsv);
+        var handler = new YahooStubHandler(YahooRates);
         var http = new HttpClient(handler);
         var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
 
         await svc.RefreshRatesAsync();
 
-        Assert.NotNull(handler.LastRequest);
-        Assert.Equal(
-            "https://rate.bot.com.tw/xrt/flcsv/0/day",
-            handler.LastRequest!.RequestUri!.ToString());
+        // One Yahoo chart request per fetched currency, each the {CODE}TWD=X pair.
+        Assert.Contains(handler.RequestedUrls, u => u.Contains("USDTWD=X", StringComparison.Ordinal));
+        Assert.Contains(handler.RequestedUrls, u => u.Contains("JPYTWD=X", StringComparison.Ordinal));
+        Assert.Contains(handler.RequestedUrls, u => u.Contains("EURTWD=X", StringComparison.Ordinal));
+        Assert.Contains(handler.RequestedUrls, u => u.Contains("HKDTWD=X", StringComparison.Ordinal));
+        Assert.All(handler.RequestedUrls, u =>
+            Assert.StartsWith("https://query1.finance.yahoo.com/v8/finance/chart/", u));
     }
 
     [Fact]
     public async Task RefreshRatesAsync_Http500_DoesNotOverwrite()
     {
-        // BOT 500s → no fabricated write; rates stay as-is, no CurrencyChanged.
+        // Every pair 500s → no fabricated write; rates stay as-is, no CurrencyChanged.
         var http = new HttpClient(new StatusHttpMessageHandler(HttpStatusCode.InternalServerError));
         AppSettings? saved = null;
         var svc = CreateCapturing(
@@ -266,8 +288,9 @@ public class CurrencyServiceTests
     [Fact]
     public async Task RefreshRatesAsync_GarbageBody_DoesNotOverwrite()
     {
-        // 200 OK but not a parseable CSV (no USD line) → rates unchanged.
-        var http = CreateHttpClient("this is not a CSV at all\nneither,is,this");
+        // 200 OK but an HTML anti-bot page (not JSON) for every pair → rates unchanged.
+        var http = new HttpClient(new BodyHttpMessageHandler(
+            "<html><head><title>Challenge Validation</title></head><body>nope</body></html>"));
         var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
         bool fired = false;
         svc.CurrencyChanged += () => fired = true;
@@ -282,29 +305,30 @@ public class CurrencyServiceTests
     [Fact]
     public async Task RefreshRatesAsync_WhenCurrencyMissingOrZero_KeepsThatRate()
     {
-        // CSV has USD (valid) but JPY 即期買入 is 0 and omits HKD entirely → both keep prior values.
-        const string partial =
-            "﻿幣別,匯率,現金,即期,本行賣出,現金,即期\n" +
-            "USD,本行買入,31.23000,31.55500,本行賣出,31.90000,31.65500\n" +
-            "JPY,本行買入,0.2050,0,本行賣出,0.2180,0.2150\n" +
-            "EUR,本行買入,35.80000,36.50000,本行賣出,37.50000,36.90000\n";
-        var http = CreateHttpClient(partial);
+        // USD valid, JPY quote is 0 (invalid), HKD pair absent entirely → JPY & HKD keep prior values.
+        var partial = new Dictionary<string, decimal>
+        {
+            ["USD"] = 31.5m,
+            ["JPY"] = 0m,     // regularMarketPrice 0 → treated as no quote
+            ["EUR"] = 36.72m,
+            // HKD omitted → handler 404s that pair
+        };
+        var http = new HttpClient(new YahooStubHandler(partial));
         var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
 
         await svc.RefreshRatesAsync();
 
-        Assert.Equal(31.555m, svc.ExchangeRates["USD"]);
-        Assert.Equal(36.50000m, svc.ExchangeRates["EUR"]);
-        Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]); // 0 in CSV → keep prior
-        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]); // absent in CSV → keep prior
+        Assert.Equal(31.5m, svc.ExchangeRates["USD"]);
+        Assert.Equal(36.72m, svc.ExchangeRates["EUR"]);
+        Assert.Equal(DefaultRates["JPY"], svc.ExchangeRates["JPY"]); // 0 quote → keep prior
+        Assert.Equal(DefaultRates["HKD"], svc.ExchangeRates["HKD"]); // absent pair → keep prior
     }
 
     [Fact]
     public async Task RefreshRatesAsync_RetriesTransientFailure_ThenSucceeds()
     {
-        // 前兩次失敗（模擬啟動初期網路/DNS 還沒就緒），第三次回正常 CSV → 應重試到成功、匯率更新。
-        // （這正是每次開機都看到 "spot-buy rate unavailable" + FX 沒刷新的根因修法。）
-        var handler = new FailThenSucceedHandler(failCount: 2, successBody: BotDailyCsv);
+        // 前兩輪整批失敗（模擬啟動初期網路/DNS 還沒就緒），第三輪成功 → 應重試到成功、匯率更新。
+        var handler = new YahooTransientHandler(failSweeps: 2, rates: YahooRates);
         var http = new HttpClient(handler);
         AppSettings? saved = null;
         var svc = CreateCapturing(out var capture, rates: new Dictionary<string, decimal>(DefaultRates), http: http);
@@ -314,8 +338,8 @@ public class CurrencyServiceTests
 
         await svc.RefreshRatesAsync();
 
-        Assert.Equal(3, handler.Calls);                  // 1 失敗 + 2 失敗 + 3 成功
-        Assert.Equal(31.555m, svc.ExchangeRates["USD"]); // 重試後成功更新
+        Assert.Equal(3, handler.Sweeps);                 // 1 失敗 + 2 失敗 + 3 成功
+        Assert.Equal(31.5m, svc.ExchangeRates["USD"]);   // 重試後成功更新
         Assert.True(fired, "CurrencyChanged should fire once a retry succeeds");
         Assert.NotNull(saved);
     }
@@ -323,8 +347,8 @@ public class CurrencyServiceTests
     [Fact]
     public async Task RefreshRatesAsync_AllAttemptsFail_KeepsCachedRates()
     {
-        // 每次都 500（連 max 次都失敗）→ 不覆寫、退回快取/預設值、不觸發事件。
-        var handler = new FailThenSucceedHandler(failCount: int.MaxValue, successBody: BotDailyCsv);
+        // 每輪都失敗（連 max 次都失敗）→ 不覆寫、退回快取/預設值、不觸發事件。
+        var handler = new YahooTransientHandler(failSweeps: int.MaxValue, rates: YahooRates);
         var http = new HttpClient(handler);
         var svc = Create("TWD", rates: new Dictionary<string, decimal>(DefaultRates), http: http);
         bool fired = false;
@@ -332,30 +356,45 @@ public class CurrencyServiceTests
 
         await svc.RefreshRatesAsync();
 
-        Assert.Equal(3, handler.Calls);                        // 重試到用完（預設 3 次）
+        Assert.Equal(3, handler.Sweeps);                       // 重試到用完（預設 3 次）
         Assert.Equal(DefaultRates["USD"], svc.ExchangeRates["USD"]);
         Assert.False(fired);
     }
 
-    // ── ParseBotDailyCsv (unit) ────────────────────────────────────────────
+    // ── ParseYahooChartPrice (unit) ────────────────────────────────────────
 
     [Fact]
-    public void ParseBotDailyCsv_TakesSpotBuyColumn_AndSkipsHeaderAndBom()
+    public void ParseYahooChartPrice_ExtractsRegularMarketPrice()
     {
-        var parsed = CurrencyService.ParseBotDailyCsv(BotDailyCsv);
-
-        Assert.Equal(31.555m, parsed["USD"]);
-        Assert.Equal(0.2100m, parsed["JPY"]);
-        Assert.Equal(36.50000m, parsed["EUR"]);
-        Assert.Equal(4.03000m, parsed["HKD"]);
-        Assert.DoesNotContain("幣別", parsed.Keys); // header row skipped
+        Assert.Equal(31.555m, CurrencyService.ParseYahooChartPrice(YahooChartJson(31.555m)));
     }
 
-    private static HttpClient CreateHttpClient(string responseBody) =>
-        new(new StubHttpMessageHandler(responseBody))
-        {
-            BaseAddress = new Uri("https://rate.bot.com.tw/")
-        };
+    [Fact]
+    public void ParseYahooChartPrice_MalformedJson_ReturnsNull()
+    {
+        // An HTML anti-bot page (the exact failure mode that killed the BOT source) → null.
+        Assert.Null(CurrencyService.ParseYahooChartPrice(
+            "<html><title>Challenge Validation</title></html>"));
+    }
+
+    [Fact]
+    public void ParseYahooChartPrice_EmptyResult_ReturnsNull()
+    {
+        Assert.Null(CurrencyService.ParseYahooChartPrice("{\"chart\":{\"result\":[]}}"));
+    }
+
+    [Fact]
+    public void ParseYahooChartPrice_MissingPrice_ReturnsNull()
+    {
+        Assert.Null(CurrencyService.ParseYahooChartPrice("{\"chart\":{\"result\":[{\"meta\":{}}]}}"));
+    }
+
+    [Fact]
+    public void ParseYahooChartPrice_ZeroPrice_ReturnsNull()
+    {
+        // regularMarketPrice ≤ 0 is not a usable rate (would divide-by-zero in Convert).
+        Assert.Null(CurrencyService.ParseYahooChartPrice(YahooChartJson(0m)));
+    }
 
     /// <summary>
     /// Like <see cref="Create"/> but exposes a hook that fires whenever the
@@ -390,6 +429,7 @@ public class CurrencyServiceTests
         public void Raise(AppSettings s) => Saved?.Invoke(s);
     }
 
+    /// <summary>Returns the given status for every request (no body of interest).</summary>
     private sealed class StatusHttpMessageHandler(HttpStatusCode status) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
@@ -401,47 +441,75 @@ public class CurrencyServiceTests
             });
     }
 
-    private sealed class StubHttpMessageHandler(string responseBody) : HttpMessageHandler
+    /// <summary>Returns 200 OK with the same body for every request.</summary>
+    private sealed class BodyHttpMessageHandler(string body) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                // Serve UTF-8 bytes so the service's byte→UTF8 decode path is exercised.
-                Content = new ByteArrayContent(Encoding.UTF8.GetBytes(responseBody)),
+                Content = new StringContent(body),
             });
     }
 
-    private sealed class RecordingHandler(string responseBody) : HttpMessageHandler
+    /// <summary>
+    /// URL-aware Yahoo stub: serves <c>YahooChartJson(rates[code])</c> for a known
+    /// <c>{CODE}TWD=X</c> pair, 404 for an unknown one. Records every requested URL.
+    /// </summary>
+    private sealed class YahooStubHandler(IReadOnlyDictionary<string, decimal> rates) : HttpMessageHandler
     {
-        public HttpRequestMessage? LastRequest { get; private set; }
+        public List<string> RequestedUrls { get; } = [];
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            LastRequest = request;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            var url = request.RequestUri!.ToString();
+            RequestedUrls.Add(url);
+            var code = ExtractPairCode(url);
+            if (code is not null && rates.TryGetValue(code, out var price))
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(YahooChartJson(price)),
+                });
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)
             {
-                Content = new ByteArrayContent(Encoding.UTF8.GetBytes(responseBody)),
+                Content = new StringContent("{}"),
             });
         }
     }
 
-    /// <summary>前 <paramref name="failCount"/> 次回 500，之後回 200＋<paramref name="successBody"/>。用來測重試。</summary>
-    private sealed class FailThenSucceedHandler(int failCount, string successBody) : HttpMessageHandler
+    /// <summary>
+    /// Fails the first <paramref name="failSweeps"/> full sweeps, then succeeds. A "sweep"
+    /// starts when the USD pair is requested (it is fetched first), letting the retry test
+    /// count whole-batch attempts rather than raw HTTP calls.
+    /// </summary>
+    private sealed class YahooTransientHandler(int failSweeps, IReadOnlyDictionary<string, decimal> rates)
+        : HttpMessageHandler
     {
-        public int Calls { get; private set; }
+        public int Sweeps { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            Calls++;
-            return Task.FromResult(Calls <= failCount
-                ? new HttpResponseMessage(HttpStatusCode.InternalServerError) { Content = new StringContent(string.Empty) }
-                : new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Encoding.UTF8.GetBytes(successBody)) });
+            var url = request.RequestUri!.ToString();
+            var code = ExtractPairCode(url);
+            if (code == "USD")
+                Sweeps++; // a new sweep begins with the first (USD) request
+
+            if (Sweeps <= failSweeps)
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent(string.Empty),
+                });
+
+            var price = code is not null && rates.TryGetValue(code, out var p) ? p : 0m;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(YahooChartJson(price)),
+            });
         }
     }
 }

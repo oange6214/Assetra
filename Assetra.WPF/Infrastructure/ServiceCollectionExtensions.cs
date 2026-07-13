@@ -50,11 +50,12 @@ internal static class ServiceCollectionExtensions
             new Assetra.Application.Fx.FxRateHistoryService(
                 sp.GetRequiredService<IFxRateHistoryRepository>()));
         services.AddSingleton<Assetra.Application.Fx.TransactionFxRateResolver>();
-        // P4.1b — historical FX fetcher to populate the store. Bank of Taiwan
-        // (台灣銀行) 即期買入 monthly CSV; YahooFxRateHistoryFetcher remains in the
-        // repo as a valid alternate source but is no longer the registered default.
+        // P4.1b — historical FX fetcher to populate the store. Yahoo Finance v8
+        // chart endpoint ({from}{to}=X). 台灣銀行 CSV 端點（BotFxRateHistoryFetcher）
+        // 已被套上反爬蟲挑戰頁、一律回 HTML 解不出，故改用 Yahoo（與即時匯率同源）；
+        // BotFxRateHistoryFetcher 保留為備援程式碼但不再註冊。
         services.AddSingleton<IFxRateHistoryFetcher>(sp =>
-            new Assetra.Infrastructure.Fx.BotFxRateHistoryFetcher(
+            new Assetra.Infrastructure.Fx.YahooFxRateHistoryFetcher(
                 sp.GetRequiredService<HttpClient>()));
         // P4.1c — orchestrator called from AppStartupTasks on every startup.
         services.AddSingleton<Assetra.Application.Fx.FxRateHistoryRefresher>(sp =>
