@@ -33,7 +33,8 @@ public class TransactionDialogViewModelTests
         PortfolioGroupCatalog? groupCatalog = null,
         TransactionFxRateResolver? fxResolver = null,
         Func<CashAccountRowViewModel?>? getDefaultCashAccount = null,
-        ISellWorkflowService? sellWorkflow = null)
+        ISellWorkflowService? sellWorkflow = null,
+        ITransactionWorkflowService? txWorkflow = null)
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
         addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
@@ -49,7 +50,7 @@ public class TransactionDialogViewModelTests
             new PortfolioSellPanelController());
 
         var deps = new TransactionDialogDependencies(
-            TransactionWorkflow: Mock.Of<ITransactionWorkflowService>(),
+            TransactionWorkflow: txWorkflow ?? Mock.Of<ITransactionWorkflowService>(),
             TradeDeletion: Mock.Of<ITradeDeletionWorkflowService>(),
             TradeMetadata: Mock.Of<ITradeMetadataWorkflowService>(),
             LoanMutation: Mock.Of<ILoanMutationWorkflowService>(),
@@ -1597,6 +1598,41 @@ public class TransactionDialogViewModelTests
         Assert.Equal(10, captured.SellQuantity);
         Assert.Equal(16_000m, captured.ActualCashAmount);   // statement 金額原樣寫入
         Assert.Equal(32m, captured.FxRate);                 // 16000 / (50 × 10) 反推
+    }
+
+    [Fact]
+    public async Task Characterization_CashDividend_TotalMode_DerivesPerShare()
+    {
+        // 現金股利「總額模式」(InputMode="total")：使用者填總股息金額，
+        // 系統反推每股金額寫入請求。觀察到的公式（ConfirmCashDivAsync L30）:
+        //   PerShare = TotalAmount / Position.Quantity
+        //   → 3000 / 15000 = 0.2
+        // 注意 TxType 實際字串為 "cashDiv"（非 spec 猜測的 "cashDividend"）。
+        CashDividendTransactionRequest? captured = null;
+        var txWorkflow = new Mock<ITransactionWorkflowService>();
+        txWorkflow.Setup(s => s.RecordCashDividendAsync(
+                It.IsAny<CashDividendTransactionRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<CashDividendTransactionRequest, CancellationToken>((req, _) => captured = req)
+            .Returns(Task.CompletedTask);
+
+        var position = MakePosition();   // TWD、持倉 15,000 股
+        var vm = CreateVm(
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            txWorkflow: txWorkflow.Object);
+
+        vm.TxType = "cashDiv";
+        vm.Div.Position = position;
+        vm.Div.InputMode = "total";
+        vm.Div.TotalInput = "3000";   // 直接填總股息金額，不填每股
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.TxError);
+        Assert.NotNull(captured);
+        Assert.Equal(3_000m, captured!.TotalAmount);
+        Assert.Equal(15_000, captured.Quantity);
+        Assert.Equal(0.2m, captured.PerShare);   // 3000 / 15000 反推
     }
 
     [Fact]
