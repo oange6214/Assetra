@@ -1,0 +1,39 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared.TxFeeField"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
+    mc:Ignorable="d">
+
+    <!--
+        Wave 1 — 抽出「手續費 override」重複區塊：shared:FormField（Fee label＋TextBox＋error）
+        ＋ FeeOverrideHint 提示。DataContext 由外層 TxForm（TransactionDialogViewModel）繼承，
+        直接綁共用 VM 屬性 TxFee / TxFeeError，故本控制項不需任何 DP。
+
+        目前只有 Buy / Sell 兩張表單帶此 override 提示；其餘 5 張（Income / CashFlow /
+        CashDividend / Loan / Transfer）無 hint 且 error 間距為 0,0,0,12，屬另一種區塊，
+        不套用此控制項（見重構報告）。
+
+        逐段對齊原 inline markup：
+        • label／TextBox／error 由 FormField 產生；FormField label margin 固定 0,0,0,6、
+          ErrorMargin 沿用預設 0,2,0,0（等同 Buy/Sell 原本未覆寫的 FormFieldError margin）。
+        • hint margin 以 Sell 原值 0,2,0,12 為準（Sell 換入後 byte-identical）；
+          Buy 的 label 上緣 14 與 hint 下緣 14 由外層 <shared:TxFeeField Margin="0,14,0,2"/> 帶回。
+    -->
+    <StackPanel>
+        <shared:FormField
+            ErrorText="{Binding TxFeeError}"
+            Label="{DynamicResource Portfolio.Tx.Fee}"
+            Placeholder="{DynamicResource Portfolio.Tx.FeePlaceholder}"
+            Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}"
+            ThousandSeparator="True" />
+        <TextBlock
+            Margin="0,2,0,12"
+            FontSize="{StaticResource Font.Size.Xs}"
+            Foreground="{DynamicResource AppTextMuted}"
+            Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
+            TextWrapping="Wrap" />
+    </StackPanel>
+</UserControl>

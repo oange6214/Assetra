@@ -267,27 +267,8 @@
             </Grid>
         </Border>
 
-        <!--  手續費 (override; 留空 → 自動計算)  -->
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Fee}" />
-        <TextBox
-            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-            Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
-            Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock
-            Style="{StaticResource FormFieldError}"
-            Text="{Binding TxFeeError}"
-            Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
-        <TextBlock
-            Margin="0,2,0,12"
-            FontSize="{StaticResource Font.Size.Xs}"
-            Foreground="{DynamicResource AppTextMuted}"
-            Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
-            TextWrapping="Wrap" />
+        <!--  手續費 (override; 留空 → 自動計算) — Wave 1：抽出 shared:TxFeeField（byte-identical）  -->
+        <shared:TxFeeField />
 
         <!--  存入現金帳戶 — checkbox + dropdown  -->
         <CheckBox

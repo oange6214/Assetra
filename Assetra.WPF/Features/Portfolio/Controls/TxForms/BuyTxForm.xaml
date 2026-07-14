@@ -440,27 +440,13 @@
                         </Style>
                     </StackPanel.Style>
 
-                    <!--  手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)  -->
-                    <TextBlock
-                        Margin="0,14,0,6"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.Tx.Fee}" />
-                    <TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                        Tag="{DynamicResource Portfolio.Tx.FeePlaceholder}"
-                        Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Style="{StaticResource FormFieldError}"
-                        Text="{Binding TxFeeError}"
-                        Visibility="{Binding TxFeeError, Converter={StaticResource StringToVisibilityConverter}}" />
-                    <TextBlock
-                        Margin="0,4,0,14"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextMuted}"
-                        Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
-                        TextWrapping="Wrap" />
+                    <!--
+                        手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)
+                        Wave 1：抽出 shared:TxFeeField。外層 Margin 帶回原 label 上緣 14 與 hint 下緣 14
+                        （14 = 控制項 Margin 底 2 + hint 內建 12）。註：原 hint 上緣 4px、控制項內建 2px，
+                        差 2px（不可用外層 Margin 吸收，屬區塊內部間距）— 見重構報告，待人工目視確認。
+                    -->
+                    <shared:TxFeeField Margin="0,14,0,2" />
 
                     <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
                     <CheckBox
