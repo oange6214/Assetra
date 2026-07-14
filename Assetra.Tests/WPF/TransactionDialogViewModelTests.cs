@@ -1560,6 +1560,46 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task Characterization_Sell_CrossCurrency_DerivesFxOrActualCash()
+    {
+        // 跨幣別賣出（外幣持倉入 TWD 帳戶）時，使用者只填「實際入帳金額」(statement)，
+        // 系統反推匯率寫入賣出請求（雙保險：存 ActualCashAmount + FxRate 兩者）。
+        // 觀察到的反推公式（SellPanelViewModel.ConfirmSell L223-228）:
+        //   FxRate = ActualCashAmount / (SellPrice × SellQty)
+        //   → 16000 / (50 × 10) = 16000 / 500 = 32
+        // 直接驅動 SellPanelViewModel + ExecuteSellFromTxDialogAsync（對齊上方
+        // ExecuteSellFromTxDialogAsync_* 既有測試），透過 GetSellActualCashAmount 委派
+        // 灌入 statement 金額 —— 比走完整 TransactionDialogViewModel 更省設定。
+        SellWorkflowRequest? captured = null;
+        var workflow = new Mock<ISellWorkflowService>();
+        workflow.Setup(s => s.RecordAsync(
+                It.IsAny<SellWorkflowRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<SellWorkflowRequest, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(new SellWorkflowResult(CreateSellTrade(), 0));
+        var vm = new SellPanelViewModel(workflow.Object, new PortfolioSellPanelController())
+        {
+            // 只給「實際入帳金額」（帳戶幣別），FxRate 留空 → 由系統反推。
+            GetSellActualCashAmount = () => "16000",
+        };
+
+        var error = await vm.ExecuteSellFromTxDialogAsync(
+            CreatePositionRow(),   // 持倉 10 股
+            "50",                  // 單價 50
+            new DateTime(2026, 5, 1, 16, 0, 0, DateTimeKind.Utc),
+            null,
+            false,
+            10);                   // 全數賣出 10 股
+
+        Assert.Null(error);
+        Assert.NotNull(captured);
+        Assert.Equal(50m, captured!.SellPrice);
+        Assert.Equal(10, captured.SellQuantity);
+        Assert.Equal(16_000m, captured.ActualCashAmount);   // statement 金額原樣寫入
+        Assert.Equal(32m, captured.FxRate);                 // 16000 / (50 × 10) 反推
+    }
+
+    [Fact]
     public void Sell_CrossCurrency_AutoExpandsAdvancedSection()
     {
         // 跨幣別賣出時，結算金額/匯率等必填欄位收在「進階」內 —— 必須自動展開，
