@@ -105,6 +105,23 @@ public partial class FormField : UserControl
         set => SetValue(ThousandSeparatorProperty, value);
     }
 
+    /// <summary>
+    /// 錯誤文字 TextBlock 的 Margin。預設 <c>0,2,0,0</c>，等同 <c>FormFieldError</c> 樣式原本的
+    /// Margin，所以未指定此 DP 的呼叫端渲染與過去完全一致。部分表單的錯誤標籤原本掛了局部
+    /// <c>Margin="0,0,0,12"</c>（覆寫樣式）以撐出欄位間距，改用此 DP 逐欄帶入即可保住原行為。
+    /// </summary>
+    public static readonly DependencyProperty ErrorMarginProperty = DependencyProperty.Register(
+        nameof(ErrorMargin),
+        typeof(Thickness),
+        typeof(FormField),
+        new PropertyMetadata(new Thickness(0, 2, 0, 0)));
+
+    public Thickness ErrorMargin
+    {
+        get => (Thickness)GetValue(ErrorMarginProperty);
+        set => SetValue(ErrorMarginProperty, value);
+    }
+
     public FormField()
     {
         InitializeComponent();

@@ -28,6 +28,7 @@
             Tag="{Binding Placeholder, ElementName=Root}"
             Text="{Binding Text, ElementName=Root, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock
+            Margin="{Binding ErrorMargin, ElementName=Root}"
             Style="{StaticResource FormFieldError}"
             Text="{Binding ErrorText, ElementName=Root}"
             Visibility="{Binding ErrorText, ElementName=Root, Converter={StaticResource StringToVisibilityConverter}}" />

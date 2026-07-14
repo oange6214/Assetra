@@ -5,6 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
@@ -16,22 +17,14 @@
         <!--  股票已由上方「選擇資產」決定（賣出只在選到投資持倉時可選，cascade 會把它設成
               Sell.Position），故此處不再重複顯示持倉選擇器，避免與「選擇資產」重複。  -->
 
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.SellQuantity}" />
-        <TextBox
-            Margin="0,0,0,0"
-            IsEnabled="{Binding AreEconomicFieldsEditable}"
-            Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
+        <!--  Wave 1 — 標準金額欄位改用 shared:FormField（error 局部 12px 間距以 ErrorMargin 帶入，與原 markup 等價）  -->
+        <shared:FormField
+            ErrorMargin="0,0,0,12"
+            ErrorText="{Binding Sell.QuantityError}"
+            InputEnabled="{Binding AreEconomicFieldsEditable}"
+            Label="{DynamicResource Portfolio.Tx.SellQuantity}"
+            Placeholder="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
             Text="{Binding Sell.Quantity, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock
-            Margin="0,0,0,12"
-            Style="{StaticResource FormFieldError}"
-            Text="{Binding Sell.QuantityError}"
-            Visibility="{Binding Sell.QuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
 
         <!--  成交明細輸入模式：單價 / 成交總額（對齊買入）。總額採 GROSS：股數×單價。  -->
         <TextBlock
@@ -96,22 +89,14 @@
 
         <!--  總額模式：成交總額（gross＝股數×單價），確認時反推單價。  -->
         <StackPanel Visibility="{Binding Sell.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.TotalAmountLabel}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                IsEnabled="{Binding AreEconomicFieldsEditable}"
-                Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
-                Text="{Binding Sell.TotalProceeds, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding Sell.TotalProceedsError}"
-                Visibility="{Binding Sell.TotalProceedsError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <shared:FormField
+                ErrorMargin="0,0,0,12"
+                ErrorText="{Binding Sell.TotalProceedsError}"
+                InputEnabled="{Binding AreEconomicFieldsEditable}"
+                Label="{DynamicResource Portfolio.Tx.TotalAmountLabel}"
+                Placeholder="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
+                Text="{Binding Sell.TotalProceeds, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
         </StackPanel>
 
         <!--  進階（手續費折扣 / 費用預覽 / 手續費 / 帳戶 / 跨幣別）— 對齊買入收合。  -->

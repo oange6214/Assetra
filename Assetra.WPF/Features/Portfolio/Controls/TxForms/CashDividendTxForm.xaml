@@ -5,6 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
@@ -39,40 +40,25 @@
 
         <!--  每股股利模式  -->
         <StackPanel Visibility="{Binding Div.IsPerShareMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.DivPerShare}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
-                Text="{Binding Div.PerShare, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding Div.PerShareError}"
-                Visibility="{Binding Div.PerShareError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <!--  Wave 1 — 標準金額欄位改用 shared:FormField（error 局部 12px 間距以 ErrorMargin 帶入，與原 markup 等價）  -->
+            <shared:FormField
+                ErrorMargin="0,0,0,12"
+                ErrorText="{Binding Div.PerShareError}"
+                Label="{DynamicResource Portfolio.Tx.DivPerShare}"
+                Placeholder="{DynamicResource Portfolio.Tx.PricePlaceholder}"
+                Text="{Binding Div.PerShare, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
         </StackPanel>
 
         <!--  總額模式  -->
         <StackPanel Visibility="{Binding Div.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.DivTotalAmount}" />
-            <TextBox
-                behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                Tag="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
-                Text="{Binding Div.TotalInput, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,12"
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding Div.TotalInputError}"
-                Visibility="{Binding Div.TotalInputError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <shared:FormField
+                ErrorMargin="0,0,0,12"
+                ErrorText="{Binding Div.TotalInputError}"
+                Label="{DynamicResource Portfolio.Tx.DivTotalAmount}"
+                Placeholder="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
+                Text="{Binding Div.TotalInput, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
         </StackPanel>
 
         <!--  持有股數 + 合計（auto-calculated）  -->

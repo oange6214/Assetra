@@ -5,6 +5,7 @@
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
     mc:Ignorable="d">
@@ -13,18 +14,13 @@
     <StackPanel Visibility="{Binding TxTypeIsIncome, Converter={StaticResource BooleanToVisibilityConverter}}">
 
         <!--  金額  -->
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{DynamicResource Portfolio.Tx.Amount}" />
-        <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBlock
-            Margin="0,0,0,12"
-            Style="{StaticResource FormFieldError}"
-            Text="{Binding TxAmountError}"
-            Visibility="{Binding TxAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
+        <!--  Wave 1 — 標準金額欄位改用 shared:FormField（error 局部 12px 間距以 ErrorMargin 帶入，與原 markup 等價）  -->
+        <shared:FormField
+            ErrorMargin="0,0,0,12"
+            ErrorText="{Binding TxAmountError}"
+            Label="{DynamicResource Portfolio.Tx.Amount}"
+            Text="{Binding TxAmount, UpdateSourceTrigger=PropertyChanged}"
+            ThousandSeparator="True" />
 
         <!--  存入帳戶 — 帳戶由上方「選擇資產」決定，不再重複選一次；
               取消勾選＝此筆收入不連動現金（只記錄、不影響任何帳戶餘額）。  -->
