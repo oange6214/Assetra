@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
     xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
@@ -65,23 +66,15 @@
                     TextWrapping="Wrap" />
 
                 <!--  Row 1：數量（全寬；價格模式 toggle 已移至進階區）  -->
-                <StackPanel Margin="0,0,0,14">
-                    <TextBlock
-                        Margin="0,0,0,6"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        FontWeight="SemiBold"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        Text="{DynamicResource Portfolio.AddQuantity}" />
-                    <TextBox
-                        behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                        IsEnabled="{Binding AreEconomicFieldsEditable}"
-                        Tag="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
-                        Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Style="{StaticResource FormFieldError}"
-                        Text="{Binding AddAssetDialog.AddQuantityError}"
-                        Visibility="{Binding AddAssetDialog.AddQuantityError, Converter={StaticResource StringToVisibilityConverter}}" />
-                </StackPanel>
+                <!--  Wave 1 — 抽出 shared:FormField；label/TextBox/error 三段與原 inline markup 等價  -->
+                <shared:FormField
+                    Margin="0,0,0,14"
+                    ErrorText="{Binding AddAssetDialog.AddQuantityError}"
+                    InputEnabled="{Binding AreEconomicFieldsEditable}"
+                    Label="{DynamicResource Portfolio.AddQuantity}"
+                    Placeholder="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
+                    Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}"
+                    ThousandSeparator="True" />
 
                 <!--
                     Row 2：價格 label + inline 「取得市價」 link。Bottom-align 兩邊讓 baseline 一致

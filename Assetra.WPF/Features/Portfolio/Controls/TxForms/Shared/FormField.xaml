@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared.FormField"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    mc:Ignorable="d">
+
+    <!--
+        Wave 1 — 「semibold label → TextBox → FormFieldError」三件組共用控制項。
+        Label / TextBox / error 三段 markup 逐字沿用 BuyTxForm 數量欄位原本的
+        inline 樣式（label 用 Font.Size.Xs + SemiBold + AppTextSecondary + margin
+        0,0,0,6；TextBox 走隱式樣式 + Tag placeholder；error 走 FormFieldError）。
+        內層綁定用 ElementName=Root 讀本控制項的 DP（對齊 CrossCurrencyOverlay 慣例）。
+    -->
+    <StackPanel>
+        <TextBlock
+            Margin="0,0,0,6"
+            FontSize="{StaticResource Font.Size.Xs}"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource AppTextSecondary}"
+            Text="{Binding Label, ElementName=Root}" />
+        <TextBox
+            behaviors:ThousandSeparatorBehavior.IsEnabled="{Binding ThousandSeparator, ElementName=Root}"
+            IsEnabled="{Binding InputEnabled, ElementName=Root}"
+            Tag="{Binding Placeholder, ElementName=Root}"
+            Text="{Binding Text, ElementName=Root, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock
+            Style="{StaticResource FormFieldError}"
+            Text="{Binding ErrorText, ElementName=Root}"
+            Visibility="{Binding ErrorText, ElementName=Root, Converter={StaticResource StringToVisibilityConverter}}" />
+    </StackPanel>
+</UserControl>
