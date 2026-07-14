@@ -1298,6 +1298,40 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task Characterization_Buy_SameCurrency_NoFxNoActualCash()
+    {
+        StockBuyRequest? captured = null;
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>())).Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 100m));
+        addWorkflow
+            .Setup(w => w.ExecuteStockBuyAsync(It.IsAny<StockBuyRequest>(), It.IsAny<CancellationToken>()))
+            .Callback<StockBuyRequest, CancellationToken>((r, _) => captured = r)
+            .ReturnsAsync(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), "2330", "TWSE", Currency: "TWD"),
+                Commission: 0m, CommissionDiscountUsed: 1m, CostPerShare: 100m));
+
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object, Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(), Mock.Of<ICreditCardMutationWorkflowService>());
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "2330";
+        vm.AddSymbolCurrency = "TWD";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);
+        Assert.NotNull(captured);
+        Assert.Equal(100m, captured!.Price);
+        Assert.Equal(10, captured.Quantity);
+        Assert.Null(captured.FxRate);
+        Assert.Null(captured.ActualCashAmount);
+    }
+
+    [Fact]
     public async Task ConfirmAdd_Stock_CrossCurrencyStatementMode_DerivesPriceFromActualCashUsingResolvedFxRate()
     {
         // 依帳戶明細 (statement) 模式：使用者只填「帳戶扣款金額」+ 股數、清空每股價，
