@@ -61,7 +61,8 @@
                         MinWidth="280"
                         DisplayMemberPath="PeriodStart"
                         ItemsSource="{Binding Sessions}"
-                        SelectedItem="{Binding SelectedSession, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
+                        Style="{StaticResource FormComboBox}" />
                 </StackPanel>
 
                 <TextBlock
@@ -121,7 +122,6 @@
                 <ComboBox
                     Grid.Row="0" Grid.Column="1"
                     Margin="0,0,0,8"
-                    DisplayMemberPath="Name"
                     ItemsSource="{Binding AccountOptions}"
                     SelectedItem="{Binding NewSessionAccount, Mode=TwoWay}" />
 
@@ -160,7 +160,6 @@
                             Content="{DynamicResource Reconciliation.NewSession.Source.ExistingBatch}" />
                         <ComboBox
                             MinWidth="320"
-                            DisplayMemberPath="Display"
                             ItemsSource="{Binding BatchOptions}"
                             SelectedItem="{Binding SelectedBatch, Mode=TwoWay}"
                             IsEnabled="{Binding UseExistingBatch}" />

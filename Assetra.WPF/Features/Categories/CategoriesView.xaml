@@ -883,7 +883,6 @@
                                                             Text="{Binding EditKeyword, UpdateSourceTrigger=PropertyChanged}" />
                                                         <ComboBox
                                                             Grid.Column="2"
-                                                            DisplayMemberPath="Name"
                                                             ItemsSource="{Binding DataContext.AvailableCategories, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             SelectedValue="{Binding EditCategoryId}"
                                                             SelectedValuePath="Id"

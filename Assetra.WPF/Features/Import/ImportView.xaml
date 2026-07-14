@@ -137,7 +137,6 @@
                     Text="{DynamicResource Import.CashAccount.Label}" />
                 <ComboBox
                     MinWidth="200"
-                    DisplayMemberPath="DisplayName"
                     ItemsSource="{Binding CashAccountOptions}"
                     SelectedItem="{Binding SelectedCashAccount, Mode=TwoWay}" />
             </StackPanel>

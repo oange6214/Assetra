@@ -173,7 +173,6 @@
                                 Margin="0,8,0,0">
                                 <TextBlock Style="{StaticResource SheetFieldLabel}" Text="{DynamicResource Categories.Field.Parent}" />
                                 <ComboBox
-                                    DisplayMemberPath="Display"
                                     ItemsSource="{Binding AddParentOptions}"
                                     SelectedValue="{Binding AddParentId, Mode=TwoWay}"
                                     SelectedValuePath="Id" />
