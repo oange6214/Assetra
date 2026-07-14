@@ -308,57 +308,36 @@
 
         <!--  Non-stock (Fund/Metal/Bond): Name + Cost  -->
         <StackPanel Visibility="{Binding Buy.IsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Dialog.AddName}" />
-            <TextBox Margin="0,0,0,14" Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Dialog.AddCost}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding AddAssetDialog.AddCostError}"
-                Visibility="{Binding AddAssetDialog.AddCostError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <!--  Wave 1 — 標準文字欄位改用 shared:FormField（label/TextBox/error 三段與原 inline markup 等價）  -->
+            <shared:FormField
+                Margin="0,0,0,14"
+                Label="{DynamicResource Portfolio.Dialog.AddName}"
+                Text="{Binding AddAssetDialog.AddName, UpdateSourceTrigger=PropertyChanged}" />
+            <shared:FormField
+                ErrorText="{Binding AddAssetDialog.AddCostError}"
+                Label="{DynamicResource Portfolio.Dialog.AddCost}"
+                Text="{Binding AddAssetDialog.AddCost, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
         </StackPanel>
 
         <!--  Crypto: Symbol + Qty + Price  -->
         <StackPanel Visibility="{Binding Buy.IsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Dialog.CryptoSymbol}" />
-            <TextBox Margin="0,0,0,14" Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Dialog.CryptoQty}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding AddAssetDialog.AddCryptoQtyError}"
-                Visibility="{Binding AddAssetDialog.AddCryptoQtyError, Converter={StaticResource StringToVisibilityConverter}}" />
-            <TextBlock
-                Margin="0,14,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Dialog.CryptoPrice}" />
-            <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock
-                Style="{StaticResource FormFieldError}"
-                Text="{Binding AddAssetDialog.AddCryptoPriceError}"
-                Visibility="{Binding AddAssetDialog.AddCryptoPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
+            <!--  Wave 1 — 標準文字欄位改用 shared:FormField（label/TextBox/error 三段與原 inline markup 等價）  -->
+            <shared:FormField
+                Margin="0,0,0,14"
+                Label="{DynamicResource Portfolio.Dialog.CryptoSymbol}"
+                Text="{Binding AddAssetDialog.AddCryptoSymbol, UpdateSourceTrigger=PropertyChanged}" />
+            <shared:FormField
+                ErrorText="{Binding AddAssetDialog.AddCryptoQtyError}"
+                Label="{DynamicResource Portfolio.Dialog.CryptoQty}"
+                Text="{Binding AddAssetDialog.AddCryptoQty, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
+            <shared:FormField
+                Margin="0,14,0,0"
+                ErrorText="{Binding AddAssetDialog.AddCryptoPriceError}"
+                Label="{DynamicResource Portfolio.Dialog.CryptoPrice}"
+                Text="{Binding AddAssetDialog.AddCryptoPrice, UpdateSourceTrigger=PropertyChanged}"
+                ThousandSeparator="True" />
         </StackPanel>
 
         <!--
