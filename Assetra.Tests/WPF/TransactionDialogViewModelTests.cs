@@ -696,6 +696,9 @@ public class TransactionDialogViewModelTests
         Assert.Equal(string.Empty, vm.Buy.FxFetchError);
     }
 
+    // ── Characterization baseline — 新增交易對話框重構（2026-07-15 spec）────────
+    //   下列測試鎖住「輸入 → 寫入請求 DTO」的行為。Wave 1–3 為行為不變重構，
+    //   這些必須在每次遷移後保持 bit-identical 綠；Wave 4 才允許新增（不放寬）驗證。
     [Fact]
     public async Task ConfirmBuy_CrossCurrency_RateNotYetFetched_EnsuresRateOnConfirm()
     {
