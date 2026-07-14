@@ -1332,6 +1332,47 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public async Task Characterization_Buy_CrossCurrency_StatementMode_DerivesFxFromActualCash()
+    {
+        StockBuyRequest? captured = null;
+        var addWorkflow = new Mock<IAddAssetWorkflowService>();
+        addWorkflow.Setup(w => w.SearchSymbols(It.IsAny<string>(), It.IsAny<int>())).Returns([]);
+        addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
+            .Returns(new BuyPreviewResult(1000m, 0m, 1000m, 100m));
+        addWorkflow
+            .Setup(w => w.ExecuteStockBuyAsync(It.IsAny<StockBuyRequest>(), It.IsAny<CancellationToken>()))
+            .Callback<StockBuyRequest, CancellationToken>((r, _) => captured = r)
+            .ReturnsAsync(new StockBuyResult(
+                new PortfolioEntry(Guid.NewGuid(), "AAPL", "NASDAQ", Currency: "USD"),
+                Commission: 0m, CommissionDiscountUsed: 1m, CostPerShare: 100m));
+
+        var vm = new AddAssetDialogViewModel(
+            addWorkflow.Object, Mock.Of<IAccountUpsertWorkflowService>(),
+            Mock.Of<ITransactionWorkflowService>(), Mock.Of<ICreditCardMutationWorkflowService>())
+        {
+            BuyContext = new StaticBuyContext(
+                cashAccountId: Guid.NewGuid(),
+                cashAccountCurrency: "TWD",
+                useCashAccount: true,
+                settlementInputMode: "statement",
+                actualCashAmount: "32500"),
+        };
+        vm.AddAssetType = "stock";
+        vm.AddSymbol = "AAPL";
+        vm.AddSymbolCurrency = "USD";
+        vm.AddPrice = "100";
+        vm.AddQuantity = "10";
+
+        await vm.ConfirmAddCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.AddError);
+        Assert.NotNull(captured);
+        Assert.Equal(32_500m, captured!.ActualCashAmount);
+        Assert.Equal(32.5m, captured.FxRate);
+        Assert.Equal("TWD", captured.SettlementCurrency);
+    }
+
+    [Fact]
     public async Task ConfirmAdd_Stock_CrossCurrencyStatementMode_DerivesPriceFromActualCashUsingResolvedFxRate()
     {
         // 依帳戶明細 (statement) 模式：使用者只填「帳戶扣款金額」+ 股數、清空每股價，
