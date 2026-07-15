@@ -155,7 +155,11 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private bool _suppressDividendFxManualTracking;
     // Total-mode 防回寫迴圈：成交總額 → 單價(AddPrice) 同步時設旗標，讓單價變動的「反推回總額」
     // 寫回路徑跳過，否則 TotalCost↔AddPrice 互寫 + 千分位行為 + 每鍵觸發會把使用者輸入改掉/放大。
+    /// <summary>寫入 AddPrice 期間暫停「AddPrice → TotalCost」回寫，避免雙向連動打架。</summary>
     private bool _suppressBuyTotalRewrite;
+
+    /// <summary>寫入 TotalCost 期間暫停「TotalCost → AddPrice」回寫（上者的反向）。</summary>
+    private bool _suppressBuyPriceRewrite;
     private readonly Action _rebuildTotals;
     private readonly Func<string, string, string> _localize;
 
@@ -223,17 +227,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 NotifyImpactPreviewChanged();
 
-                // P2.9 — 取得市價在 Total mode 也要有用：fetched AddPrice 用 quantity
-                // 反推 TotalCost 寫進可見 TextBox。Unit mode 不必處理 (AddPrice 本身就是
-                // 使用者輸入的欄位)。AddQuantity 變動也走這條 — 使用者改數量後 TotalCost
-                // 會跟著校正，跟改 unit price 是對稱的。
+                // 成交明細三欄連動（數量 / 每股價格 / 成交總額）：使用者打哪一欄，哪一欄就是權威，
+                // 另一欄自動補算。不再有「單價/總額」模式切換 — PriceMode 降級為內部隱含旗標，
+                // 只記錄「金額類欄位最後是誰被使用者輸入」，供確認層沿用既有 GROSS 語意。
+                // _suppressBuyTotalRewrite 為 true 代表這次變動是 TotalCost→AddPrice 的程式回寫，
+                // 不是使用者輸入，不可反過來再改權威。
                 if (!_suppressBuyTotalRewrite &&
-                    Buy.IsTotalMode &&
-                    e.PropertyName is nameof(AddAssetDialog.AddPrice) or nameof(AddAssetDialog.AddQuantity) &&
-                    ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) && price > 0 &&
-                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
+                    e.PropertyName is nameof(AddAssetDialog.AddPrice) or nameof(AddAssetDialog.AddQuantity))
                 {
-                    Buy.TotalCost = (price * qty).ToString("0.##");
+                    // 使用者親手打「每股價格」→ 單價為權威。改「數量」不改變權威（沿用目前這邊）。
+                    if (e.PropertyName is nameof(AddAssetDialog.AddPrice))
+                        Buy.PriceMode = "unit";
+
+                    RecomputeBuyDerivedAmount();
                 }
 
                 SyncBuyGrossNative();
@@ -434,6 +440,41 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     public bool IsTxCurrencyEditable =>
         SelectedAsset is null || !IsInvestmentAssetKind(SelectedAsset.Kind);
+
+    /// <summary>
+    /// 成交明細三欄（數量 / 每股價格 / 成交總額）的連動核心：依 <c>Buy.PriceMode</c>
+    /// （＝使用者最後輸入的金額欄）把「非權威」的那一欄重算出來。
+    ///
+    /// <para>單價為權威 → 總額 = 單價 × 數量；總額為權威 → 單價 = 總額 ÷ 數量。
+    /// 兩個方向各自用對向的 suppress 旗標擋住回授，否則會互相覆蓋（千分位 + 每鍵觸發會放大成亂跳）。</para>
+    ///
+    /// <para>反推單價刻意用高精度（非 F4）：否則 單價(4位) × 數量 會把使用者輸入的總額 round-trip 掉
+    /// （例：123,456,789 → 6172.8395 → 123,456,790）。顯示用的格式化另由
+    /// <see cref="TxBuyComputedUnitPriceDisplay"/> 負責，不受此精度影響。</para>
+    /// </summary>
+    private void RecomputeBuyDerivedAmount()
+    {
+        if (!ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0)
+            return;
+
+        if (Buy.IsTotalMode)
+        {
+            if (ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0)
+            {
+                _suppressBuyTotalRewrite = true;
+                try { AddAssetDialog.AddPrice = (total / qty).ToString("0.##########"); }
+                finally { _suppressBuyTotalRewrite = false; }
+            }
+            return;
+        }
+
+        if (ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) && price > 0)
+        {
+            _suppressBuyPriceRewrite = true;
+            try { Buy.TotalCost = (price * qty).ToString("0.##"); }
+            finally { _suppressBuyPriceRewrite = false; }
+        }
+    }
 
     /// <summary>
     /// 把「成交價金」（數量 × 每股價格，成交幣別）同步進 <c>Buy</c> 供溢價合理性檢查用。
@@ -2093,34 +2134,18 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         switch (e.PropertyName)
         {
             case nameof(BuyTxViewModel.PriceMode):
-                // 切換到「成交總額」模式時回填總額，否則欄位是空的 0.00（編輯既有交易最明顯）。
-                // 回填值要保住「總成本」不變：
-                //   已含手續費 → 用含費總額 (AddTotalCost)；總額模式會把手續費視為 0、總成本＝此值。
-                //   未含手續費 → 用 單價 × 數量（成交金額）；手續費另計加在上面，總成本一致。
-                if (Buy.IsTotalMode &&
-                    ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var switchPrice) && switchPrice > 0 &&
-                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var switchQty) && switchQty > 0)
-                {
-                    Buy.TotalCost = Buy.TotalIncludesFee && AddAssetDialog.AddTotalCost > 0
-                        ? AddAssetDialog.AddTotalCost.ToString("0.##")
-                        : (switchPrice * switchQty).ToString("0.##");
-                }
+                // 三欄連動後不再需要「切到總額模式時回填總額」——成交總額欄位一直可見且持續同步，
+                // 不會有空欄要補。PriceMode 現在只是內部權威旗標，由使用者輸入哪一欄決定。
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
                 OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.TotalCost):
-                if (Buy.IsTotalMode &&
-                    ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0 &&
-                    ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0)
+                // _suppressBuyPriceRewrite 為 true 代表這是 AddPrice→TotalCost 的程式回寫，非使用者輸入。
+                if (!_suppressBuyPriceRewrite)
                 {
-                    // 防迴圈：設定 AddPrice 時暫停「AddPrice → 反推回 TotalCost」的寫回路徑，
-                    // 否則會把使用者剛輸入的成交總額改掉（甚至被千分位 + 每鍵觸發放大）。
-                    // 用高精度（非 F4）反推單價，否則 單價(4位) × 數量 會把總額 round-trip 掉
-                    // （例：123,456,789 → 6172.8395 → 123,456,790）。每股價格的顯示另由
-                    // TxBuyComputedUnitPriceDisplay 格式化，不受此精度影響。
-                    _suppressBuyTotalRewrite = true;
-                    try { AddAssetDialog.AddPrice = (total / qty).ToString("0.##########"); }
-                    finally { _suppressBuyTotalRewrite = false; }
+                    // 使用者親手打「成交總額」→ 總額為權威，單價改由總額反推。
+                    Buy.PriceMode = "total";
+                    RecomputeBuyDerivedAmount();
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
                 OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));

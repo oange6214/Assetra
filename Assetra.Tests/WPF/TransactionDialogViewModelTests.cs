@@ -864,6 +864,39 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public void BuyTradeDetails_ThreeFields_EitherAmountFieldFillsTheOther()
+    {
+        // Wave4 — 成交明細三欄：填任兩欄自動補第三欄，不再有單價/總額切換。
+        // 使用者最後打哪個金額欄，那欄就是權威（PriceMode 降級為內部旗標）。
+        var vm = CreateVm();
+        vm.TxType = "buy";
+        vm.AddAssetDialog.AddQuantity = "10";
+
+        // 打「每股價格」→ 單價為權威，總額自動補
+        vm.AddAssetDialog.AddPrice = "100";
+        Assert.Equal("unit", vm.Buy.PriceMode);
+        Assert.Equal(1_000m, decimal.Parse(vm.Buy.TotalCost));
+
+        // 改「數量」→ 權威仍是單價，總額跟著校正（不會反過來改掉單價）
+        vm.AddAssetDialog.AddQuantity = "20";
+        Assert.Equal("unit", vm.Buy.PriceMode);
+        Assert.Equal("100", vm.AddAssetDialog.AddPrice);
+        Assert.Equal(2_000m, decimal.Parse(vm.Buy.TotalCost));
+
+        // 改打「成交總額」→ 總額變權威，單價由 總額÷數量 反推（定期定額／均價情境）
+        vm.Buy.TotalCost = "3000";
+        Assert.Equal("total", vm.Buy.PriceMode);
+        Assert.Equal(150m, decimal.Parse(vm.AddAssetDialog.AddPrice));
+        Assert.Equal("3000", vm.Buy.TotalCost);   // 使用者輸入的總額不被回寫蓋掉
+
+        // 總額為權威時改數量 → 單價重算，總額保持不動
+        vm.AddAssetDialog.AddQuantity = "30";
+        Assert.Equal("total", vm.Buy.PriceMode);
+        Assert.Equal(100m, decimal.Parse(vm.AddAssetDialog.AddPrice));
+        Assert.Equal("3000", vm.Buy.TotalCost);
+    }
+
+    [Fact]
     public void BuyPremium_StatementMode_GradesDeviationAndHidesWhenNotApplicable()
     {
         // Wave4 — 總成本溢價檢查只在「跨幣別 + 依帳戶明細」有意義，且缺任何一項就不顯示
