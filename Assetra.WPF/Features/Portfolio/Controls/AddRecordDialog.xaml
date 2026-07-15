@@ -378,27 +378,122 @@
                                                 </ds:AppIcon>
                                             </StackPanel>
                                             <!--
-                                                DisplayMemberPath 跟 ItemTemplate 互斥 (WPF 限制：
-                                                同時設會丟 InvalidOperationException at runtime)。
-                                                這裡用 ItemTemplate 是因為 DisplayKey 是 i18n
-                                                resource key，需要走 Converter 解析成當下語系字串。
-                                                Tag = placeholder「請選擇類型」，SelectedItem=null 時自動顯示。
+                                                類型 chips（取代原 type ComboBox）—— 買入/賣出 為主 chip；
+                                                其餘類型（現金股利/股票股利…依資產而定）收進「更多 ▾」popup。
+                                                選取語意與原 ComboBox 一致：點擊走 SelectTxTypeCommand 設 TxType，
+                                                chip 勾選狀態由 TxType == Key 比對（EqualityConverter multi 模式，OneWay）。
+                                                視覺沿用 每股價格/成交總額 toggle 的 SegmentBtn 樣式。
                                             -->
-                                            <ComboBox
-                                                IsEnabled="{Binding CanSelectTxType}"
-                                                ItemsSource="{Binding AvailableTradeTypes}"
-                                                SelectedValue="{Binding TxType, Mode=TwoWay}"
-                                                SelectedValuePath="Key"
-                                                Style="{StaticResource FormComboBox}"
-                                                Tag="{DynamicResource Portfolio.Tx.TypePicker.Placeholder}"
-                                                ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
-                                                ToolTipService.ShowOnDisabled="True">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
+                                            <StackPanel Orientation="Horizontal">
+                                                <ItemsControl
+                                                    IsEnabled="{Binding CanSelectTxType}"
+                                                    ItemsSource="{Binding PrimaryTradeTypes}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <RadioButton
+                                                                Margin="0,0,6,0"
+                                                                Command="{Binding DataContext.SelectTxTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding Key}"
+                                                                Content="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                                GroupName="TxTypeChips"
+                                                                IsEnabled="{Binding DataContext.CanSelectTxType, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                Style="{StaticResource SegmentBtn}">
+                                                                <RadioButton.IsChecked>
+                                                                    <MultiBinding Converter="{StaticResource EqualityConverter}" Mode="OneWay">
+                                                                        <Binding Path="DataContext.TxType" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                                        <Binding Path="Key" />
+                                                                    </MultiBinding>
+                                                                </RadioButton.IsChecked>
+                                                            </RadioButton>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <!--  「更多 ▾」—— 只有 MoreTradeTypes 非空時才顯示；IsChecked 綁 popup 開闔。  -->
+                                                <RadioButton
+                                                    x:Name="MoreTypesToggle"
+                                                    Content="{DynamicResource Portfolio.Tx.TypePicker.More}"
+                                                    IsChecked="{Binding IsMoreTypesPopupOpen, Mode=TwoWay}"
+                                                    IsEnabled="{Binding CanSelectTxType}"
+                                                    Style="{StaticResource SegmentBtn}"
+                                                    ToolTip="{Binding TxTypePickerHintKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                    ToolTipService.ShowOnDisabled="True"
+                                                    Visibility="{Binding HasMoreTradeTypes, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            </StackPanel>
+
+                                            <!--
+                                                「更多」類型 popup —— 視覺沿用 command palette / FormComboBox 下拉
+                                                （AppSurface 底 + AppBorderLight 框 + Radius）。點列走 SelectTxTypeCommand，
+                                                命令內會把 IsMoreTypesPopupOpen 設回 false 關閉 popup；點外部由 StaysOpen=False 關閉。
+                                            -->
+                                            <Popup
+                                                AllowsTransparency="True"
+                                                IsOpen="{Binding IsMoreTypesPopupOpen, Mode=TwoWay}"
+                                                Placement="Bottom"
+                                                PlacementTarget="{Binding ElementName=MoreTypesToggle}"
+                                                PopupAnimation="Fade"
+                                                StaysOpen="False">
+                                                <Border
+                                                    Margin="0,4,0,0"
+                                                    Padding="4"
+                                                    MinWidth="160"
+                                                    Background="{DynamicResource AppSurface}"
+                                                    BorderBrush="{DynamicResource AppBorderLight}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource Radius.Md}">
+                                                    <ItemsControl ItemsSource="{Binding MoreTradeTypes}">
+                                                        <ItemsControl.Resources>
+                                                            <Style x:Key="MoreTypeRow" TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
+                                                                <Setter Property="Cursor" Value="Hand" />
+                                                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                                                <Setter Property="FontFamily" Value="{StaticResource Font.Family.UI}" />
+                                                                <Setter Property="FontSize" Value="{StaticResource Font.Size.Sm}" />
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border
+                                                                                x:Name="Bd"
+                                                                                Padding="12,8"
+                                                                                Background="{TemplateBinding Background}"
+                                                                                CornerRadius="{StaticResource Radius.Sm}">
+                                                                                <TextBlock
+                                                                                    HorizontalAlignment="Left"
+                                                                                    FontFamily="{TemplateBinding FontFamily}"
+                                                                                    FontSize="{TemplateBinding FontSize}"
+                                                                                    Foreground="{TemplateBinding Foreground}"
+                                                                                    Text="{TemplateBinding Content}" />
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHover}" />
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </ItemsControl.Resources>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Button
+                                                                    HorizontalAlignment="Stretch"
+                                                                    HorizontalContentAlignment="Left"
+                                                                    Command="{Binding DataContext.SelectTxTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding Key}"
+                                                                    Content="{Binding DisplayKey, Converter={StaticResource ResourceKeyToStringConverter}}"
+                                                                    Style="{StaticResource MoreTypeRow}" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Border>
+                                            </Popup>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">

@@ -703,6 +703,7 @@
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">Shows trade types matching the selected asset.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">Pick an asset first.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Placeholder">Pick a type</sys:String>
+    <sys:String x:Key="Portfolio.Tx.TypePicker.More">More ▾</sys:String>
     <sys:String x:Key="Portfolio.Tx.QuantityPlaceholder">0</sys:String>
     <sys:String x:Key="Portfolio.Tx.PricePlaceholder">0.00</sys:String>
     <sys:String x:Key="Portfolio.Tx.AmountPlaceholder">0.00</sys:String>

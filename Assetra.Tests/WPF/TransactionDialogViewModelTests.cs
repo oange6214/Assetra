@@ -447,6 +447,33 @@ public class TransactionDialogViewModelTests
         Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
     }
 
+    // 類型 chips 版面：AddRecordDialog 把 AvailableTradeTypes 拆成「買入/賣出」主 chip
+    // (PrimaryTradeTypes) 與「更多」popup (MoreTradeTypes)。此測試鎖定拆分規則 —— 換 UI
+    // 時若把 buy/sell 以外的類型誤放進主 chip、或把 buy/sell 漏掉，都會讓這裡失敗。
+    [Fact]
+    public void TradeTypeChips_SplitsPrimaryAndMore()
+    {
+        // 股票部位 → AvailableTradeTypes = buy, sell, cashDiv, stockDiv（同時具備主/次類型）。
+        var position = MakePosition();
+        var vm = CreateVm(positions: new ObservableCollection<PortfolioRowViewModel> { position });
+
+        vm.OpenTxDialogForPosition(position, "buy");
+
+        // 前置：這個資產情境確實同時有 buy/sell 與其他類型，拆分才有意義。
+        Assert.Equal(4, vm.AvailableTradeTypes.Count);
+
+        // Primary = buy/sell 子集，保持 buy 在 sell 前。
+        Assert.Equal(2, vm.PrimaryTradeTypes.Count);
+        Assert.Equal("buy", vm.PrimaryTradeTypes[0].Key);
+        Assert.Equal("sell", vm.PrimaryTradeTypes[1].Key);
+
+        // More = 其餘類型（保持原順序），且不含 buy/sell。
+        Assert.Equal(2, vm.MoreTradeTypes.Count);
+        Assert.Equal("cashDiv", vm.MoreTradeTypes[0].Key);
+        Assert.Equal("stockDiv", vm.MoreTradeTypes[1].Key);
+        Assert.True(vm.HasMoreTradeTypes);
+    }
+
     // ── Q02: editing a trade whose asset is no longer in the live view ───────────
     // Closed lots are excluded from Positions by ShowClosedPositions (off by default), so editing a
     // Sell/Buy/StockDividend on such a lot used to leave SelectedAsset null (asset-subject

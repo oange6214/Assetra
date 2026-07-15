@@ -319,6 +319,39 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     }
 
     /// <summary>
+    /// 類型 chips 的主選項 — <see cref="AvailableTradeTypes"/> 中 key 為 "buy"/"sell"
+    /// 的子集（保持 buy 在 sell 前）。AddRecordDialog 用它渲染主 chip 列。
+    /// </summary>
+    public IReadOnlyList<TradeTypeOption> PrimaryTradeTypes =>
+        AvailableTradeTypes.Where(o => o.Key is "buy" or "sell").ToList();
+
+    /// <summary>
+    /// 類型 chips 的「更多」選項 — <see cref="AvailableTradeTypes"/> 扣掉
+    /// <see cref="PrimaryTradeTypes"/> 後其餘項（保持原順序），走「更多 ▾」popup。
+    /// </summary>
+    public IReadOnlyList<TradeTypeOption> MoreTradeTypes =>
+        AvailableTradeTypes.Where(o => o.Key is not ("buy" or "sell")).ToList();
+
+    /// <summary>True 時顯示「更多 ▾」按鈕（<see cref="MoreTradeTypes"/> 非空）。</summary>
+    public bool HasMoreTradeTypes => MoreTradeTypes.Count > 0;
+
+    /// <summary>「更多 ▾」popup 開闔狀態；選定任一類型後由 <see cref="SelectTxType"/> 關閉。</summary>
+    [ObservableProperty] private bool _isMoreTypesPopupOpen;
+
+    /// <summary>
+    /// 由類型 chip / 「更多」popup 列點擊呼叫 — 設定 <see cref="TxType"/> 並關閉「更多」popup。
+    /// 對齊原 type ComboBox SelectedValue TwoWay 的行為（設 TxType 即觸發 OnTxTypeChanged）。
+    /// </summary>
+    [RelayCommand]
+    private void SelectTxType(string? key)
+    {
+        if (!CanSelectTxType || string.IsNullOrEmpty(key))
+            return;
+        TxType = key;
+        IsMoreTypesPopupOpen = false;
+    }
+
+    /// <summary>
     /// True 才允許使用者開「交易類型」下拉。SelectedAsset = null 時 disabled。
     /// </summary>
     public bool CanSelectTxType => SelectedAsset is not null;
@@ -477,6 +510,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         // P2.3 — 不管 value 是否 null，都要通知 AvailableTradeTypes / CanSelectTxType 重新計算。
         OnPropertyChanged(nameof(AvailableTradeTypes));
+        OnPropertyChanged(nameof(PrimaryTradeTypes));
+        OnPropertyChanged(nameof(MoreTradeTypes));
+        OnPropertyChanged(nameof(HasMoreTradeTypes));
         OnPropertyChanged(nameof(CanSelectTxType));
         OnPropertyChanged(nameof(TxTypePickerHintKey));
         OnPropertyChanged(nameof(IsTxCurrencyEditable));
