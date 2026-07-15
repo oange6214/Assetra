@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
     Visibility="{Binding IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -47,12 +48,38 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock
+                <!--  Header + ⓘ — 原本 header 下方的 CrossCurrency.Hint.Short 收進 tooltip（key 不變）  -->
+                <StackPanel
                     Grid.Column="0"
-                    FontSize="{StaticResource Font.Size.Sm}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{DynamicResource Portfolio.Tx.SettlementSection}" />
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Portfolio.Tx.SettlementSection}" />
+                    <ds:AppIcon
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="{DynamicResource Portfolio.Tx.CrossCurrency.Hint.Short}"
+                        FontSize="12"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Info24"
+                        ToolTipService.InitialShowDelay="250"
+                        ToolTipService.ShowDuration="20000">
+                        <ds:AppIcon.ToolTip>
+                            <ToolTip>
+                                <TextBlock
+                                    MaxWidth="280"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint.Short}"
+                                    TextWrapping="Wrap" />
+                            </ToolTip>
+                        </ds:AppIcon.ToolTip>
+                    </ds:AppIcon>
+                </StackPanel>
                 <Border
                     Grid.Column="1"
                     Padding="8,3"
@@ -67,17 +94,9 @@
                 </Border>
             </Grid>
 
-            <!--  Cross-currency short hint  -->
+            <!--  Input mode label（原本上方的 short hint 已收進 header ⓘ）  -->
             <TextBlock
-                Margin="0,4,0,12"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{DynamicResource Portfolio.Tx.CrossCurrency.Hint.Short}"
-                TextWrapping="Wrap" />
-
-            <!--  Input mode label  -->
-            <TextBlock
-                Margin="0,0,0,6"
+                Margin="0,12,0,6"
                 FontSize="{StaticResource Font.Size.Xs}"
                 FontWeight="SemiBold"
                 Foreground="{DynamicResource AppTextSecondary}"
@@ -97,19 +116,14 @@
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}">
-                    <StackPanel>
-                        <RadioButton
-                            Content="{DynamicResource Portfolio.Tx.SettlementMode.Statement}"
-                            GroupName="{Binding GroupName, ElementName=Root}"
-                            IsChecked="{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}"
-                            Style="{StaticResource AppRadioButton}" />
-                        <TextBlock
-                            Margin="24,4,0,0"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Tx.SettlementMode.StatementHint}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
+                    <!--  說明收進 RadioButton 的 tooltip（key 不變），卡片只留選項本身  -->
+                    <RadioButton
+                        Content="{DynamicResource Portfolio.Tx.SettlementMode.Statement}"
+                        GroupName="{Binding GroupName, ElementName=Root}"
+                        IsChecked="{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}"
+                        Style="{StaticResource AppRadioButton}"
+                        ToolTip="{DynamicResource Portfolio.Tx.SettlementMode.StatementHint}"
+                        ToolTipService.ShowDuration="20000" />
                 </Border>
                 <Border
                     Grid.Column="2"
@@ -118,19 +132,13 @@
                     BorderBrush="{DynamicResource AppBorderLight}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource Radius.Sm}">
-                    <StackPanel>
-                        <RadioButton
-                            Content="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimate}"
-                            GroupName="{Binding GroupName, ElementName=Root}"
-                            IsChecked="{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}"
-                            Style="{StaticResource AppRadioButton}" />
-                        <TextBlock
-                            Margin="24,4,0,0"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppTextMuted}"
-                            Text="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimateHint}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
+                    <RadioButton
+                        Content="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimate}"
+                        GroupName="{Binding GroupName, ElementName=Root}"
+                        IsChecked="{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}"
+                        Style="{StaticResource AppRadioButton}"
+                        ToolTip="{DynamicResource Portfolio.Tx.SettlementMode.FxEstimateHint}"
+                        ToolTipService.ShowDuration="20000" />
                 </Border>
             </Grid>
 
@@ -154,18 +162,33 @@
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{Binding SettlementCurrencyDisplay, Mode=OneWay}" />
                     </Border>
+                    <!--  ActualCashAmountHint（原本欄位下方約 3 行說明）收進 ⓘ；DP 本身不變  -->
+                    <ds:AppIcon
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="{Binding ActualCashAmountHint, ElementName=Root}"
+                        FontSize="12"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Info24"
+                        ToolTipService.InitialShowDelay="250"
+                        ToolTipService.ShowDuration="20000">
+                        <ds:AppIcon.ToolTip>
+                            <ToolTip>
+                                <TextBlock
+                                    MaxWidth="280"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{Binding ActualCashAmountHint, ElementName=Root}"
+                                    TextWrapping="Wrap" />
+                            </ToolTip>
+                        </ds:AppIcon.ToolTip>
+                    </ds:AppIcon>
                 </StackPanel>
                 <TextBox behaviors:ThousandSeparatorBehavior.IsEnabled="True" Text="{Binding ActualCashAmount, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock
                     Style="{StaticResource FormFieldError}"
                     Text="{Binding ActualCashAmountError}"
                     Visibility="{Binding ActualCashAmountError, Converter={StaticResource StringToVisibilityConverter}}" />
-                <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Text="{Binding ActualCashAmountHint, ElementName=Root}"
-                    TextWrapping="Wrap" />
             </StackPanel>
 
             <!--  FX mode panel: FxRate + Fetch button + FxRateDate display + errors + source  -->
