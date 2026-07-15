@@ -52,18 +52,34 @@
                     （沒有 lift 到 parent VM 的 facade，因為 sub-VM 已是同一個 dialog DataContext 可訪問），
                     所以下游 ConfirmBuyAsync 邏輯不受影響。
                 -->
-                <TextBlock
-                    Margin="0,0,0,4"
-                    FontSize="{StaticResource Font.Size.Sm}"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource AppTextPrimary}"
-                    Text="{DynamicResource Portfolio.Tx.TradeDetailsSection}" />
-                <TextBlock
-                    Margin="0,0,0,12"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Text="{DynamicResource Portfolio.Tx.TradeDetailsHint}"
-                    TextWrapping="Wrap" />
+                <!--  Section header + ⓘ — 原本 header 下方的說明 TextBlock 收進 tooltip（文案 key 不變）  -->
+                <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Sm}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextPrimary}"
+                        Text="{DynamicResource Portfolio.Tx.TradeDetailsSection}" />
+                    <ds:AppIcon
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="{DynamicResource Portfolio.Tx.TradeDetailsHint}"
+                        FontSize="12"
+                        Foreground="{DynamicResource AppTextMuted}"
+                        Symbol="Info24"
+                        ToolTipService.InitialShowDelay="250"
+                        ToolTipService.ShowDuration="20000">
+                        <ds:AppIcon.ToolTip>
+                            <ToolTip>
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource Portfolio.Tx.TradeDetailsHint}"
+                                    TextWrapping="Wrap" />
+                            </ToolTip>
+                        </ds:AppIcon.ToolTip>
+                    </ds:AppIcon>
+                </StackPanel>
 
                 <!--  Row 1：數量（全寬；價格模式 toggle 已移至進階區）  -->
                 <!--  Wave 1 — 抽出 shared:FormField；label/TextBox/error 三段與原 inline markup 等價  -->
@@ -359,33 +375,44 @@
                 </Style>
             </StackPanel.Style>
 
-            <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
-            <CheckBox
-                Margin="0,0,0,6"
-                Content="{Binding TxUseCashAccountLabel}"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextSecondary}"
-                IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
-                    Margin="0,0,0,6"
+            <!--
+                從現金帳戶扣款 — checkbox + 帳戶下拉並排一行（原本 checkbox／扣款帳戶 label／
+                下拉共佔三行）。獨立的「扣款帳戶」label 拿掉：checkbox 文字本身已說明用途，
+                語系 key（TxCashAccountLabel）保留未動。下拉仍由 TxUseCashAccount gating。
+            -->
+            <Grid Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <CheckBox
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Content="{Binding TxUseCashAccountLabel}"
                     FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxCashAccountLabel}" />
-                <ComboBox
-                    Margin="0,0,0,4"
-                    DisplayMemberPath="Name"
-                    IsEditable="True"
-                    IsTextSearchEnabled="True"
-                    ItemsSource="{Binding CashAccounts}"
-                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                    Style="{StaticResource FormComboBox}"
-                    Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                    <ComboBox.Resources>
-                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                    </ComboBox.Resources>
-                </ComboBox>
+                    IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
+                <StackPanel
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ComboBox
+                        MinWidth="180"
+                        DisplayMemberPath="Name"
+                        IsEditable="True"
+                        IsTextSearchEnabled="True"
+                        ItemsSource="{Binding CashAccounts}"
+                        SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                        Style="{StaticResource FormComboBox}"
+                        Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <ComboBox.Resources>
+                            <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     Margin="0,2,0,0"
                     FontSize="{StaticResource Font.Size.Xs}"

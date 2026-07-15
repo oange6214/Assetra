@@ -105,32 +105,43 @@
             進階裡；CrossCurrencyOverlay 自身以 IsCrossCurrency 自我 gating，同幣別不顯示。
         -->
         <StackPanel Margin="0,4,0,0">
-            <!--  存入現金帳戶 — checkbox + dropdown  -->
-            <CheckBox
-                Margin="0,0,0,4"
-                Content="{Binding TxUseCashAccountLabel}"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppTextSecondary}"
-                IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock
-                    Margin="0,0,0,6"
+            <!--
+                存入現金帳戶 — checkbox + 帳戶下拉並排一行（對齊買入）。獨立的「存入帳戶」
+                label 拿掉：checkbox 文字本身已說明用途，語系 key（TxCashAccountLabel）保留未動。
+            -->
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <CheckBox
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Content="{Binding TxUseCashAccountLabel}"
                     FontSize="{StaticResource Font.Size.Xs}"
-                    FontWeight="SemiBold"
                     Foreground="{DynamicResource AppTextSecondary}"
-                    Text="{Binding TxCashAccountLabel}" />
-                <ComboBox
-                    DisplayMemberPath="Name"
-                    IsEditable="True"
-                    IsTextSearchEnabled="True"
-                    ItemsSource="{Binding CashAccounts}"
-                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                    Style="{StaticResource FormComboBox}"
-                    Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                    <ComboBox.Resources>
-                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                    </ComboBox.Resources>
-                </ComboBox>
+                    IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
+                <StackPanel
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ComboBox
+                        MinWidth="180"
+                        DisplayMemberPath="Name"
+                        IsEditable="True"
+                        IsTextSearchEnabled="True"
+                        ItemsSource="{Binding CashAccounts}"
+                        SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                        Style="{StaticResource FormComboBox}"
+                        Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <ComboBox.Resources>
+                            <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <TextBlock
                     Margin="0,2,0,0"
                     FontSize="{StaticResource Font.Size.Xs}"
