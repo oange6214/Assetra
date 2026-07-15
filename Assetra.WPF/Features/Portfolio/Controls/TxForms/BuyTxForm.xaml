@@ -81,126 +81,143 @@
                     </ds:AppIcon>
                 </StackPanel>
 
-                <!--  Row 1：數量（全寬；價格模式 toggle 已移至進階區）  -->
-                <!--  Wave 1 — 抽出 shared:FormField；label/TextBox/error 三段與原 inline markup 等價  -->
-                <shared:FormField
-                    Margin="0,0,0,14"
-                    ErrorText="{Binding AddAssetDialog.AddQuantityError}"
-                    InputEnabled="{Binding AreEconomicFieldsEditable}"
-                    Label="{DynamicResource Portfolio.AddQuantity}"
-                    Placeholder="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
-                    Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}"
-                    ThousandSeparator="True" />
-
                 <!--
-                    Row 2：價格 label + inline 「取得市價」 link。Bottom-align 兩邊讓 baseline 一致
-                    (button padding 取消，避免比 label 高造成 label「飄」在上方的視覺問題)。
-                    Margin="0,0,0,6" 給 label → input 的 6px 呼吸空間，跟其他欄位一致。
+                    數量 ｜ 每股價格 併為一行（密度對齊 Investing 的 Amount | Price）。
+                    價格欄取較寬的 3（vs 數量 2）：它還要塞幣別 badge 與「取得市價」連結。
+                    兩欄 Top 對齊，任一側出現錯誤字時不會把另一側推歪。
                 -->
-                <Grid Margin="0,0,0,6">
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="3*" />
                     </Grid.ColumnDefinitions>
 
-                    <!--  Label — 單價模式：「單位價格 (USD)」、總額模式：「總價值 (USD)」  -->
-                    <StackPanel
+                    <!--  Wave 1 — 抽出 shared:FormField；label/TextBox/error 三段與原 inline markup 等價  -->
+                    <shared:FormField
                         Grid.Column="0"
-                        VerticalAlignment="Bottom"
-                        Orientation="Horizontal">
+                        VerticalAlignment="Top"
+                        ErrorText="{Binding AddAssetDialog.AddQuantityError}"
+                        InputEnabled="{Binding AreEconomicFieldsEditable}"
+                        Label="{DynamicResource Portfolio.AddQuantity}"
+                        Placeholder="{DynamicResource Portfolio.Tx.QuantityPlaceholder}"
+                        Text="{Binding AddAssetDialog.AddQuantity, UpdateSourceTrigger=PropertyChanged}"
+                        ThousandSeparator="True" />
+
+                    <StackPanel Grid.Column="2" VerticalAlignment="Top">
+
+                        <!--
+                            價格 label + inline 「取得市價」 link。Bottom-align 兩邊讓 baseline 一致
+                            (button padding 取消，避免比 label 高造成 label「飄」在上方的視覺問題)。
+                            Margin="0,0,0,6" 給 label → input 的 6px 呼吸空間，跟其他欄位一致。
+                        -->
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--  Label — 單價模式：「單位價格 (USD)」、總額模式：「總價值 (USD)」  -->
+                            <StackPanel
+                                Grid.Column="0"
+                                VerticalAlignment="Bottom"
+                                Orientation="Horizontal">
+                                <TextBlock
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource AppTextSecondary}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.UnitPriceLabel}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Buy.IsTotalMode}" Value="True">
+                                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.TotalAmountLabel}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock
+                                    Margin="6,0,0,0"
+                                    FontSize="{StaticResource Font.Size.Xs}"
+                                    Foreground="{DynamicResource AppAccent}"
+                                    Text="{Binding Buy.InstrumentCurrencyBadge}"
+                                    Visibility="{Binding Buy.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <!--
+                                Stock 的 close-price 抓取 link — Stock 都顯示（Unit + Total 兩種 mode）。
+                                Total mode 下抓回 unit price 後 PropertyChanged handler 會用 quantity 反推
+                                TotalCost 寫進可見 TextBox，使用者看見金額自動填上。
+                                Padding=0 + Bottom align 讓 link baseline 對齊 label，避免 button padding
+                                讓 label 看似飄高。IsStock 過濾透過外層 StackPanel 已隱含。
+                            -->
+                            <Button
+                                Grid.Column="1"
+                                Padding="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding AddAssetDialog.FetchMarketPriceCommand}"
+                                Cursor="Hand"
+                                ToolTip="{DynamicResource Portfolio.Tx.FetchMarketPrice.Hint}">
+                                <StackPanel Orientation="Horizontal">
+                                    <ds:AppIcon
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="{DynamicResource AppAccent}"
+                                        Symbol="Flash16" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="{StaticResource Font.Size.Xs}"
+                                        Foreground="{DynamicResource AppAccent}"
+                                        Text="{DynamicResource Portfolio.Tx.FetchMarketPrice}" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <!--
+                            單一 input — 依 PriceMode 切換 binding。Unit mode 用 AddAssetDialog.AddPrice（預設可見）。
+                            Total mode 用 Buy.TotalCost（移至進階區）。
+                            unit-mode TextBox 留在此處（預設可見）；total-mode TextBox 移入進階 Expander。
+                        -->
+                        <TextBox
+                            behaviors:ThousandSeparatorBehavior.IsEnabled="True"
+                            IsEnabled="{Binding AreEconomicFieldsEditable}"
+                            Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
+                            Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}"
+                            Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <TextBlock
+                            Style="{StaticResource FormFieldError}"
+                            Text="{Binding AddAssetDialog.AddPriceError}"
+                            Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
+
+                        <!--  Row 3: inline mirror — 對稱顯示另一邊的計算值  -->
+                        <!--  unit mode → 「總計: X」  -->
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            HorizontalAlignment="Right"
                             FontSize="{StaticResource Font.Size.Xs}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextSecondary}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.UnitPriceLabel}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Buy.IsTotalMode}" Value="True">
-                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.TotalAmountLabel}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Run Text="{DynamicResource Portfolio.Tx.TotalMirrorPrefix}" />
+                            <Run Text="{Binding TxBuyComputedTotalDisplay, Mode=OneWay}" />
                         </TextBlock>
+                        <!--  total mode → 「單位價格: X」mirror，由 parent VM 算（需 AddQuantity + Buy.TotalCost）  -->
                         <TextBlock
-                            Margin="6,0,0,0"
+                            Margin="0,2,0,0"
+                            HorizontalAlignment="Right"
                             FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppAccent}"
-                            Text="{Binding Buy.InstrumentCurrencyBadge}"
-                            Visibility="{Binding Buy.InstrumentCurrencyBadge, Converter={StaticResource StringToVisibilityConverter}}" />
+                            Foreground="{DynamicResource AppTextMuted}"
+                            Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Run Text="{DynamicResource Portfolio.Tx.UnitPriceMirrorPrefix}" />
+                            <Run Text="{Binding TxBuyComputedUnitPriceDisplay, Mode=OneWay}" />
+                        </TextBlock>
+
                     </StackPanel>
-
-                    <!--
-                        Stock 的 close-price 抓取 link — Stock 都顯示（Unit + Total 兩種 mode）。
-                        Total mode 下抓回 unit price 後 PropertyChanged handler 會用 quantity 反推
-                        TotalCost 寫進可見 TextBox，使用者看見金額自動填上。
-                        Padding=0 + Bottom align 讓 link baseline 對齊 label，避免 button padding
-                        讓 label 看似飄高。IsStock 過濾透過外層 StackPanel 已隱含。
-                    -->
-                    <Button
-                        Grid.Column="1"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Command="{Binding AddAssetDialog.FetchMarketPriceCommand}"
-                        Cursor="Hand"
-                        ToolTip="{DynamicResource Portfolio.Tx.FetchMarketPrice.Hint}">
-                        <StackPanel Orientation="Horizontal">
-                            <ds:AppIcon
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                FontSize="12"
-                                Foreground="{DynamicResource AppAccent}"
-                                Symbol="Flash16" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppAccent}"
-                                Text="{DynamicResource Portfolio.Tx.FetchMarketPrice}" />
-                        </StackPanel>
-                    </Button>
                 </Grid>
-
-                <!--
-                    單一 input — 依 PriceMode 切換 binding。Unit mode 用 AddAssetDialog.AddPrice（預設可見）。
-                    Total mode 用 Buy.TotalCost（移至進階區）。
-                    unit-mode TextBox 留在此處（預設可見）；total-mode TextBox 移入進階 Expander。
-                -->
-                <TextBox
-                    behaviors:ThousandSeparatorBehavior.IsEnabled="True"
-                    IsEnabled="{Binding AreEconomicFieldsEditable}"
-                    Tag="{DynamicResource Portfolio.Tx.PricePlaceholder}"
-                    Text="{Binding AddAssetDialog.AddPrice, UpdateSourceTrigger=PropertyChanged}"
-                    Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBlock
-                    Style="{StaticResource FormFieldError}"
-                    Text="{Binding AddAssetDialog.AddPriceError}"
-                    Visibility="{Binding AddAssetDialog.AddPriceError, Converter={StaticResource StringToVisibilityConverter}}" />
-
-                <!--  Row 3: inline mirror — 對稱顯示另一邊的計算值  -->
-                <!--  unit mode → 「總計: X」  -->
-                <TextBlock
-                    Margin="0,2,0,0"
-                    HorizontalAlignment="Right"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Visibility="{Binding Buy.IsUnitMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Run Text="{DynamicResource Portfolio.Tx.TotalMirrorPrefix}" />
-                    <Run Text="{Binding TxBuyComputedTotalDisplay, Mode=OneWay}" />
-                </TextBlock>
-                <!--  total mode → 「單位價格: X」mirror，由 parent VM 算（需 AddQuantity + Buy.TotalCost）  -->
-                <TextBlock
-                    Margin="0,2,0,0"
-                    HorizontalAlignment="Right"
-                    FontSize="{StaticResource Font.Size.Xs}"
-                    Foreground="{DynamicResource AppTextMuted}"
-                    Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Run Text="{DynamicResource Portfolio.Tx.UnitPriceMirrorPrefix}" />
-                    <Run Text="{Binding TxBuyComputedUnitPriceDisplay, Mode=OneWay}" />
-                </TextBlock>
 
                 <!--  ClosePrice 自動抓取後的 hint（只在 unit mode 才相關）  -->
                 <TextBlock
