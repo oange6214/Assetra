@@ -321,7 +321,9 @@ public sealed class ControlsBehaviorTests
         var zh = File.ReadAllText(GetLanguagePath("zh-TW.xaml"));
         var en = File.ReadAllText(GetLanguagePath("en-US.xaml"));
 
-        Assert.Contains("成交明細輸入", zh);
+        // 註：「成交明細輸入」（單價/總額 toggle 的標題）已隨 toggle 一併移除 —— 成交明細
+        // 改為 數量/每股價格/成交總額 三欄互補，沒有模式要選。每股價格與成交總額改由
+        // UnitPriceLabel / TotalAmountLabel 這兩個欄位標題提供，用語本身仍受此測試保護。
         Assert.Contains("每股價格", zh);
         Assert.Contains("成交總額", zh);
         Assert.Contains("帳戶扣款", zh);
@@ -336,7 +338,7 @@ public sealed class ControlsBehaviorTests
         Assert.DoesNotContain(">複委託請填<", zh);
         Assert.DoesNotContain("跨幣別交易（複委託）", zh);
 
-        Assert.Contains("Trade detail input", en);
+        // 同上：toggle 標題 "Trade detail input" 已隨 toggle 移除。
         Assert.Contains("Per-share price", en);
         Assert.Contains("Trade total", en);
         Assert.Contains("Account debit", en);

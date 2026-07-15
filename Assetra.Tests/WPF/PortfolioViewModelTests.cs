@@ -3329,16 +3329,6 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task TxBuyComputedTotalDisplay_UnitMode_ShowsPriceTimesQty()
-    {
-        var (vm, _, _, _) = await CreateVmWithLiabilityAsync(0m, 0m);
-        vm.Transaction.Buy.PriceMode = "unit";
-        vm.AddAssetDialog.AddPrice = "18.04";
-        vm.AddAssetDialog.AddQuantity = "5000";
-        Assert.Equal("90,200", vm.Transaction.TxBuyComputedTotalDisplay);
-    }
-
-    [Fact]
     public async Task ConfirmCashDiv_TotalMode_AcceptsTotalInput()
     {
         // 不輸入每股股利、改填總股息 1,000 → 應該成功（per-share 自動回算）

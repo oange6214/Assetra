@@ -697,7 +697,6 @@
     <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Title">+ 新增資產</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Hint">建立新的投資項目（會關閉此對話框）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">交易幣別</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CurrencyInstrumentLockedHint">投資交易的成交幣別由所選資產決定；扣款幣別由下方扣款帳戶決定。</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">依所選資產顯示適合的交易類型。</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">請先選擇資產。</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Placeholder">請選擇類型</sys:String>
@@ -783,15 +782,10 @@
     <sys:String x:Key="Portfolio.Tx.BuyModeMetaOnly">僅登記標的</sys:String>
     <sys:String x:Key="Portfolio.Tx.TradeDetailsSection">成交明細</sys:String>
     <sys:String x:Key="Portfolio.Tx.TradeDetailsHint">用成交幣別記錄投資成本；若從資金帳戶扣款，帳戶扣款會在下方另外處理。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceMode">成交明細輸入</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceModeUnit">每股價格</sys:String>
     <sys:String x:Key="Portfolio.Tx.UnitPriceLabel">每股價格</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmountLabel">成交總額</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TotalMirrorPrefix">成交總額:</sys:String>
-    <sys:String x:Key="Portfolio.Tx.UnitPriceMirrorPrefix">每股價格:</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice">取得市價</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice.Hint">用目前的代號 + 日期向報價來源抓最新收盤價填入。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceModeTotal">成交總額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">總成交金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">成交總額已含手續費</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時，上方成交總額會直接作為投資成本，不再額外加自動手續費；這仍是成交幣別的成本，不等同跨幣別帳戶扣款。</sys:String>

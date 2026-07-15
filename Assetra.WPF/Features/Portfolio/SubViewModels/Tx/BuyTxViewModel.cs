@@ -173,9 +173,9 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// <summary>True 代表使用者手動覆寫匯率，日期/幣別變動時不自動蓋掉。</summary>
     [ObservableProperty] private bool _isFxManual;
 
-    /// <summary>True 時「進階」區塊展開。跨幣別交易會自動設為 true（FX/結算為必填），
-    /// 但同幣別不會強制收合，避免跟手動展開的使用者打架。</summary>
-    [ObservableProperty] private bool _isAdvancedExpanded;
+    // IsAdvancedExpanded 已移除：買入表單的「進階」Expander 整個拿掉了（最後只剩一個選填
+    // 手續費欄位還包一張卡片，純屬多餘），手續費已並排到成交明細列。賣出表單仍有自己的
+    // Expander，故 SellTxViewModel 保留同名屬性。
 
     /// <summary>匯率查詢失敗或缺資料的可見錯誤訊息。</summary>
     [ObservableProperty] private string _fxFetchError = string.Empty;
@@ -293,21 +293,8 @@ public sealed partial class BuyTxViewModel : ObservableObject
     public bool IsStatementSettlementMode => SettlementInputMode == "statement";
     public bool IsFxSettlementMode => SettlementInputMode == "fx";
 
-    /// <summary>
-    /// 總計顯示文字。
-    /// 總額模式 → 顯示使用者輸入的總額。
-    /// 單價模式 → 顯示 數量 × 單價，由 caller 提供 price/qty。
-    /// </summary>
-    public string ComputeTotalDisplay(string addPriceText, string addQuantityText)
-    {
-        if (IsTotalMode &&
-            ParseHelpers.TryParseDecimal(TotalCost, out var t) && t > 0)
-            return t.ToString("N0");
-        if (ParseHelpers.TryParseDecimal(addPriceText, out var p) && p > 0 &&
-            ParseHelpers.TryParseInt(addQuantityText, out var q) && q > 0)
-            return (p * q).ToString("N0");
-        return "0";
-    }
+    // ComputeTotalDisplay 已移除：它只服務 TransactionDialogViewModel.TxBuyComputedTotalDisplay
+    // 這個「總計鏡像」文字，而鏡像已被可編輯的成交總額欄位取代。
 
     /// <summary>重置所有買入欄位回預設（dialog 開新交易時呼叫）。</summary>
     public void Reset()
@@ -332,6 +319,5 @@ public sealed partial class BuyTxViewModel : ObservableObject
         FxSourceLabel = string.Empty;
         IsFxManual = false;
         FxFetchError = string.Empty;
-        IsAdvancedExpanded = false;
     }
 }

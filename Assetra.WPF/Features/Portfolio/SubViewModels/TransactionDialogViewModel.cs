@@ -223,8 +223,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                               or nameof(AddAssetDialog.AddQuantity)
                               or nameof(AddAssetDialog.AddCost))
             {
-                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
-                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 NotifyImpactPreviewChanged();
 
                 // 成交明細三欄連動（數量 / 每股價格 / 成交總額）：使用者打哪一欄，哪一欄就是權威，
@@ -449,8 +447,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// 兩個方向各自用對向的 suppress 旗標擋住回授，否則會互相覆蓋（千分位 + 每鍵觸發會放大成亂跳）。</para>
     ///
     /// <para>反推單價刻意用高精度（非 F4）：否則 單價(4位) × 數量 會把使用者輸入的總額 round-trip 掉
-    /// （例：123,456,789 → 6172.8395 → 123,456,790）。顯示用的格式化另由
-    /// <see cref="TxBuyComputedUnitPriceDisplay"/> 負責，不受此精度影響。</para>
+    /// （例：123,456,789 → 6172.8395 → 123,456,790）。</para>
     /// </summary>
     private void RecomputeBuyDerivedAmount()
     {
@@ -1459,8 +1456,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxBuyIsStock => TxTypeIsBuy && Buy.IsStock;
     public bool TxBuyIsNonStock => TxTypeIsBuy && Buy.IsNonStock;
     public bool TxBuyIsCrypto => TxTypeIsBuy && Buy.IsCrypto;
-    public bool TxBuyIsUnitMode => Buy.IsUnitMode;
-    public bool TxBuyIsTotalMode => Buy.IsTotalMode;
 
     public string TxCashAccountLabel => TxType switch
     {
@@ -1866,31 +1861,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             Div.Total = perShare * Div.Position.Quantity;
     }
 
-    /// <summary>
-    /// 總計顯示文字。注入 <see cref="AddAssetDialogViewModel"/> 的 AddPrice / AddQuantity
-    /// 後委派給 <see cref="Tx.BuyTxViewModel.ComputeTotalDisplay"/>。XAML 直接 bind 此屬性
-    /// （Buy.ComputedTotalDisplay 不知道 AddPrice/Qty 故無法 self-compute）。
-    /// </summary>
-    public string TxBuyComputedTotalDisplay =>
-        Buy.ComputeTotalDisplay(AddAssetDialog.AddPrice, AddAssetDialog.AddQuantity);
-
-    /// <summary>
-    /// P2.4 — 總額模式下方的「單位價格: X」inline mirror。Buy.TotalCost / AddQuantity。
-    /// 無法計算（空欄位 / 0）時回 "0"。
-    /// </summary>
-    public string TxBuyComputedUnitPriceDisplay
-    {
-        get
-        {
-            if (!Buy.IsTotalMode)
-                return "0";
-            if (!ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) || total <= 0)
-                return "0";
-            if (!ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) || qty <= 0)
-                return "0";
-            return (total / qty).ToString("N4").TrimEnd('0').TrimEnd('.');
-        }
-    }
+    // TxBuyComputedTotalDisplay / TxBuyComputedUnitPriceDisplay 已移除：它們只餵成交明細
+    // 下方那兩行唯讀「鏡像」文字，而鏡像已被可編輯的「成交總額」欄位取代（三欄互補）。
 
     public bool CanFetchBuyFxRate => _transactionFxRateResolver is not null && Buy.IsCrossCurrency;
 
@@ -2136,8 +2108,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             case nameof(BuyTxViewModel.PriceMode):
                 // 三欄連動後不再需要「切到總額模式時回填總額」——成交總額欄位一直可見且持續同步，
                 // 不會有空欄要補。PriceMode 現在只是內部權威旗標，由使用者輸入哪一欄決定。
-                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
-                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.TotalCost):
                 // _suppressBuyPriceRewrite 為 true 代表這是 AddPrice→TotalCost 的程式回寫，非使用者輸入。
@@ -2148,13 +2118,9 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                     RecomputeBuyDerivedAmount();
                 }
                 Buy.TotalCostError = ValidatePositiveDecimalOrEmpty(Buy.TotalCost);
-                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
-                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.TotalIncludesFee):
                 AddAssetDialog.UpdateBuyPreview();
-                OnPropertyChanged(nameof(TxBuyComputedTotalDisplay));
-                OnPropertyChanged(nameof(TxBuyComputedUnitPriceDisplay));
                 break;
             case nameof(BuyTxViewModel.ActualCashAmount):
                 Buy.ActualCashAmountError = ValidatePositiveDecimalOrEmpty(Buy.ActualCashAmount);

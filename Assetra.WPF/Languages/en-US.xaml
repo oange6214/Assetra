@@ -699,7 +699,6 @@
     <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Title">+ Add asset</sys:String>
     <sys:String x:Key="Portfolio.Tx.Asset.AddNew.Hint">Create a new investment item (closes this dialog)</sys:String>
     <sys:String x:Key="Portfolio.Tx.Currency">Trade currency</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CurrencyInstrumentLockedHint">Investment trades use the selected asset currency; debit currency comes from the cash account below.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Hint">Shows trade types matching the selected asset.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.NeedAsset">Pick an asset first.</sys:String>
     <sys:String x:Key="Portfolio.Tx.TypePicker.Placeholder">Pick a type</sys:String>
@@ -785,15 +784,10 @@
     <sys:String x:Key="Portfolio.Tx.BuyModeMetaOnly">Register only</sys:String>
     <sys:String x:Key="Portfolio.Tx.TradeDetailsSection">Trade details</sys:String>
     <sys:String x:Key="Portfolio.Tx.TradeDetailsHint">Records the investment cost in the trade currency. If a funds account is debited, that settlement is handled below.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceMode">Trade detail input</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceModeUnit">Per-share price</sys:String>
     <sys:String x:Key="Portfolio.Tx.UnitPriceLabel">Per-share price</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmountLabel">Trade total</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TotalMirrorPrefix">Trade total: </sys:String>
-    <sys:String x:Key="Portfolio.Tx.UnitPriceMirrorPrefix">Per-share price: </sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice">Fetch market price</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice.Hint">Pulls the latest close price from the configured quote source for the current symbol + date.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.PriceModeTotal">Trade total</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">Trade total includes commission</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the trade total above is recorded as the investment cost without adding auto commission. It is still the trade-currency cost, not the cross-currency account debit.</sys:String>
