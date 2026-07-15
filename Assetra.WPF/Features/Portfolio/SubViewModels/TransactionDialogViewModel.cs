@@ -433,6 +433,13 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool IsTxCurrencyEditable =>
         SelectedAsset is null || !IsInvestmentAssetKind(SelectedAsset.Kind);
 
+    /// <summary>
+    /// 交易幣別列僅在「幣別可編輯」（現金/負債/無資產）且非 meta-only 編輯時顯示。
+    /// 投資標的幣別由所選資產決定、已顯示於資產列（SecondaryLine 的「· CCY」），故隱藏這個
+    /// 原本唯讀又長得像可選的下拉，消除「說由資產決定卻擺個下拉」的矛盾。
+    /// </summary>
+    public bool ShowTxCurrencyRow => IsTxCurrencyEditable && !ShowEditLockedSummary;
+
     partial void OnTxCurrencyChanged(string value)
     {
         if (!_suppressCurrencyDirty &&
@@ -517,6 +524,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(CanSelectTxType));
         OnPropertyChanged(nameof(TxTypePickerHintKey));
         OnPropertyChanged(nameof(IsTxCurrencyEditable));
+        OnPropertyChanged(nameof(ShowTxCurrencyRow));
 
         if (value is null)
             return;
@@ -1077,6 +1085,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(AreEconomicFieldsEditable));
         OnPropertyChanged(nameof(ShowEditLockedSummary));
         OnPropertyChanged(nameof(ShowAssetSelector));
+        OnPropertyChanged(nameof(ShowTxCurrencyRow));
         // Edit-mode toggle changes the preview baseline (original delta is now
         // either applicable or zeroed).
         NotifyImpactPreviewChanged();

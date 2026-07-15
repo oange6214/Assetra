@@ -864,6 +864,38 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
+    public void ShowTxCurrencyRow_HiddenForInvestment_ShownWhenEditable()
+    {
+        // Wave4 — 幣別列只在幣別可編輯（現金/負債/無資產）時顯示；投資標的幣別由資產決定、
+        // 已顯示在資產列（SecondaryLine 的「· CCY」），故隱藏那個矛盾的唯讀下拉。
+        var twd = MakeCashAccount("富邦", "TWD");
+        var position = new PortfolioRowViewModel
+        {
+            Id = Guid.NewGuid(),
+            Symbol = "DRAM",
+            Exchange = "NASDAQ",
+            Name = "Roundhill Memory ETF",
+            Currency = "USD",
+            BuyPrice = 50m,
+            Quantity = 20,
+            CurrentPrice = 51m,
+        };
+        var vm = CreateVm(
+            positions: new ObservableCollection<PortfolioRowViewModel> { position },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { twd });
+
+        // 無選定資產：可編輯 → 顯示
+        Assert.Null(vm.SelectedAsset);
+        Assert.True(vm.IsTxCurrencyEditable);
+        Assert.True(vm.ShowTxCurrencyRow);
+
+        // 選投資標的：不可編輯 → 隱藏
+        vm.SelectedAsset = vm.AvailableAssets.Single(a => a.Symbol == "DRAM");
+        Assert.False(vm.IsTxCurrencyEditable);
+        Assert.False(vm.ShowTxCurrencyRow);
+    }
+
+    [Fact]
     public void BuySettlementInputMode_DefaultsToStatementAndCanSwitchToFxEstimate()
     {
         var vm = CreateVm();

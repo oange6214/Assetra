@@ -36,6 +36,7 @@ public partial class TransactionDialogViewModel
         OnPropertyChanged(nameof(IsEditingMetaOnly));
         OnPropertyChanged(nameof(AreEconomicFieldsEditable));
         OnPropertyChanged(nameof(ShowEditLockedSummary));
+        OnPropertyChanged(nameof(ShowTxCurrencyRow));
         CreateRevisionCommand.NotifyCanExecuteChanged();
         DeleteTradeCommand.NotifyCanExecuteChanged();
     }

@@ -512,11 +512,12 @@
                                     </Grid>
 
                                     <!--
-                                        P2.2 — 通用「幣別」ComboBox。選了資產後自動帶值；使用者可手動覆寫
-                                        (覆寫後 _userTouchedCurrency = true，後續切換資產不會被自動蓋掉)。
+                                        P2.2 / Wave4 — 「幣別」ComboBox 只在幣別可編輯（現金/負債/無資產）時顯示。
+                                        投資標的幣別由所選資產決定、已顯示於上方資產列（「· CCY」），故整列隱藏，
+                                        消除「說由資產決定卻擺個唯讀下拉」的矛盾（ShowTxCurrencyRow）。
                                         SupportedCurrencies 走 ICurrencyService（跟 Settings 共用清單）。
                                     -->
-                                    <StackPanel Margin="0,0,0,14" Visibility="{Binding ShowEditLockedSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <StackPanel Margin="0,0,0,14" Visibility="{Binding ShowTxCurrencyRow, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             Margin="0,0,0,6"
                                             FontSize="{StaticResource Font.Size.Xs}"
@@ -526,17 +527,9 @@
                                         <ComboBox
                                             MinWidth="120"
                                             HorizontalAlignment="Left"
-                                            IsEnabled="{Binding IsTxCurrencyEditable}"
                                             ItemsSource="{Binding SupportedCurrencies}"
                                             SelectedItem="{Binding TxCurrency, Mode=TwoWay}"
                                             Style="{StaticResource FormComboBox}" />
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="{StaticResource Font.Size.Xs}"
-                                            Foreground="{DynamicResource AppTextMuted}"
-                                            Text="{DynamicResource Portfolio.Tx.CurrencyInstrumentLockedHint}"
-                                            TextWrapping="Wrap"
-                                            Visibility="{Binding IsTxCurrencyEditable, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                     </StackPanel>
 
                                 </StackPanel>
