@@ -134,6 +134,8 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="10" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <!--  數量  -->
@@ -185,7 +187,27 @@
                         Placeholder="{DynamicResource Portfolio.Tx.AmountPlaceholder}"
                         Text="{Binding Buy.TotalCost, UpdateSourceTrigger=PropertyChanged}"
                         ThousandSeparator="True" />
+
+                    <!--
+                        手續費 — 從進階搬上來並排。留空即走「折扣 × 標準費率」自動計算，
+                        說明在 label 旁的 ⓘ。原本為了這一個選填欄位包一整張 Expander 卡片，
+                        純屬多餘的包裝，已整個移除。
+                    -->
+                    <shared:TxFeeField Grid.Column="6" VerticalAlignment="Top" />
                 </Grid>
+
+                <!--
+                    「金額已含手續費」— 不是模式而是寫入語意（已含＝手續費視為 0、總成本即此值；
+                    未含＝手續費另計加上去），僅在「總額為權威」時才有意義，故沿用 IsTotalMode。
+                    原本住在進階裡，進階移除後改掛在成交明細下方。
+                -->
+                <CheckBox
+                    Margin="0,0,0,14"
+                    Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
+                    IsChecked="{Binding Buy.TotalIncludesFee, Mode=TwoWay}"
+                    IsEnabled="{Binding AreEconomicFieldsEditable}"
+                    ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}"
+                    Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--  ClosePrice 自動抓取後的 hint（只在 unit mode 才相關）  -->
                 <TextBlock
@@ -494,78 +516,17 @@
         </StackPanel>
 
         <!--
-            進階區塊 Expander — 收合進階選項：
-            • Stock only: 價格模式 toggle (單價/總額)、總額輸入、金額已含手續費
-            • Shared: 手續費 override
-            IsExpanded 綁定 Buy.IsAdvancedExpanded（純使用者手動控制）
+            進階 Expander 已整個移除：它到最後只剩「手續費」一個選填欄位還要包一張卡片，
+            純屬多餘包裝。手續費已並排到上方成交明細列（股票路徑）；「金額已含手續費」
+            改掛在成交明細下方。此處只補「非股票 / 加密貨幣」兩條路徑的手續費——
+            它們沒有成交明細那個四欄格，原本是靠根層級的 Expander 才拿到這個欄位。
         -->
-        <Expander
-            Margin="0,14,0,0"
-            Style="{StaticResource AppExpander}"
-            Header="{DynamicResource Portfolio.Tx.AdvancedSection}"
-            IsExpanded="{Binding Buy.IsAdvancedExpanded, Mode=TwoWay}">
-            <StackPanel>
-
-                <!--  Stock-only advanced fields: 價格模式 toggle + 總額輸入 + 已含手續費  -->
-                <StackPanel Visibility="{Binding Buy.IsStock, Converter={StaticResource BooleanToVisibilityConverter}}">
-
-                    <!--  MetaOnly 隱藏（Stock economic fields 同步隱藏）  -->
-                    <StackPanel>
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-
-                        <!--
-                            「單價 / 總額」toggle 與總額輸入框已移除：成交總額現在是上方成交明細
-                            的常駐可編輯欄位，填任兩欄即自動補第三欄，沒有模式要選。
-                            只留下「金額已含手續費」——它不是模式，而是真的會改變寫入語意
-                            （已含＝手續費視為 0、總成本即此值；未含＝手續費另計加上去），
-                            且僅在「總額為權威」時才有意義，故沿用 IsTotalMode 顯示條件。
-                        -->
-
-                        <!--  總額為權威時才相關：「金額已含手續費」CheckBox  -->
-                        <CheckBox
-                            Margin="0,8,0,8"
-                            Content="{DynamicResource Portfolio.Tx.TotalIncludesFee}"
-                            IsChecked="{Binding Buy.TotalIncludesFee, Mode=TwoWay}"
-                            IsEnabled="{Binding AreEconomicFieldsEditable}"
-                            ToolTip="{DynamicResource Portfolio.Tx.TotalIncludesFee.Tooltip}"
-                            Visibility="{Binding Buy.IsTotalMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                    </StackPanel>
-                </StackPanel>
-
-                <!--  Fee — hidden in meta-only mode  -->
-                <StackPanel>
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Visible" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
-
-                    <!--
-                        手續費 (manual override; 留空 → 走 TxCommissionDiscount 自動計算)
-                        Wave 1：抽出 shared:TxFeeField。外層 Margin 帶回原 label 上緣 14 與 hint 下緣 14
-                        （14 = 控制項 Margin 底 2 + hint 內建 12）。註：原 hint 上緣 4px、控制項內建 2px，
-                        差 2px（不可用外層 Margin 吸收，屬區塊內部間距）— 見重構報告，待人工目視確認。
-                    -->
-                    <shared:TxFeeField Margin="0,14,0,2" />
-                </StackPanel>
-
-            </StackPanel>
-        </Expander>
+        <StackPanel Visibility="{Binding Buy.IsNonStock, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <shared:TxFeeField Margin="0,14,0,0" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding Buy.IsCrypto, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <shared:TxFeeField Margin="0,14,0,0" />
+        </StackPanel>
 
     </StackPanel>
 </UserControl>
