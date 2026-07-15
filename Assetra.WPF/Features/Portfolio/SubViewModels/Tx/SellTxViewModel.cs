@@ -116,7 +116,6 @@ public sealed partial class SellTxViewModel : ObservableObject
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(InstrumentCurrencyBadge));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnCashAccountCurrencyChanged(string value)
@@ -126,7 +125,6 @@ public sealed partial class SellTxViewModel : ObservableObject
             : value.Trim().ToUpperInvariant();
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnSettlementInputModeChanged(string value)
@@ -142,7 +140,6 @@ public sealed partial class SellTxViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
     }
 
     private string NormalizeSettlementCurrency() =>
@@ -198,14 +195,6 @@ public sealed partial class SellTxViewModel : ObservableObject
             ParseHelpers.TryParseInt(quantityText, out var q) && q > 0)
             return (p * q).ToString("N0");
         return "0";
-    }
-
-    // 跨幣別時自動展開「進階」，避免結算金額/匯率等必填欄位藏在收合區裡（對齊 Buy）。
-    // one-way：需要時展開，使用者仍可手動收合。
-    private void AutoExpandAdvancedIfCrossCurrency()
-    {
-        if (IsCrossCurrency)
-            IsAdvancedExpanded = true;
     }
 
     public bool HasPreview => GrossAmount > 0;

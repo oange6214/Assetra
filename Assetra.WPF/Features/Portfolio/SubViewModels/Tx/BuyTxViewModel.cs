@@ -144,7 +144,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(InstrumentCurrencyBadge));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnCashAccountCurrencyChanged(string value)
@@ -154,7 +153,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
             : value.Trim().ToUpperInvariant();
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
     }
 
     partial void OnSettlementInputModeChanged(string value)
@@ -170,13 +168,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        AutoExpandAdvancedIfCrossCurrency();
-    }
-
-    private void AutoExpandAdvancedIfCrossCurrency()
-    {
-        if (IsCrossCurrency)
-            IsAdvancedExpanded = true;   // one-way: open when needed, never force-close
     }
 
     private string NormalizeSettlementCurrency() =>

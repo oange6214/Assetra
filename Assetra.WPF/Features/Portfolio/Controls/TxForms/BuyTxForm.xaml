@@ -341,13 +341,82 @@
         </StackPanel>
 
         <!--
+            扣款帳戶 + 跨幣別結算 — 主流程（非進階）。
+            跨幣別（成交幣別 ≠ 扣款帳戶幣別，如複委託 USD 交易由 TWD 帳戶扣款）的
+            結算金額/匯率攸關成本正確性，不可收在進階裡；CrossCurrencyOverlay 自身
+            以 IsCrossCurrency 自我 gating，同幣別（台股 TWD→TWD、IB USD→USD）不顯示。
+            外層 StackPanel 保留 MetaOnly 收合（原本在進階內由同樣的 trigger 包住）。
+        -->
+        <StackPanel Margin="0,12,0,0">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Buy.MetaOnly}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
+            <CheckBox
+                Margin="0,0,0,6"
+                Content="{Binding TxUseCashAccountLabel}"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
+            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,0,0,6"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{Binding TxCashAccountLabel}" />
+                <ComboBox
+                    Margin="0,0,0,4"
+                    DisplayMemberPath="Name"
+                    IsEditable="True"
+                    IsTextSearchEnabled="True"
+                    ItemsSource="{Binding CashAccounts}"
+                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                    Style="{StaticResource FormComboBox}"
+                    Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                    <ComboBox.Resources>
+                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                    </ComboBox.Resources>
+                </ComboBox>
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppAccent}"
+                    Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
+                    Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <!--
+                    P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
+                    UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
+                    這裡只負責設定 4 個 DP 把 Buy 專屬的差異塞進去（GroupName / FetchCommand /
+                    Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
+                -->
+                <txforms:CrossCurrencyOverlay
+                    ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
+                    ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
+                    DataContext="{Binding Buy}"
+                    FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
+                    GroupName="TxBuySettlementInputMode" />
+
+            </StackPanel>
+        </StackPanel>
+
+        <!--
             進階區塊 Expander — 收合進階選項：
             • Stock only: 價格模式 toggle (單價/總額)、總額輸入、金額已含手續費
-            • Shared: 手續費 override、從現金帳戶扣款、CrossCurrencyOverlay
-            IsExpanded 綁定 Buy.IsAdvancedExpanded（cross-currency 自動展開）
+            • Shared: 手續費 override
+            IsExpanded 綁定 Buy.IsAdvancedExpanded（純使用者手動控制）
         -->
         <Expander
-            Margin="0,12,0,0"
+            Margin="0,14,0,0"
             Style="{StaticResource AppExpander}"
             Header="{DynamicResource Portfolio.Tx.AdvancedSection}"
             IsExpanded="{Binding Buy.IsAdvancedExpanded, Mode=TwoWay}">
@@ -427,7 +496,7 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!--  Fee + cash-account — hidden in meta-only mode  -->
+                <!--  Fee — hidden in meta-only mode  -->
                 <StackPanel>
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
@@ -447,55 +516,6 @@
                         差 2px（不可用外層 Margin 吸收，屬區塊內部間距）— 見重構報告，待人工目視確認。
                     -->
                     <shared:TxFeeField Margin="0,14,0,2" />
-
-                    <!--  從現金帳戶扣款 — checkbox + dropdown (一致 with 借款/還款 / Transfer)  -->
-                    <CheckBox
-                        Margin="0,0,0,6"
-                        Content="{Binding TxUseCashAccountLabel}"
-                        FontSize="{StaticResource Font.Size.Xs}"
-                        Foreground="{DynamicResource AppTextSecondary}"
-                        IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-                    <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock
-                            Margin="0,0,0,6"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{Binding TxCashAccountLabel}" />
-                        <ComboBox
-                            Margin="0,0,0,4"
-                            DisplayMemberPath="Name"
-                            IsEditable="True"
-                            IsTextSearchEnabled="True"
-                            ItemsSource="{Binding CashAccounts}"
-                            SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                            Style="{StaticResource FormComboBox}"
-                            Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                            <ComboBox.Resources>
-                                <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                            </ComboBox.Resources>
-                        </ComboBox>
-                        <TextBlock
-                            Margin="0,2,0,0"
-                            FontSize="{StaticResource Font.Size.Xs}"
-                            Foreground="{DynamicResource AppAccent}"
-                            Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
-                            Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                        <!--
-                            P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                            UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                            這裡只負責設定 4 個 DP 把 Buy 專屬的差異塞進去（GroupName / FetchCommand /
-                            Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
-                        -->
-                        <txforms:CrossCurrencyOverlay
-                            ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
-                            ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
-                            DataContext="{Binding Buy}"
-                            FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
-                            GroupName="TxBuySettlementInputMode" />
-
-                    </StackPanel>
                 </StackPanel>
 
             </StackPanel>

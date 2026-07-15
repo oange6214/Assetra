@@ -99,9 +99,64 @@
                 ThousandSeparator="True" />
         </StackPanel>
 
-        <!--  進階（手續費折扣 / 費用預覽 / 手續費 / 帳戶 / 跨幣別）— 對齊買入收合。  -->
+        <!--
+            存入帳戶 + 跨幣別結算 — 主流程（非進階），對齊買入。
+            跨幣別（成交幣別 ≠ 存入帳戶幣別）的結算金額/匯率攸關損益正確性，不可收在
+            進階裡；CrossCurrencyOverlay 自身以 IsCrossCurrency 自我 gating，同幣別不顯示。
+        -->
+        <StackPanel Margin="0,4,0,0">
+            <!--  存入現金帳戶 — checkbox + dropdown  -->
+            <CheckBox
+                Margin="0,0,0,4"
+                Content="{Binding TxUseCashAccountLabel}"
+                FontSize="{StaticResource Font.Size.Xs}"
+                Foreground="{DynamicResource AppTextSecondary}"
+                IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
+            <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock
+                    Margin="0,0,0,6"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource AppTextSecondary}"
+                    Text="{Binding TxCashAccountLabel}" />
+                <ComboBox
+                    DisplayMemberPath="Name"
+                    IsEditable="True"
+                    IsTextSearchEnabled="True"
+                    ItemsSource="{Binding CashAccounts}"
+                    SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
+                    Style="{StaticResource FormComboBox}"
+                    Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                    <ComboBox.Resources>
+                        <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
+                    </ComboBox.Resources>
+                </ComboBox>
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="{StaticResource Font.Size.Xs}"
+                    Foreground="{DynamicResource AppAccent}"
+                    Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
+                    Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <!--
+                    P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
+                    UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
+                    這裡只負責設定 4 個 DP 把 Sell 專屬的差異塞進去（GroupName /
+                    FetchCommand / Label / Hint），其餘 binding 透過 DataContext=Sell
+                    自動解到 sub-VM 屬性。
+                -->
+                <txforms:CrossCurrencyOverlay
+                    ActualCashAmountHint="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
+                    ActualCashAmountLabel="{DynamicResource Portfolio.Tx.SellActualCashAmount}"
+                    DataContext="{Binding Sell}"
+                    FetchFxRateCommand="{Binding DataContext.FetchSellFxRateCommand, ElementName=Root}"
+                    GroupName="TxSellSettlementInputMode" />
+            </StackPanel>
+        </StackPanel>
+
+        <!--  進階（手續費折扣 / 費用預覽 / 手續費）— 對齊買入收合。  -->
         <Expander
-            Margin="0,4,0,0"
+            Margin="0,14,0,0"
             Header="{DynamicResource Portfolio.Tx.AdvancedSection}"
             IsExpanded="{Binding Sell.IsAdvancedExpanded, Mode=TwoWay}"
             Style="{StaticResource AppExpander}">
@@ -269,54 +324,6 @@
 
         <!--  手續費 (override; 留空 → 自動計算) — Wave 1：抽出 shared:TxFeeField（byte-identical）  -->
         <shared:TxFeeField />
-
-        <!--  存入現金帳戶 — checkbox + dropdown  -->
-        <CheckBox
-            Margin="0,0,0,4"
-            Content="{Binding TxUseCashAccountLabel}"
-            FontSize="{StaticResource Font.Size.Xs}"
-            Foreground="{DynamicResource AppTextSecondary}"
-            IsChecked="{Binding TxUseCashAccount, Mode=TwoWay}" />
-        <StackPanel Visibility="{Binding TxUseCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="0,0,0,6"
-                FontSize="{StaticResource Font.Size.Xs}"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource AppTextSecondary}"
-                Text="{Binding TxCashAccountLabel}" />
-            <ComboBox
-                DisplayMemberPath="Name"
-                IsEditable="True"
-                IsTextSearchEnabled="True"
-                ItemsSource="{Binding CashAccounts}"
-                SelectedItem="{Binding TxCashAccount, Mode=TwoWay}"
-                Style="{StaticResource FormComboBox}"
-                Text="{Binding TxCashAccountName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                <ComboBox.Resources>
-                    <Style BasedOn="{StaticResource FormComboBoxItem}" TargetType="ComboBoxItem" />
-                </ComboBox.Resources>
-            </ComboBox>
-            <TextBlock
-                Margin="0,2,0,0"
-                FontSize="{StaticResource Font.Size.Xs}"
-                Foreground="{DynamicResource AppAccent}"
-                Text="{DynamicResource Portfolio.Tx.WillCreateNew}"
-                Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-            <!--
-                P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                這裡只負責設定 4 個 DP 把 Sell 專屬的差異塞進去（GroupName /
-                FetchCommand / Label / Hint），其餘 binding 透過 DataContext=Sell
-                自動解到 sub-VM 屬性。
-            -->
-            <txforms:CrossCurrencyOverlay
-                ActualCashAmountHint="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
-                ActualCashAmountLabel="{DynamicResource Portfolio.Tx.SellActualCashAmount}"
-                DataContext="{Binding Sell}"
-                FetchFxRateCommand="{Binding DataContext.FetchSellFxRateCommand, ElementName=Root}"
-                GroupName="TxSellSettlementInputMode" />
-        </StackPanel>
         </StackPanel>
         </Expander>
     </StackPanel>
