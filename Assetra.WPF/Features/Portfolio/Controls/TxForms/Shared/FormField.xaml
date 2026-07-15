@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
     mc:Ignorable="d">
@@ -16,12 +17,36 @@
         內層綁定用 ElementName=Root 讀本控制項的 DP（對齊 CrossCurrencyOverlay 慣例）。
     -->
     <StackPanel>
-        <TextBlock
-            Margin="0,0,0,6"
-            FontSize="{StaticResource Font.Size.Xs}"
-            FontWeight="SemiBold"
-            Foreground="{DynamicResource AppTextSecondary}"
-            Text="{Binding Label, ElementName=Root}" />
+        <!--  label（＋選填 ⓘ：說明只在 hover 顯示，不常駐佔行）  -->
+        <StackPanel Margin="0,0,0,6" Orientation="Horizontal">
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="{StaticResource Font.Size.Xs}"
+                FontWeight="SemiBold"
+                Foreground="{DynamicResource AppTextSecondary}"
+                Text="{Binding Label, ElementName=Root}" />
+            <ds:AppIcon
+                Margin="6,0,0,0"
+                VerticalAlignment="Center"
+                AutomationProperties.Name="{Binding InfoTooltip, ElementName=Root}"
+                FontSize="12"
+                Foreground="{DynamicResource AppTextMuted}"
+                Symbol="Info24"
+                ToolTipService.InitialShowDelay="250"
+                ToolTipService.ShowDuration="20000"
+                Visibility="{Binding InfoTooltip, ElementName=Root, Converter={StaticResource StringToVisibilityConverter}}">
+                <ds:AppIcon.ToolTip>
+                    <ToolTip>
+                        <TextBlock
+                            MaxWidth="280"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{Binding InfoTooltip, ElementName=Root}"
+                            TextWrapping="Wrap" />
+                    </ToolTip>
+                </ds:AppIcon.ToolTip>
+            </ds:AppIcon>
+        </StackPanel>
         <TextBox
             behaviors:ThousandSeparatorBehavior.IsEnabled="{Binding ThousandSeparator, ElementName=Root}"
             IsEnabled="{Binding InputEnabled, ElementName=Root}"

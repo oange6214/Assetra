@@ -22,18 +22,13 @@
         • hint margin 以 Sell 原值 0,2,0,12 為準（Sell 換入後 byte-identical）；
           Buy 的 label 上緣 14 與 hint 下緣 14 由外層 <shared:TxFeeField Margin="0,14,0,2"/> 帶回。
     -->
-    <StackPanel>
+    <StackPanel Margin="0,0,0,12">
         <shared:FormField
             ErrorText="{Binding TxFeeError}"
+            InfoTooltip="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
             Label="{DynamicResource Portfolio.Tx.Fee}"
             Placeholder="{DynamicResource Portfolio.Tx.FeePlaceholder}"
             Text="{Binding TxFee, UpdateSourceTrigger=PropertyChanged}"
             ThousandSeparator="True" />
-        <TextBlock
-            Margin="0,2,0,12"
-            FontSize="{StaticResource Font.Size.Xs}"
-            Foreground="{DynamicResource AppTextMuted}"
-            Text="{DynamicResource Portfolio.Tx.FeeOverrideHint}"
-            TextWrapping="Wrap" />
     </StackPanel>
 </UserControl>

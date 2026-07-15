@@ -122,6 +122,23 @@ public partial class FormField : UserControl
         set => SetValue(ErrorMarginProperty, value);
     }
 
+    /// <summary>
+    /// 選填的欄位說明。非空字串時在 label 右側顯示一顆 ⓘ，說明只在 hover 時以 tooltip 呈現。
+    /// 用來取代原本常駐在欄位下方、把表單撐成「說明書」的 hint TextBlock（文案 key 不變）。
+    /// 留空（預設）時完全不顯示圖示，既有呼叫端渲染不受影響。
+    /// </summary>
+    public static readonly DependencyProperty InfoTooltipProperty = DependencyProperty.Register(
+        nameof(InfoTooltip),
+        typeof(string),
+        typeof(FormField),
+        new PropertyMetadata(string.Empty));
+
+    public string InfoTooltip
+    {
+        get => (string)GetValue(InfoTooltipProperty);
+        set => SetValue(InfoTooltipProperty, value);
+    }
+
     public FormField()
     {
         InitializeComponent();
