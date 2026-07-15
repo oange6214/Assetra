@@ -21,6 +21,7 @@
     <Color x:Key="Color.Slate.950">#020617</Color>
 
     <!--  Green scale  -->
+    <Color x:Key="Color.Green.50">#F0FDF4</Color>
     <Color x:Key="Color.Green.500">#22C55E</Color>
     <Color x:Key="Color.Green.700">#15803D</Color>
 

@@ -799,6 +799,11 @@
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the trade total above is recorded as the investment cost without adding auto commission. It is still the trade-currency cost, not the cross-currency account debit.</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount">Account debit amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">Enter the amount actually debited by the broker or bank account, such as a TWD sub-brokerage debit. This only affects the funds-account movement; price or trade total still preserves investment cost. If trade details are blank, cross-currency back-solving still requires an FX rate.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Label">Total cost premium</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Normal">fees + FX spread, within normal range</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Warning">on the high side — double-check the debited amount</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Excessive">far off — check for a typo (e.g. a missing digit)</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Hint">Compares the amount you actually paid against price × the trade-date market rate. Sub-brokerage fees and FX spread normally cause a small premium; a large deviation usually means a mistyped amount. The check is skipped when no market rate is available for that date.</sys:String>
     <sys:String x:Key="Portfolio.Tx.SettlementSection">Account debit</sys:String>
     <sys:String x:Key="Portfolio.Tx.InstrumentCurrency">Trade currency</sys:String>
     <sys:String x:Key="Portfolio.Tx.SettlementCurrency">Debit currency</sys:String>

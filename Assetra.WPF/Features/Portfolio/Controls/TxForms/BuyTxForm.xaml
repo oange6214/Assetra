@@ -450,6 +450,78 @@
                     FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
                     GroupName="TxBuySettlementInputMode" />
 
+                <!--
+                    總成本溢價合理性檢查 — 實際扣款 vs 價金 × 交易日市場匯率。
+                    刻意放在 CrossCurrencyOverlay 之外：那張卡是 Buy/Sell/CashDividend 共用，
+                    而溢價屬性目前只有 Buy 有；擺進去會讓另外兩張表單噴 binding error。
+                    Buy.ShowPremium 自我 gating（非跨幣別、非依帳戶明細、或查無市場匯率 → 不顯示，
+                    絕不擋記帳）。
+                -->
+                <Border
+                    Margin="0,8,0,0"
+                    Padding="10,6"
+                    CornerRadius="{StaticResource Radius.Sm}"
+                    ToolTipService.ShowDuration="20000"
+                    Visibility="{Binding Buy.ShowPremium, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <TextBlock
+                                MaxWidth="300"
+                                FontSize="{StaticResource Font.Size.Xs}"
+                                Foreground="{DynamicResource AppTextSecondary}"
+                                Text="{DynamicResource Portfolio.Tx.Premium.Hint}"
+                                TextWrapping="Wrap" />
+                        </ToolTip>
+                    </Border.ToolTip>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <!--  Normal（≤3%）：綠底，代表費用/匯差在正常範圍  -->
+                            <Setter Property="Background" Value="{DynamicResource AppSuccessSubtle}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
+                                    <Setter Property="Background" Value="{DynamicResource AppWarningSubtle}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
+                                    <Setter Property="Background" Value="{DynamicResource AppDangerSubtle}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock FontSize="{StaticResource Font.Size.Xs}" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource AppSuccess}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppWarning}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run Text="{DynamicResource Portfolio.Tx.Premium.Label}" />
+                        <Run FontWeight="SemiBold" Text="{Binding Buy.PremiumPercentDisplay, Mode=OneWay}" />
+                        <Run Text="—" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Normal}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Warning}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
+                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Excessive}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </Border>
+
             </StackPanel>
         </StackPanel>
 

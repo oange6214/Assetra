@@ -42,6 +42,8 @@
     <SolidColorBrush x:Key="AppWarningSubtle"  Color="#FFF8EB" />
     <SolidColorBrush x:Key="AppInfoSubtle"     Color="#EFF6FF" />
     <SolidColorBrush x:Key="AppSuccess"   Color="{StaticResource Color.Green.700}" />
+    <!--  soft green wash — 補齊 Success 的 Subtle 變體（Warning/Danger/Info 本來就有）  -->
+    <SolidColorBrush x:Key="AppSuccessSubtle" Color="{StaticResource Color.Green.50}" />
     <SolidColorBrush x:Key="AppFocusRing" Color="{StaticResource Color.Brand.Navy}" />
 
     <!--  Semantic — destructive  -->

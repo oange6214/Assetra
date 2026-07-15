@@ -235,6 +235,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
                 {
                     Buy.TotalCost = (price * qty).ToString("0.##");
                 }
+
+                SyncBuyGrossNative();
             }
             // P3 — keep Buy.InstrumentCurrency in sync with the selected symbol's
             // currency (filled by SelectSuggestion after the user picks an autocomplete
@@ -432,6 +434,28 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     public bool IsTxCurrencyEditable =>
         SelectedAsset is null || !IsInvestmentAssetKind(SelectedAsset.Kind);
+
+    /// <summary>
+    /// 把「成交價金」（數量 × 每股價格，成交幣別）同步進 <c>Buy</c> 供溢價合理性檢查用。
+    /// 總額模式下改用使用者輸入的 <c>Buy.TotalCost</c>（那就是價金本身）。
+    /// 任一欄缺漏／非正數 → null＝資料不足，Buy 端不顯示檢查。純顯示用途，不碰寫入路徑。
+    /// </summary>
+    private void SyncBuyGrossNative()
+    {
+        if (Buy.IsTotalMode)
+        {
+            Buy.GrossNative = ParseHelpers.TryParseDecimal(Buy.TotalCost, out var total) && total > 0m
+                ? total
+                : null;
+            return;
+        }
+
+        Buy.GrossNative =
+            ParseHelpers.TryParseDecimal(AddAssetDialog.AddPrice, out var price) && price > 0m &&
+            ParseHelpers.TryParseInt(AddAssetDialog.AddQuantity, out var qty) && qty > 0
+                ? price * qty
+                : null;
+    }
 
     /// <summary>
     /// 交易幣別列僅在「幣別可編輯」（現金/負債/無資產）且非 meta-only 編輯時顯示。

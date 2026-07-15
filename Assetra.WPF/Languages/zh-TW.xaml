@@ -797,6 +797,11 @@
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時，上方成交總額會直接作為投資成本，不再額外加自動手續費；這仍是成交幣別的成本，不等同跨幣別帳戶扣款。</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount">帳戶扣款金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">請填券商或銀行帳戶實際扣款金額（例如複委託台幣扣款）。此欄只影響資金帳戶流水；成交價或成交總額仍用來保存投資成本。若成交明細留空，跨幣別反推仍需要匯率。</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Label">本筆總成本溢價</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Normal">費用＋匯差，正常範圍</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Warning">偏高，請確認實際扣款金額</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Excessive">偏離過大，請檢查是否輸入錯誤（例如少一位數）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.Premium.Hint">以「實際扣款 vs 價金 × 交易日市場匯率」比對。複委託的手續費與匯差本來就會造成小幅溢價；偏離過大通常代表金額打錯。查不到當日市場匯率時不做此檢查。</sys:String>
     <sys:String x:Key="Portfolio.Tx.SettlementSection">帳戶扣款</sys:String>
     <sys:String x:Key="Portfolio.Tx.InstrumentCurrency">成交幣別</sys:String>
     <sys:String x:Key="Portfolio.Tx.SettlementCurrency">扣款幣別</sys:String>
