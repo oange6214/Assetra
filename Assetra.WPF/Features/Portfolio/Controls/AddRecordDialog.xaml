@@ -378,8 +378,8 @@
                                                 </ds:AppIcon>
                                             </StackPanel>
                                             <!--
-                                                類型 chips（取代原 type ComboBox）—— 買入/賣出 為主 chip；
-                                                其餘類型（現金股利/股票股利…依資產而定）收進「更多 ▾」popup。
+                                                類型 chips（取代原 type ComboBox）—— 前兩個可用類型為主 chip
+                                                （投資標的即 買入/賣出）；其餘類型依資產而定收進「更多 ▾」popup。
                                                 選取語意與原 ComboBox 一致：點擊走 SelectTxTypeCommand 設 TxType，
                                                 chip 勾選狀態由 TxType == Key 比對（EqualityConverter multi 模式，OneWay）。
                                                 視覺沿用 每股價格/成交總額 toggle 的 SegmentBtn 樣式。

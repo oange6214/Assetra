@@ -319,18 +319,19 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     }
 
     /// <summary>
-    /// 類型 chips 的主選項 — <see cref="AvailableTradeTypes"/> 中 key 為 "buy"/"sell"
-    /// 的子集（保持 buy 在 sell 前）。AddRecordDialog 用它渲染主 chip 列。
+    /// 類型 chips 的主選項 — <see cref="AvailableTradeTypes"/> 的前兩項（依 source 順序）。
+    /// 投資標的前兩項即 buy/sell，故股票/ETF 行為不變；現金/負債等情境則各自取自己的前兩項
+    /// （如 income/deposit），避免主 chip 列為空只剩「更多」。AddRecordDialog 用它渲染主 chip 列。
     /// </summary>
     public IReadOnlyList<TradeTypeOption> PrimaryTradeTypes =>
-        AvailableTradeTypes.Where(o => o.Key is "buy" or "sell").ToList();
+        AvailableTradeTypes.Take(2).ToList();
 
     /// <summary>
-    /// 類型 chips 的「更多」選項 — <see cref="AvailableTradeTypes"/> 扣掉
-    /// <see cref="PrimaryTradeTypes"/> 後其餘項（保持原順序），走「更多 ▾」popup。
+    /// 類型 chips 的「更多」選項 — <see cref="AvailableTradeTypes"/> 前兩項以外其餘項
+    /// （保持原順序），走「更多 ▾」popup。
     /// </summary>
     public IReadOnlyList<TradeTypeOption> MoreTradeTypes =>
-        AvailableTradeTypes.Where(o => o.Key is not ("buy" or "sell")).ToList();
+        AvailableTradeTypes.Skip(2).ToList();
 
     /// <summary>True 時顯示「更多 ▾」按鈕（<see cref="MoreTradeTypes"/> 非空）。</summary>
     public bool HasMoreTradeTypes => MoreTradeTypes.Count > 0;
