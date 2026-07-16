@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
-    xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -171,18 +171,70 @@
                 Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <!--
-                P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                這裡只負責設定 4 個 DP 把 Div 專屬的差異塞進去（GroupName /
-                FetchCommand / Label / Hint），其餘 binding 透過 DataContext=Div
-                自動解到 sub-VM 屬性。
+                「帳戶入帳」卡（入帳依據 radios ＋ 實際入帳金額 ＋ 三段說明）已整張移除，
+                對齊買入／賣出。現金股利一律走「依匯率估算」：台幣入帳 = 股息 × 當日市場匯率
+                － 手續費，匯率由 QueueDividendFxRateRefresh() 在日期／帳戶／幣別變動時靜默
+                自動抓，確認前還有一道補抓，使用者不需要碰任何跨幣別欄位。
+
+                只留這一行匯率：①自動抓不到當日匯率時（補記舊股息）否則會卡在確認錯誤、
+                無處可修；②台幣入帳完全由它推導出來，使用者有權看見並覆寫。
             -->
-            <txforms:CrossCurrencyOverlay
-                ActualCashAmountHint="{DynamicResource Portfolio.Tx.DivActualCashAmountHint}"
-                ActualCashAmountLabel="{DynamicResource Portfolio.Tx.DivActualCashAmount}"
-                DataContext="{Binding Div}"
-                FetchFxRateCommand="{Binding DataContext.FetchDividendFxRateCommand, ElementName=Root}"
-                GroupName="TxDivSettlementInputMode" />
+            <Grid
+                Margin="0,10,0,0"
+                Visibility="{Binding Div.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource AppTextSecondary}"
+                        Text="{DynamicResource Portfolio.Tx.FxRate.Short}" />
+                    <TextBlock
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource Font.Size.Xs}"
+                        Foreground="{DynamicResource AppAccent}"
+                        Text="{Binding Div.SettlementPairDisplay, Mode=OneWay}" />
+                </StackPanel>
+                <TextBox
+                    Grid.Column="1"
+                    MinWidth="90"
+                    Margin="10,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding AreEconomicFieldsEditable}"
+                    Text="{Binding Div.FxRate, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{DynamicResource Portfolio.Tx.FxRate.Hint}" />
+                <Button
+                    Grid.Column="2"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Command="{Binding FetchDividendFxRateCommand}"
+                    Cursor="Hand"
+                    ToolTip="{DynamicResource Portfolio.Tx.FetchFxRate}">
+                    <ds:AppIcon
+                        FontSize="12"
+                        Foreground="{DynamicResource AppAccent}"
+                        Symbol="Flash16" />
+                </Button>
+            </Grid>
+            <!--  抓匯率失敗訊息 — 走設計系統既有的 FormFieldError 樣式（勿直接塗 AppDanger）  -->
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{StaticResource FormFieldError}"
+                Text="{Binding Div.FxFetchError}"
+                TextWrapping="Wrap"
+                Visibility="{Binding Div.FxFetchError, Converter={StaticResource StringToVisibilityConverter}}" />
         </StackPanel>
     </StackPanel>
 </UserControl>

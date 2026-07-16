@@ -789,45 +789,29 @@
     <sys:String x:Key="Portfolio.Tx.TotalAmount">總成交金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">成交總額已含手續費</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">勾選時，上方成交總額會直接作為投資成本，不再額外加自動手續費；這仍是成交幣別的成本，不等同跨幣別帳戶扣款。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.ActualCashAmount">帳戶扣款金額</sys:String>
-    <sys:String x:Key="Portfolio.Tx.ActualCashAmountHint">請填券商或銀行帳戶實際扣款金額（例如複委託台幣扣款）。此欄只影響資金帳戶流水；成交價或成交總額仍用來保存投資成本。若成交明細留空，跨幣別反推仍需要匯率。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Premium.Label">本筆總成本溢價</sys:String>
     <sys:String x:Key="Portfolio.Tx.Premium.Normal">費用＋匯差，正常範圍</sys:String>
     <sys:String x:Key="Portfolio.Tx.Premium.Warning">偏高，請確認實際扣款金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.Premium.Excessive">偏離過大，請檢查是否輸入錯誤（例如少一位數）</sys:String>
     <sys:String x:Key="Portfolio.Tx.Premium.Hint">以「實際扣款 vs 價金 × 交易日市場匯率」比對。複委託的手續費與匯差本來就會造成小幅溢價；偏離過大通常代表金額打錯。查不到當日市場匯率時不做此檢查。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementSection">帳戶扣款</sys:String>
     <sys:String x:Key="Portfolio.Tx.InstrumentCurrency">成交幣別</sys:String>
     <sys:String x:Key="Portfolio.Tx.SettlementCurrency">扣款幣別</sys:String>
-    <sys:String x:Key="Portfolio.Tx.FxRateDate">匯率日期</sys:String>
-    <sys:String x:Key="Portfolio.Tx.FxSource">匯率來源</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchFxRate">取得匯率</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Unavailable">查無此日期匯率，請手動輸入匯率或實際扣款金額。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementInputMode">扣款依據</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementMode.Statement">依帳戶明細</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementMode.StatementHint">複委託或銀行明細已知時使用。此金額會寫入資金帳戶，並在成交明細已填時反推有效匯率。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementMode.FxEstimate">依匯率估算</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementMode.FxEstimateHint">沒有實際扣款明細時使用。系統用上方成交明細與匯率估算帳戶扣款。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.FxMode.Hint">沒有實際扣款明細時，請填寫或取得匯率；系統會用上方成交明細與匯率估算資金帳戶扣款。</sys:String>
     <!--  MultiCurrency-Trade-Refactor P3 — 跨幣別 banner + FX rate  -->
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">跨幣別交易（標的幣別 ≠ 扣款帳戶幣別）</sys:String>
     <!--  P5.7 — shorter cross-currency banner; promotes ActualCashAmount as primary; FxRate goes 進階  -->
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner.Short">跨幣別交易</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint.Short">成交明細以標的幣別保存投資成本；帳戶扣款以資金帳戶幣別記錄現金流水。</sys:String>
     <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">明細金額</sys:String>
     <sys:String x:Key="Portfolio.Tx.Advanced">進階</sys:String>
     <sys:String x:Key="Portfolio.Tx.AdvancedSection">進階（手續費 / 跨幣別 / 結算）</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">系統偵測到此交易跨幣別。為了正確記錄持倉成本與現金餘額，請選擇以券商或帳戶明細金額為準，或用匯率估算扣款。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.FxRate">匯率（成交幣別 → 扣款幣別）</sys:String>
+    <sys:String x:Key="Portfolio.Tx.FxRate.Short">匯率</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">例：美股以 TWD 帳戶扣款時，請填 USD → TWD 匯率。若已填實際扣款金額，匯率只作為估算與紀錄參考。</sys:String>
     <!--  MultiCurrency-Trade-Refactor P3 Mode C — 成交價可留空，由實際扣款 + 股數 反推  -->
     <sys:String x:Key="Portfolio.AddPrice.OptionalHint">不知道單價？同幣別可由帳戶扣款金額與股數反推；跨幣別請同時提供匯率或填寫成交明細。</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.SellHint">系統偵測到此賣出跨幣別（例如：賣出美股後入款到台幣帳戶）。為了正確記錄已實現損益與現金餘額，請填寫匯率或券商實際入帳金額；兩者擇一即可，皆填則以實際入帳為權威。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SellActualCashAmount">實際入帳金額（依券商對帳單）</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SellActualCashAmountHint">若券商對帳單已有實際入帳，請直接填此欄；複委託通常已包含手續費、交易稅與換匯價差。留空時系統會用賣出價、股數、手續費與匯率估算。</sys:String>
     <sys:String x:Key="Portfolio.Tx.CrossCurrency.DivHint">系統偵測到此股息跨幣別（例如：美股配 USD 股息入款到台幣帳戶）。為了正確記錄股息收入與現金餘額，請填寫匯率或券商實際入帳金額；兩者擇一即可，皆填則以實際入帳為權威。</sys:String>
-    <sys:String x:Key="Portfolio.Tx.DivActualCashAmount">實際入帳金額（依券商對帳單）</sys:String>
-    <sys:String x:Key="Portfolio.Tx.DivActualCashAmountHint">若券商對帳單已有實際入帳，請直接填此欄；留空時系統會用每股股利、持股數與匯率估算。</sys:String>
     <sys:String x:Key="Portfolio.Tx.Subtotal">總計</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">輸入方式</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">每股股利</sys:String>

@@ -284,35 +284,20 @@ public sealed class ControlsBehaviorTests
     }
 
     [Fact]
-    public void BuyTxForm_ReadOnlyDisplayBindingsAreOneWay()
+    public void CrossCurrencyTxForms_ReadOnlyPairDisplayBindingsAreOneWay()
     {
-        // P5.8b — cross-currency settlement section markup moved to shared
-        // CrossCurrencyOverlay UserControl. Source of truth for read-only display
-        // bindings is now the overlay markup (DataContext=Buy resolves the unprefixed
-        // SettlementPairDisplay / FxRateDateDisplay / FxSourceDisplay).
-        var xaml = File.ReadAllText(GetCrossCurrencyOverlayPath());
-
-        Assert.Contains("Text=\"{Binding SettlementPairDisplay, Mode=OneWay}\"", xaml);
-        Assert.Contains("Text=\"{Binding FxRateDateDisplay, Mode=OneWay}\"", xaml);
-        Assert.Contains("Text=\"{Binding FxSourceDisplay, Mode=OneWay}\"", xaml);
-    }
-
-    [Fact]
-    public void BuyTxForm_FxRefreshActionDoesNotFillSectionHeader()
-    {
-        // P5.8b — Fetch button markup is in the shared overlay; BuyTxForm only
-        // wires the parent VM's FetchBuyFxRateCommand into the overlay's
-        // FetchFxRateCommand DP.
-        var overlay = File.ReadAllText(GetCrossCurrencyOverlayPath());
+        // WHY: SettlementPairDisplay 是唯讀的計算屬性（"USD → TWD"），沒有 setter。
+        // 少了 Mode=OneWay，WPF 預設會嘗試回寫而在執行期靜默丟 binding error。
+        // 「帳戶扣款」卡移除後，三張表單各自留一行匯率，各自帶自己的 pair 顯示 —
+        // 故三張都要守。FxRateDateDisplay / FxSourceDisplay 的斷言隨該卡一併移除：
+        // 那兩個顯示欄位已不存在於任何表單。
         var buy = File.ReadAllText(GetBuyTxFormPath());
+        var sell = File.ReadAllText(GetTxFormPath("SellTxForm.xaml"));
+        var dividend = File.ReadAllText(GetTxFormPath("CashDividendTxForm.xaml"));
 
-        Assert.Contains("MinWidth=\"0\"", overlay);
-        Assert.Contains("MinHeight=\"28\"", overlay);
-        Assert.Contains("Command=\"{Binding FetchFxRateCommand, ElementName=Root}\"", overlay);
-        Assert.Contains("Visibility=\"{Binding IsFxSettlementMode", overlay);
-
-        // Buy form wires the parent VM's FetchBuyFxRateCommand into the overlay DP.
-        Assert.Contains("FetchFxRateCommand=\"{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}\"", buy);
+        Assert.Contains("Text=\"{Binding Buy.SettlementPairDisplay, Mode=OneWay}\"", buy);
+        Assert.Contains("Text=\"{Binding Sell.SettlementPairDisplay, Mode=OneWay}\"", sell);
+        Assert.Contains("Text=\"{Binding Div.SettlementPairDisplay, Mode=OneWay}\"", dividend);
     }
 
     [Fact]
@@ -324,14 +309,14 @@ public sealed class ControlsBehaviorTests
         // 註：「成交明細輸入」（單價/總額 toggle 的標題）已隨 toggle 一併移除 —— 成交明細
         // 改為 數量/每股價格/成交總額 三欄互補，沒有模式要選。每股價格與成交總額改由
         // UnitPriceLabel / TotalAmountLabel 這兩個欄位標題提供，用語本身仍受此測試保護。
+        //
+        // 「帳戶扣款」卡整張移除後，以下斷言連同其 key 一併拿掉（它們守的是已不存在的 UI）：
+        // 帳戶扣款金額 (ActualCashAmount)、依帳戶明細 / 依匯率估算 (SettlementMode.*)、
+        // 此欄只影響資金帳戶流水 + 成交價或成交總額仍用來保存投資成本 (ActualCashAmountHint)。
+        // 「帳戶扣款」一詞本身仍在服役（TradeDetailsHint / UseDeductCashAccount 等），故保留。
         Assert.Contains("每股價格", zh);
         Assert.Contains("成交總額", zh);
         Assert.Contains("帳戶扣款", zh);
-        Assert.Contains("帳戶扣款金額", zh);
-        Assert.Contains("依帳戶明細", zh);
-        Assert.Contains("依匯率估算", zh);
-        Assert.Contains("此欄只影響資金帳戶流水", zh);
-        Assert.Contains("成交價或成交總額仍用來保存投資成本", zh);
         Assert.DoesNotContain(">結算與匯率<", zh);
         Assert.DoesNotContain(">扣款與匯率<", zh);
         Assert.DoesNotContain(">依明細金額<", zh);
@@ -339,94 +324,16 @@ public sealed class ControlsBehaviorTests
         Assert.DoesNotContain("跨幣別交易（複委託）", zh);
 
         // 同上：toggle 標題 "Trade detail input" 已隨 toggle 移除。
+        // 英文側「Account debit」只存在於已刪除的 SettlementSection / ActualCashAmount 兩個 key
+        // （中文的「帳戶扣款」另有現役 key 支撐，故 zh 側保留、en 側整條移除）。
         Assert.Contains("Per-share price", en);
         Assert.Contains("Trade total", en);
-        Assert.Contains("Account debit", en);
-        Assert.Contains("Account debit amount", en);
-        Assert.Contains("Account statement", en);
-        Assert.Contains("FX estimate", en);
-        Assert.Contains("This only affects the funds-account movement", en);
-        Assert.Contains("price or trade total still preserves investment cost", en);
         Assert.DoesNotContain(">Settlement and FX<", en);
         Assert.DoesNotContain(">Cash settlement and FX<", en);
         Assert.DoesNotContain(">Required for sub-brokerage<", en);
     }
 
-    [Fact]
-    public void BuyTxForm_CrossCurrencySettlementUsesExplicitInputMode()
-    {
-        // P5.8b — the SettlementInputMode toggle now lives in the shared
-        // CrossCurrencyOverlay; BuyTxForm just sets DataContext=Buy + GroupName.
-        var overlay = File.ReadAllText(GetCrossCurrencyOverlayPath());
-        var buy = File.ReadAllText(GetBuyTxFormPath());
-
-        Assert.Contains("Text=\"{DynamicResource Portfolio.Tx.SettlementInputMode}\"", overlay);
-        Assert.Contains("IsChecked=\"{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=statement, Mode=TwoWay}\"", overlay);
-        Assert.Contains("IsChecked=\"{Binding SettlementInputMode, Converter={StaticResource EqualityConverter}, ConverterParameter=fx, Mode=TwoWay}\"", overlay);
-        Assert.Contains("Visibility=\"{Binding IsStatementSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}\"", overlay);
-        Assert.Contains("Visibility=\"{Binding IsFxSettlementMode, Converter={StaticResource BooleanToVisibilityConverter}}\"", overlay);
-
-        // Buy form wires the overlay to Buy sub-VM + supplies form-unique GroupName.
-        Assert.Contains("DataContext=\"{Binding Buy}\"", buy);
-        Assert.Contains("GroupName=\"TxBuySettlementInputMode\"", buy);
-    }
-
-    [Fact]
-    public void BuyTxForm_CashSettlementDoesNotUseBadgeForRequiredAmount()
-    {
-        // P5.8b — shared overlay must not introduce the danger-red required badge;
-        // Buy form must supply the standard (non-red) label via the DP.
-        var overlay = File.ReadAllText(GetCrossCurrencyOverlayPath());
-        var buy = File.ReadAllText(GetBuyTxFormPath());
-
-        Assert.DoesNotContain("Portfolio.Tx.ActualCashAmount.RequiredBadge", overlay);
-        Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", overlay);
-        Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", overlay);
-        Assert.DoesNotContain("Portfolio.Tx.ActualCashAmount.RequiredBadge", buy);
-        Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", buy);
-        Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", buy);
-
-        // Buy form supplies the standard label via the ActualCashAmountLabel DP.
-        Assert.Contains("ActualCashAmountLabel=\"{DynamicResource Portfolio.Tx.ActualCashAmount}\"", buy);
-    }
-
-    [Fact]
-    public void CrossCurrencyTxForms_UseSharedSettlementBadgeStyle()
-    {
-        // P5.8a → P5.8b — all three forms (Buy/Sell/CashDividend) now route
-        // their cross-currency UI through the shared CrossCurrencyOverlay.
-        // Architectural assertions:
-        //   1. None of the three forms (nor the overlay) may use danger color
-        //      background — earlier P5.7 had a red "複委託請填" badge that's
-        //      now obsolete with the explicit statement-vs-fx mode toggle.
-        //   2. Each form must bind DataContext to its own sub-VM (Buy/Sell/Div)
-        //      so the overlay's unprefixed bindings resolve correctly.
-        var sell = File.ReadAllText(GetTxFormPath("SellTxForm.xaml"));
-        var dividend = File.ReadAllText(GetTxFormPath("CashDividendTxForm.xaml"));
-        var buy = File.ReadAllText(GetBuyTxFormPath());
-        var overlay = File.ReadAllText(GetCrossCurrencyOverlayPath());
-
-        Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", sell);
-        Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", sell);
-        Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", dividend);
-        Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", dividend);
-        Assert.DoesNotContain("Background=\"{DynamicResource AppDangerSubtle}\"", overlay);
-        Assert.DoesNotContain("Foreground=\"{DynamicResource AppDanger}\"", overlay);
-
-        // Each form wires the overlay to its own sub-VM via DataContext.
-        Assert.Contains("DataContext=\"{Binding Buy}\"", buy);
-        Assert.Contains("DataContext=\"{Binding Sell}\"", sell);
-        Assert.Contains("DataContext=\"{Binding Div}\"", dividend);
-
-        // Overlay binds the unprefixed SettlementInputMode (resolves to the
-        // chosen sub-VM's settlement state).
-        Assert.Contains("Binding SettlementInputMode", overlay);
-    }
-
     private static string GetBuyTxFormPath() => GetTxFormPath("BuyTxForm.xaml");
-
-    /// <summary>P5.8b — shared cross-currency settlement section UserControl.</summary>
-    private static string GetCrossCurrencyOverlayPath() => GetTxFormPath("CrossCurrencyOverlay.xaml");
 
     private static string GetTxFormPath(string fileName)
     {

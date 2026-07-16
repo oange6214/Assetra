@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:Assetra.WPF.Infrastructure.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
-    xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -100,9 +100,9 @@
         </StackPanel>
 
         <!--
-            存入帳戶 + 跨幣別結算 — 主流程（非進階），對齊買入。
-            跨幣別（成交幣別 ≠ 存入帳戶幣別）的結算金額/匯率攸關損益正確性，不可收在
-            進階裡；CrossCurrencyOverlay 自身以 IsCrossCurrency 自我 gating，同幣別不顯示。
+            存入帳戶 + 跨幣別匯率 — 主流程（非進階），對齊買入。
+            跨幣別（成交幣別 ≠ 存入帳戶幣別）的匯率攸關損益正確性，不可收在進階裡；
+            下方匯率列以 Sell.IsCrossCurrency 自我 gating，同幣別不顯示。
         -->
         <StackPanel Margin="0,4,0,0">
             <!--
@@ -150,18 +150,72 @@
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--
-                    P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                    UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                    這裡只負責設定 4 個 DP 把 Sell 專屬的差異塞進去（GroupName /
-                    FetchCommand / Label / Hint），其餘 binding 透過 DataContext=Sell
-                    自動解到 sub-VM 屬性。
+                    「帳戶入帳」卡（入帳依據 radios ＋ 實際入帳金額 ＋ 三段說明）已整張移除，
+                    對齊買入。賣出一律走「依匯率估算」：台幣入帳 = 價金 × 當日市場匯率 － 手續費／稅，
+                    匯率由 QueueSellFxRateRefresh() 在日期／帳戶／幣別變動時靜默自動抓，
+                    確認前還有一道補抓，使用者不需要碰任何跨幣別欄位。
+
+                    只留這一行匯率：①自動抓不到當日匯率時（補記舊交易）否則會卡在確認錯誤、
+                    無處可修；②台幣入帳完全由它推導出來，使用者有權看見並覆寫。
+                    代價：實際入帳金額無法在此輸入，故餘額為估算值 — 靠帳戶設定的券商換匯價差
+                    收斂、並以既有的「對帳」功能定期校正。
                 -->
-                <txforms:CrossCurrencyOverlay
-                    ActualCashAmountHint="{DynamicResource Portfolio.Tx.SellActualCashAmountHint}"
-                    ActualCashAmountLabel="{DynamicResource Portfolio.Tx.SellActualCashAmount}"
-                    DataContext="{Binding Sell}"
-                    FetchFxRateCommand="{Binding DataContext.FetchSellFxRateCommand, ElementName=Root}"
-                    GroupName="TxSellSettlementInputMode" />
+                <Grid
+                    Margin="0,10,0,0"
+                    Visibility="{Binding Sell.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.FxRate.Short}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{Binding Sell.SettlementPairDisplay, Mode=OneWay}" />
+                    </StackPanel>
+                    <TextBox
+                        Grid.Column="1"
+                        MinWidth="90"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding AreEconomicFieldsEditable}"
+                        Text="{Binding Sell.FxRate, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="{DynamicResource Portfolio.Tx.FxRate.Hint}" />
+                    <Button
+                        Grid.Column="2"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Command="{Binding FetchSellFxRateCommand}"
+                        Cursor="Hand"
+                        ToolTip="{DynamicResource Portfolio.Tx.FetchFxRate}">
+                        <ds:AppIcon
+                            FontSize="12"
+                            Foreground="{DynamicResource AppAccent}"
+                            Symbol="Flash16" />
+                    </Button>
+                </Grid>
+                <!--  抓匯率失敗訊息 — 走設計系統既有的 FormFieldError 樣式（勿直接塗 AppDanger）  -->
+                <TextBlock
+                    Margin="0,4,0,0"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding Sell.FxFetchError}"
+                    TextWrapping="Wrap"
+                    Visibility="{Binding Sell.FxFetchError, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
         </StackPanel>
 

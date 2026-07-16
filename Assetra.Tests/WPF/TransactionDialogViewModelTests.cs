@@ -972,18 +972,22 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
-    public void BuySettlementInputMode_DefaultsToStatementAndCanSwitchToFxEstimate()
+    public void BuySettlementInputMode_DefaultsToFxEstimate()
     {
+        // WHY: 對話框已移除「帳戶扣款」卡，介面上沒有實際扣款金額可輸入。若預設仍是
+        // "statement"，確認時會要求一個根本不存在的欄位而卡死使用者 —— 故預設必須是 "fx"。
+        // 反向仍要能設回 "statement"：匯入券商明細／事後校正等路徑有真實扣款金額，
+        // 確認層的 statement 分支仍在服役。
         var vm = CreateVm();
 
-        Assert.Equal("statement", vm.Buy.SettlementInputMode);
+        Assert.Equal("fx", vm.Buy.SettlementInputMode);
+        Assert.True(vm.Buy.IsFxSettlementMode);
+        Assert.False(vm.Buy.IsStatementSettlementMode);
+
+        vm.Buy.SettlementInputMode = "statement";
+
         Assert.True(vm.Buy.IsStatementSettlementMode);
         Assert.False(vm.Buy.IsFxSettlementMode);
-
-        vm.Buy.SettlementInputMode = "fx";
-
-        Assert.False(vm.Buy.IsStatementSettlementMode);
-        Assert.True(vm.Buy.IsFxSettlementMode);
     }
 
     [Fact]

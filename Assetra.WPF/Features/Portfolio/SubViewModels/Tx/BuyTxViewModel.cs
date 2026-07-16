@@ -88,6 +88,12 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// "statement" means the broker/account statement cash amount is authoritative;
     /// "fx" means the FX rate is authoritative and cash amount is estimated.
     /// </summary>
+    /// <remarks>
+    /// 預設 "fx"（依匯率估算）：新增交易對話框已移除「帳戶扣款」卡，沒有實際扣款可輸入，
+    /// 台幣扣款一律由 價金 × 自動抓的當日市場匯率 ＋ 手續費 推得。若仍預設 "statement"，
+    /// 確認時會要求一個介面上根本不存在的欄位而卡死。匯入券商明細／事後校正等有真實金額的
+    /// 路徑仍可把此值設回 "statement"，確認層兩條分支都原封不動。
+    /// </remarks>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStatementSettlementMode))]
     [NotifyPropertyChangedFor(nameof(IsFxSettlementMode))]
@@ -95,7 +101,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowPremium))]
     [NotifyPropertyChangedFor(nameof(PremiumPercentDisplay))]
     [NotifyPropertyChangedFor(nameof(PremiumGrade))]
-    private string _settlementInputMode = "statement";
+    private string _settlementInputMode = "fx";
 
     /// <summary>
     /// 跨幣別交易的匯率（標的幣別 → 扣款帳戶幣別）。
@@ -308,7 +314,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
         ActualCashAmount = string.Empty;
         ActualCashAmountError = string.Empty;
         GrossNative = null;
-        SettlementInputMode = "statement";
+        SettlementInputMode = "fx";
         // P3
         FxRate = string.Empty;
         FxRateError = string.Empty;

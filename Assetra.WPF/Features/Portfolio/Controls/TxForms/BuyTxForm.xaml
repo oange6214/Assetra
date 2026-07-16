@@ -7,7 +7,6 @@
     xmlns:ds="clr-namespace:Assetra.WPF.DesignSystem.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shared="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms.Shared"
-    xmlns:txforms="clr-namespace:Assetra.WPF.Features.Portfolio.Controls.TxForms"
     xmlns:vm="clr-namespace:Assetra.WPF.Features.Portfolio.SubViewModels"
     x:Name="Root"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TransactionDialogViewModel}}"
@@ -364,10 +363,10 @@
         </StackPanel>
 
         <!--
-            扣款帳戶 + 跨幣別結算 — 主流程（非進階）。
+            扣款帳戶 + 跨幣別匯率 — 主流程（非進階）。
             跨幣別（成交幣別 ≠ 扣款帳戶幣別，如複委託 USD 交易由 TWD 帳戶扣款）的
-            結算金額/匯率攸關成本正確性，不可收在進階裡；CrossCurrencyOverlay 自身
-            以 IsCrossCurrency 自我 gating，同幣別（台股 TWD→TWD、IB USD→USD）不顯示。
+            匯率攸關成本正確性，不可收在進階裡；下方匯率列以 Buy.IsCrossCurrency
+            自我 gating，同幣別（台股 TWD→TWD、IB USD→USD）不顯示。
             外層 StackPanel 保留 MetaOnly 收合（原本在進階內由同樣的 trigger 包住）。
         -->
         <StackPanel Margin="0,12,0,0">
@@ -428,89 +427,80 @@
                     Visibility="{Binding IsNewCashAccount, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!--
-                    P5.8b — Cross-currency settlement section 抽到 CrossCurrencyOverlay 共用
-                    UserControl，三個 form (Buy / Sell / CashDividend) 都用同一份 markup。
-                    這裡只負責設定 4 個 DP 把 Buy 專屬的差異塞進去（GroupName / FetchCommand /
-                    Label / Hint），其餘 binding 透過 DataContext=Buy 自動解到 sub-VM 屬性。
+                    「帳戶扣款」卡（扣款依據 radios ＋ 帳戶扣款金額 ＋ 三段說明）已整張移除。
+                    新增交易時一律走「依匯率估算」：台幣扣款 = 價金 × 當日市場匯率 ＋ 手續費，
+                    匯率由 QueueBuyFxRateRefresh() 在日期／帳戶／幣別變動時靜默自動抓，
+                    確認前還有一道補抓，使用者不需要碰任何跨幣別欄位。
+
+                    只留這一行匯率：①自動抓不到當日匯率時（補記舊交易）否則會卡在確認錯誤、
+                    無處可修；②台幣扣款完全由它推導出來，使用者有權看見並覆寫。
+                    代價：實際扣款金額無法在此輸入，故餘額為估算值 — 靠帳戶設定的券商換匯價差
+                    收斂、並以既有的「對帳」功能定期校正。
                 -->
-                <txforms:CrossCurrencyOverlay
-                    ActualCashAmountHint="{DynamicResource Portfolio.Tx.ActualCashAmountHint}"
-                    ActualCashAmountLabel="{DynamicResource Portfolio.Tx.ActualCashAmount}"
-                    DataContext="{Binding Buy}"
-                    FetchFxRateCommand="{Binding DataContext.FetchBuyFxRateCommand, ElementName=Root}"
-                    GroupName="TxBuySettlementInputMode" />
+                <Grid
+                    Margin="0,10,0,0"
+                    Visibility="{Binding Buy.IsCrossCurrency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource AppTextSecondary}"
+                            Text="{DynamicResource Portfolio.Tx.FxRate.Short}" />
+                        <TextBlock
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource Font.Size.Xs}"
+                            Foreground="{DynamicResource AppAccent}"
+                            Text="{Binding Buy.SettlementPairDisplay, Mode=OneWay}" />
+                    </StackPanel>
+                    <TextBox
+                        Grid.Column="1"
+                        MinWidth="90"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding AreEconomicFieldsEditable}"
+                        Text="{Binding Buy.FxRate, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="{DynamicResource Portfolio.Tx.FxRate.Hint}" />
+                    <Button
+                        Grid.Column="2"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Command="{Binding FetchBuyFxRateCommand}"
+                        Cursor="Hand"
+                        ToolTip="{DynamicResource Portfolio.Tx.FetchFxRate}">
+                        <ds:AppIcon
+                            FontSize="12"
+                            Foreground="{DynamicResource AppAccent}"
+                            Symbol="Flash16" />
+                    </Button>
+                </Grid>
+                <!--  抓匯率失敗訊息 — 走設計系統既有的 FormFieldError 樣式（勿直接塗 AppDanger）  -->
+                <TextBlock
+                    Margin="0,4,0,0"
+                    Style="{StaticResource FormFieldError}"
+                    Text="{Binding Buy.FxFetchError}"
+                    TextWrapping="Wrap"
+                    Visibility="{Binding Buy.FxFetchError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--
-                    總成本溢價合理性檢查 — 實際扣款 vs 價金 × 交易日市場匯率。
-                    刻意放在 CrossCurrencyOverlay 之外：那張卡是 Buy/Sell/CashDividend 共用，
-                    而溢價屬性目前只有 Buy 有；擺進去會讓另外兩張表單噴 binding error。
-                    Buy.ShowPremium 自我 gating（非跨幣別、非依帳戶明細、或查無市場匯率 → 不顯示，
-                    絕不擋記帳）。
+                    溢價合理性檢查的顯示列已移除：它的原理是「實際扣款 vs 價金 × 市場匯率」對照，
+                    而「實際扣款」的輸入隨帳戶扣款卡一起拿掉了，新增交易一律走匯率估算
+                    （現金由匯率推得 ⇒ 對照必然為 0、沒有資訊量），此列永遠不會顯示。
+                    計算本身（SettlementPremiumCalculator）與 Buy 的 Premium/PremiumGrade 屬性保留：
+                    它們是純函式＋已測試，等「匯入券商明細／事後校正實際扣款」的流程接上就能直接復用。
                 -->
-                <Border
-                    Margin="0,8,0,0"
-                    Padding="10,6"
-                    CornerRadius="{StaticResource Radius.Sm}"
-                    ToolTipService.ShowDuration="20000"
-                    Visibility="{Binding Buy.ShowPremium, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Border.ToolTip>
-                        <ToolTip>
-                            <TextBlock
-                                MaxWidth="300"
-                                FontSize="{StaticResource Font.Size.Xs}"
-                                Foreground="{DynamicResource AppTextSecondary}"
-                                Text="{DynamicResource Portfolio.Tx.Premium.Hint}"
-                                TextWrapping="Wrap" />
-                        </ToolTip>
-                    </Border.ToolTip>
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <!--  Normal（≤3%）：綠底，代表費用/匯差在正常範圍  -->
-                            <Setter Property="Background" Value="{DynamicResource AppSuccessSubtle}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
-                                    <Setter Property="Background" Value="{DynamicResource AppWarningSubtle}" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
-                                    <Setter Property="Background" Value="{DynamicResource AppDangerSubtle}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock FontSize="{StaticResource Font.Size.Xs}" TextWrapping="Wrap">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource AppSuccess}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppWarning}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
-                                        <Setter Property="Foreground" Value="{DynamicResource AppDanger}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                        <Run Text="{DynamicResource Portfolio.Tx.Premium.Label}" />
-                        <Run FontWeight="SemiBold" Text="{Binding Buy.PremiumPercentDisplay, Mode=OneWay}" />
-                        <Run Text="—" />
-                        <Run>
-                            <Run.Style>
-                                <Style TargetType="Run">
-                                    <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Normal}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Warning">
-                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Warning}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Buy.PremiumGrade}" Value="Excessive">
-                                            <Setter Property="Text" Value="{DynamicResource Portfolio.Tx.Premium.Excessive}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Run.Style>
-                        </Run>
-                    </TextBlock>
-                </Border>
 
             </StackPanel>
         </StackPanel>

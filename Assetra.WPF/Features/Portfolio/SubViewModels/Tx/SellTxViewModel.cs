@@ -70,10 +70,16 @@ public sealed partial class SellTxViewModel : ObservableObject
     /// P5.8a — Settlement input authority mirrors Buy. "statement" = ActualCashAmount
     /// is authoritative; "fx" = FxRate is authoritative and cash is estimated.
     /// </summary>
+    /// <remarks>
+    /// 預設 "fx"（依匯率估算）：賣出對話框已移除「帳戶入帳」卡，沒有實際入帳可輸入，
+    /// 台幣入帳一律由 價金 × 自動抓的當日市場匯率 － 手續費／稅 推得。若仍預設 "statement"，
+    /// 確認時會要求一個介面上根本不存在的欄位而卡死。匯入券商明細／事後校正等有真實金額的
+    /// 路徑仍可把此值設回 "statement"，確認層兩條分支都原封不動。
+    /// </remarks>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStatementSettlementMode))]
     [NotifyPropertyChangedFor(nameof(IsFxSettlementMode))]
-    private string _settlementInputMode = "statement";
+    private string _settlementInputMode = "fx";
 
     /// <summary>實際入帳的現金幣別，預設跟現金帳戶幣別一致。</summary>
     [ObservableProperty]
@@ -230,7 +236,7 @@ public sealed partial class SellTxViewModel : ObservableObject
         InstrumentCurrency = string.Empty;
         CashAccountCurrency = string.Empty;
         // P5.8a — reset Buy-mirror settlement metadata
-        SettlementInputMode = "statement";
+        SettlementInputMode = "fx";
         SettlementCurrency = string.Empty;
         FxRateDate = null;
         FxSourceLabel = string.Empty;
