@@ -495,11 +495,12 @@
                     Visibility="{Binding Buy.FxFetchError, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--
-                    溢價合理性檢查的顯示列已移除：它的原理是「實際扣款 vs 價金 × 市場匯率」對照，
+                    溢價合理性檢查整組已移除：它的原理是「實際扣款 vs 價金 × 市場匯率」對照，
                     而「實際扣款」的輸入隨帳戶扣款卡一起拿掉了，新增交易一律走匯率估算
                     （現金由匯率推得 ⇒ 對照必然為 0、沒有資訊量），此列永遠不會顯示。
-                    計算本身（SettlementPremiumCalculator）與 Buy 的 Premium/PremiumGrade 屬性保留：
-                    它們是純函式＋已測試，等「匯入券商明細／事後校正實際扣款」的流程接上就能直接復用。
+                    連同 Buy 的 Premium/GrossNative 等 VM 屬性一併刪除——那是純樣板管線，
+                    真要接「匯入券商明細／事後校正」時會照當時的設計重寫，留著只是死碼。
+                    純函式 SettlementPremiumCalculator（Application 層＋已測試）保留備用。
                 -->
 
             </StackPanel>

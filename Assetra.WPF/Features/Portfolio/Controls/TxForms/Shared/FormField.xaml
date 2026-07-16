@@ -14,7 +14,7 @@
         Label / TextBox / error 三段 markup 逐字沿用 BuyTxForm 數量欄位原本的
         inline 樣式（label 用 Font.Size.Xs + SemiBold + AppTextSecondary + margin
         0,0,0,6；TextBox 走隱式樣式 + Tag placeholder；error 走 FormFieldError）。
-        內層綁定用 ElementName=Root 讀本控制項的 DP（對齊 CrossCurrencyOverlay 慣例）。
+        內層綁定用 ElementName=Root 讀本控制項的 DP。
     -->
     <StackPanel>
         <!--  label（＋選填 ⓘ：說明只在 hover 顯示，不常駐佔行）  -->

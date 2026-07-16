@@ -1,5 +1,4 @@
 using System.Globalization;
-using Assetra.Application.Fx;
 using Assetra.WPF.Infrastructure;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -61,24 +60,7 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// Used for sub-brokerage / FX settlement where price × shares in the
     /// instrument currency is not the exact cash-account deduction.
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Premium))]
-    [NotifyPropertyChangedFor(nameof(ShowPremium))]
-    [NotifyPropertyChangedFor(nameof(PremiumPercentDisplay))]
-    [NotifyPropertyChangedFor(nameof(PremiumGrade))]
-    private string _actualCashAmount = string.Empty;
-
-    /// <summary>
-    /// 成交價金（以成交／標的幣別計，＝數量 × 每股價格），由 <c>TransactionDialogViewModel</c>
-    /// 在數量或價格變動時同步寫入。<b>僅供溢價合理性檢查使用</b>，不參與任何寫入路徑。
-    /// null＝資料還不足以檢查。
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Premium))]
-    [NotifyPropertyChangedFor(nameof(ShowPremium))]
-    [NotifyPropertyChangedFor(nameof(PremiumPercentDisplay))]
-    [NotifyPropertyChangedFor(nameof(PremiumGrade))]
-    private decimal? _grossNative;
+    [ObservableProperty] private string _actualCashAmount = string.Empty;
 
     /// <summary>Validation error for <see cref="ActualCashAmount"/>.</summary>
     [ObservableProperty] private string _actualCashAmountError = string.Empty;
@@ -97,10 +79,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStatementSettlementMode))]
     [NotifyPropertyChangedFor(nameof(IsFxSettlementMode))]
-    [NotifyPropertyChangedFor(nameof(Premium))]
-    [NotifyPropertyChangedFor(nameof(ShowPremium))]
-    [NotifyPropertyChangedFor(nameof(PremiumPercentDisplay))]
-    [NotifyPropertyChangedFor(nameof(PremiumGrade))]
     private string _settlementInputMode = "fx";
 
     /// <summary>
@@ -109,44 +87,10 @@ public sealed partial class BuyTxViewModel : ObservableObject
     /// 同幣別交易留空字串（後續由 <see cref="ActualCashAmount"/> 反推或保持 implicit 1.0）。
     /// MultiCurrency-Trade-Refactor P3 — 跨幣別 Mode 才暴露此欄位。
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Premium))]
-    [NotifyPropertyChangedFor(nameof(ShowPremium))]
-    [NotifyPropertyChangedFor(nameof(PremiumPercentDisplay))]
-    [NotifyPropertyChangedFor(nameof(PremiumGrade))]
-    private string _fxRate = string.Empty;
+    [ObservableProperty] private string _fxRate = string.Empty;
 
     /// <summary>Validation error for <see cref="FxRate"/>.</summary>
     [ObservableProperty] private string _fxRateError = string.Empty;
-
-    // ── 總成本溢價合理性檢查（顯示用，不影響寫入）───────────────────────────
-    //
-    // 只在「依帳戶明細」模式有意義：那時 ActualCashAmount 是使用者獨立輸入的實際扣款，
-    // 跟「價金 × 市場匯率」比對才有資訊量。「依匯率估算」模式的現金本來就是用匯率推出來的
-    // （cash = gross × fx），比對必然為 0，故不顯示。
-    //
-    // FxRate 在此當作市場匯率基準：跨幣別時由 TransactionFxRateResolver 依交易日自動帶入
-    // （查 fx_rate_history）。使用者手動覆寫過也照用——那代表他主張的匯率，仍值得對照。
-    // 任一項缺漏（含尚未取得匯率）→ Evaluate 回 null → 不顯示，絕不擋記帳。
-
-    /// <summary>溢價評估結果；null＝資料不足或非適用情境，不做檢查。</summary>
-    public SettlementPremiumResult? Premium =>
-        IsCrossCurrency && IsStatementSettlementMode
-            ? SettlementPremiumCalculator.Evaluate(
-                GrossNative,
-                ParseHelpers.TryParseDecimal(ActualCashAmount, out var cash) ? cash : null,
-                ParseHelpers.TryParseDecimal(FxRate, out var fx) ? fx : null)
-            : null;
-
-    /// <summary>是否顯示溢價提示列。</summary>
-    public bool ShowPremium => Premium is not null;
-
-    /// <summary>分級（Normal / Warning / Excessive），供 UI 決定顏色與措辭。</summary>
-    public SettlementPremiumGrade PremiumGrade => Premium?.Grade ?? SettlementPremiumGrade.Normal;
-
-    /// <summary>帶正負號的百分比字串，例：+1.6% / −12.3%。</summary>
-    public string PremiumPercentDisplay =>
-        Premium is { } p ? p.Percent.ToString("+0.0%;-0.0%;0.0%") : string.Empty;
 
     /// <summary>
     /// 標的計價幣別（ISO 4217）。由 <c>TransactionDialogViewModel</c> 依照
@@ -201,24 +145,11 @@ public sealed partial class BuyTxViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// <see cref="IsCrossCurrency"/> 變動時一併刷新溢價相關屬性（它們以 IsCrossCurrency 為前提）。
-    /// 各 On*CurrencyChanged 已負責 raise IsCrossCurrency，這裡集中處理其連動項。
-    /// </summary>
-    private void NotifyPremiumChanged()
-    {
-        OnPropertyChanged(nameof(Premium));
-        OnPropertyChanged(nameof(ShowPremium));
-        OnPropertyChanged(nameof(PremiumPercentDisplay));
-        OnPropertyChanged(nameof(PremiumGrade));
-    }
-
     partial void OnInstrumentCurrencyChanged(string value)
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(InstrumentCurrencyBadge));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        NotifyPremiumChanged();
     }
 
     partial void OnCashAccountCurrencyChanged(string value)
@@ -228,7 +159,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
             : value.Trim().ToUpperInvariant();
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        NotifyPremiumChanged();
     }
 
     partial void OnSettlementInputModeChanged(string value)
@@ -244,7 +174,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsCrossCurrency));
         OnPropertyChanged(nameof(SettlementPairDisplay));
-        NotifyPremiumChanged();
     }
 
     private string NormalizeSettlementCurrency() =>
@@ -313,7 +242,6 @@ public sealed partial class BuyTxViewModel : ObservableObject
         TotalCostError = string.Empty;
         ActualCashAmount = string.Empty;
         ActualCashAmountError = string.Empty;
-        GrossNative = null;
         SettlementInputMode = "fx";
         // P3
         FxRate = string.Empty;

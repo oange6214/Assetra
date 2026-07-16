@@ -897,49 +897,6 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
-    public void BuyPremium_StatementMode_GradesDeviationAndHidesWhenNotApplicable()
-    {
-        // Wave4 — 總成本溢價檢查只在「跨幣別 + 依帳戶明細」有意義，且缺任何一項就不顯示
-        //（絕不因缺匯率資料擋記帳）。價金 US$1,000（10 股 × 100）、匯率 32 → 期望 TWD 32,000。
-        var vm = CreateVm();
-        vm.Buy.InstrumentCurrency = "USD";
-        vm.Buy.CashAccountCurrency = "TWD";
-        Assert.True(vm.Buy.IsCrossCurrency);
-
-        vm.Buy.SettlementInputMode = "statement";
-        vm.Buy.GrossNative = 1_000m;
-
-        // 只有價金，還沒匯率/實扣 → 不檢查
-        Assert.False(vm.Buy.ShowPremium);
-
-        vm.Buy.FxRate = "32";
-        vm.Buy.ActualCashAmount = "32500";   // 比 32,000 多 1.5% ＝ 正常費用範圍
-        Assert.True(vm.Buy.ShowPremium);
-        Assert.Equal(SettlementPremiumGrade.Normal, vm.Buy.PremiumGrade);
-
-        vm.Buy.ActualCashAmount = "34000";   // +6.25% → 警告
-        Assert.Equal(SettlementPremiumGrade.Warning, vm.Buy.PremiumGrade);
-
-        vm.Buy.ActualCashAmount = "3200";    // 少打一位數 → −90% → 過高
-        Assert.Equal(SettlementPremiumGrade.Excessive, vm.Buy.PremiumGrade);
-
-        // 依匯率估算模式：現金本來就是用匯率推出來的，比對必然為 0 → 不顯示
-        vm.Buy.SettlementInputMode = "fx";
-        Assert.False(vm.Buy.ShowPremium);
-
-        // 查無市場匯率 → 不檢查
-        vm.Buy.SettlementInputMode = "statement";
-        vm.Buy.FxRate = string.Empty;
-        Assert.False(vm.Buy.ShowPremium);
-
-        // 同幣別（台股 / IB 美金帳戶）→ 不檢查
-        vm.Buy.FxRate = "32";
-        vm.Buy.CashAccountCurrency = "USD";
-        Assert.False(vm.Buy.IsCrossCurrency);
-        Assert.False(vm.Buy.ShowPremium);
-    }
-
-    [Fact]
     public void ShowTxCurrencyRow_HiddenForInvestment_ShownWhenEditable()
     {
         // Wave4 — 幣別列只在幣別可編輯（現金/負債/無資產）時顯示；投資標的幣別由資產決定、

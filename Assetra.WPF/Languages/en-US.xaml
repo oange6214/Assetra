@@ -788,32 +788,13 @@
     <sys:String x:Key="Portfolio.Tx.TotalAmountLabel">Trade total</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice">Fetch market price</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchMarketPrice.Hint">Pulls the latest close price from the configured quote source for the current symbol + date.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.TotalAmount">Total amount</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee">Trade total includes commission</sys:String>
     <sys:String x:Key="Portfolio.Tx.TotalIncludesFee.Tooltip">When checked, the trade total above is recorded as the investment cost without adding auto commission. It is still the trade-currency cost, not the cross-currency account debit.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Premium.Label">Total cost premium</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Premium.Normal">fees + FX spread, within normal range</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Premium.Warning">on the high side — double-check the debited amount</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Premium.Excessive">far off — check for a typo (e.g. a missing digit)</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Premium.Hint">Compares the amount you actually paid against price × the trade-date market rate. Sub-brokerage fees and FX spread normally cause a small premium; a large deviation usually means a mistyped amount. The check is skipped when no market rate is available for that date.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.InstrumentCurrency">Trade currency</sys:String>
-    <sys:String x:Key="Portfolio.Tx.SettlementCurrency">Debit currency</sys:String>
     <sys:String x:Key="Portfolio.Tx.FetchFxRate">Get FX rate</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Unavailable">No FX rate was found for this date. Enter the FX rate or actual cash debit manually.</sys:String>
-    <!-- MultiCurrency-Trade-Refactor P3 -->
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner">Cross-currency trade (instrument currency ≠ cash account currency)</sys:String>
-    <!--  P5.7 — shorter cross-currency banner; promotes ActualCashAmount as primary; FxRate goes 進階  -->
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Banner.Short">Cross-currency trade</sys:String>
-    <sys:String x:Key="Portfolio.Tx.ActualCashAmount.RequiredBadge">Statement amount</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Advanced">Advanced</sys:String>
     <sys:String x:Key="Portfolio.Tx.AdvancedSection">Advanced (fees / FX / settlement)</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.Hint">Detected a cross-currency trade. To record cost basis and cash balance correctly, choose either the broker/account statement amount or an FX estimate.</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Short">FX rate</sys:String>
     <sys:String x:Key="Portfolio.Tx.FxRate.Hint">Example: US stock paid from a TWD account uses USD → TWD. If the actual cash debit is entered, FX is supporting estimate metadata.</sys:String>
-    <sys:String x:Key="Portfolio.AddPrice.OptionalHint">Don't know the unit price? Same-currency trades can be back-solved from account debit and quantity; cross-currency trades also need an FX rate or trade details.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.SellHint">Detected a cross-currency sale (e.g. US stock proceeds deposited to a TWD account). To record realized P&amp;L and cash balance correctly, fill in the FX rate or the broker's actual cash credit — either one works; if both are provided, the actual cash credit takes precedence.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CrossCurrency.DivHint">Detected a cross-currency dividend (e.g. US stock USD dividend deposited to a TWD account). To record dividend income and cash balance correctly, fill in the FX rate or the broker's actual cash credit — either one works; if both are provided, the actual cash credit takes precedence.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.Subtotal">Subtotal</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivInputMode">Input mode</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModePerShare">Per share</sys:String>
     <sys:String x:Key="Portfolio.Tx.DivModeTotal">Total dividend</sys:String>
