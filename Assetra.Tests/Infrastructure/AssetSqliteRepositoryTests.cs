@@ -473,6 +473,34 @@ public class AssetSqliteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task Items_PaymentMethodType_RoundTripsAndSeparatesFromLiability()
+    {
+        var repo = new AssetSqliteRepository(_dbPath);
+        var card = new AssetItem(
+            Guid.NewGuid(),
+            "台新 @GoGo",
+            FinancialType.PaymentMethod,
+            null,
+            "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            LiabilitySubtype: LiabilitySubtype.CreditCard,
+            BillingDay: 15,
+            IssuerName: "台新銀行");
+
+        await repo.AddItemAsync(card);
+
+        var found = await repo.GetByIdAsync(card.Id);
+        Assert.NotNull(found);
+        Assert.Equal(FinancialType.PaymentMethod, found!.Type);
+
+        var paymentMethods = await repo.GetItemsByTypeAsync(FinancialType.PaymentMethod);
+        Assert.Contains(paymentMethods, a => a.Id == card.Id);
+
+        var liabilities = await repo.GetItemsByTypeAsync(FinancialType.Liability);
+        Assert.DoesNotContain(liabilities, a => a.Id == card.Id);
+    }
+
+    [Fact]
     public async Task Wave7_IsIdempotent_WhenRunTwice()
     {
         // First init

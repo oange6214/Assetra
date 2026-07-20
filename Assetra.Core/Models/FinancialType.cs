@@ -5,4 +5,4 @@ namespace Assetra.Core.Models;
 /// Intentionally named FinancialType (not AssetType) to avoid collision
 /// with the existing <see cref="AssetType"/> enum (Stock, ETF, Fund, …).
 /// </summary>
-public enum FinancialType { Asset, Investment, Liability }
+public enum FinancialType { Asset, Investment, Liability, PaymentMethod }
