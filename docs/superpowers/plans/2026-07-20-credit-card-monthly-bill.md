@@ -585,6 +585,11 @@ git commit -m "test(信用卡): 負債頁不再顯示付款方式卡片"
 
 > 不在此展開真實碼——它們依賴 Phase 1 落地後的欄位與 migrator 行為。此處僅記任務輪廓,供下一輪 writing-plans。
 
+**跨階段待辦 — 同步層 mapper（Phase 1 執行時發現，刻意暫緩）**
+- Phase 1 只更新了 SQLite repo 層（含 `ApplyRemoteAsync` 的 SQL）。**JSON 跨裝置同步 DTO 尚未帶新欄位**：`Assetra.Infrastructure/Sync/AssetSyncMapper.cs`（`default_cash_account_id`/`default_category_id`）與對應的 Trade sync mapper（`payment_method_id`）。
+- 後果：新欄位跨裝置同步會掉成 null。因這些欄位要到 Phase 2（PaymentMethodId）/Phase 3（AssetItem 兩 default）才被填值，Phase 1 期間無實害。
+- 需在**填值的那個 Phase 之前**補上，且需先弄懂 sync 協定的版本相容性（新欄位對舊版 peer 的影響）——非機械改動,不可盲補。Trade mapper（Phase 2 用）優先。
+
 **Phase 2 — 每月帳單流程 + 結帳日提醒**
 - 每月帳單記為 `Trade{ Type=Withdrawal, CashAccountId=銀行, CategoryId, PaymentMethodId=卡, CashAmount }`；沿用既有支出/現金流機制（`PrimaryCashDelta` 已處理 Withdrawal）。
 - 結帳日 cycle 查詢 service：`[最近結帳日, 下次結帳日)`，短月 clamp 月底；「本期未記」＝無 `Withdrawal(PaymentMethodId=卡, TradeDate>=最近結帳日)`。
