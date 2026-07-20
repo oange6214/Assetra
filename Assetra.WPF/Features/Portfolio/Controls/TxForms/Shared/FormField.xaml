@@ -14,7 +14,7 @@
         Label / TextBox / error 三段 markup 逐字沿用 BuyTxForm 數量欄位原本的
         inline 樣式（label 用 Font.Size.Xs + SemiBold + AppTextSecondary + margin
         0,0,0,6；TextBox 走隱式樣式 + Tag placeholder；error 走 FormFieldError）。
-        內層綁定用 ElementName=Root 讀本控制項的 DP。
+        內層綁定用 ElementName=Root 讀本控制項的 DP（唯 ToolTip 內例外，見下方說明）。
     -->
     <StackPanel>
         <!--  label（＋選填 ⓘ：說明只在 hover 顯示，不常駐佔行）  -->
@@ -37,11 +37,17 @@
                 Visibility="{Binding InfoTooltip, ElementName=Root, Converter={StaticResource StringToVisibilityConverter}}">
                 <ds:AppIcon.ToolTip>
                     <ToolTip>
+                        <!--
+                            ToolTip 由 Popup 承載，活在獨立 namescope，看不到外層的 x:Name="Root"，
+                            所以此處不能用 ElementName=Root（會噴 Cannot find source）。改走
+                            ToolTip.PlacementTarget（＝上面那顆 AppIcon）→ 它的 AutomationProperties.Name
+                            已綁同一個 InfoTooltip 字串，直接借來當顯示文字。
+                        -->
                         <TextBlock
                             MaxWidth="280"
                             FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{Binding InfoTooltip, ElementName=Root}"
+                            Text="{Binding PlacementTarget.(AutomationProperties.Name), RelativeSource={RelativeSource AncestorType=ToolTip}}"
                             TextWrapping="Wrap" />
                     </ToolTip>
                 </ds:AppIcon.ToolTip>
