@@ -39,7 +39,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
     private const string ItemSelectClause =
         "id, name, asset_type, group_id, currency, created_date, is_active, updated_at, " +
         "loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee, " +
-        "liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype";
+        "liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype, " +
+        "default_cash_account_id, default_category_id";
 
     private const string ItemSyncSelectClause = ItemSelectClause +
         ", version, last_modified_at, last_modified_by_device, is_deleted";
@@ -222,6 +223,7 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                     loan_annual_rate=$lar, loan_term_months=$ltm, loan_start_date=$lsd, loan_handling_fee=$lhf,
                     liability_subtype=$lst, billing_day=$bill, due_day=$due, credit_limit=$limit,
                     issuer_name=$issuer, subtype=$sub,
+                    default_cash_account_id=$default_cash_account_id, default_category_id=$default_category_id,
                     version = version + 1,
                     last_modified_at = $now,
                     last_modified_by_device = $device,
@@ -248,6 +250,7 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                 loan_annual_rate=$lar, loan_term_months=$ltm, loan_start_date=$lsd, loan_handling_fee=$lhf,
                 liability_subtype=$lst, billing_day=$bill, due_day=$due, credit_limit=$limit,
                 issuer_name=$issuer, subtype=$sub,
+                default_cash_account_id = $default_cash_account_id, default_category_id = $default_category_id,
                 version = version + 1,
                 last_modified_at = $now,
                 last_modified_by_device = $device,
@@ -570,10 +573,10 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         {
             var item = MapItem(reader);
             var version = new EntityVersion(
-                Version: reader.GetInt64(18),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(19)),
-                LastModifiedByDevice: reader.GetString(20));
-            var isDeleted = reader.GetInt32(21) != 0;
+                Version: reader.GetInt64(20),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(21)),
+                LastModifiedByDevice: reader.GetString(22));
+            var isDeleted = reader.GetInt32(23) != 0;
             results.Add(AssetSyncMapper.ToEnvelope(item, version, isDeleted));
         }
         return results;
@@ -662,11 +665,13 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                     (id, name, asset_type, group_id, currency, created_date, is_active, updated_at,
                      loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee,
                      liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype,
+                     default_cash_account_id, default_category_id,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
                     ($id, $name, $type, $grp, $cur, $dt, $ia, $ua,
                      $lar, $ltm, $lsd, $lhf,
                      $lst, $bill, $due, $limit, $issuer, $sub,
+                     $default_cash_account_id, $default_category_id,
                      $ver, $modAt, $modBy, 0, 0)
                 ON CONFLICT(id) DO UPDATE SET
                     name = excluded.name,
@@ -686,6 +691,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
                     credit_limit = excluded.credit_limit,
                     issuer_name = excluded.issuer_name,
                     subtype = excluded.subtype,
+                    default_cash_account_id = excluded.default_cash_account_id,
+                    default_category_id = excluded.default_category_id,
                     version = excluded.version,
                     last_modified_at = excluded.last_modified_at,
                     last_modified_by_device = excluded.last_modified_by_device,
@@ -709,11 +716,13 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             (id, name, asset_type, group_id, currency, created_date, is_active, updated_at,
              loan_annual_rate, loan_term_months, loan_start_date, loan_handling_fee,
              liability_subtype, billing_day, due_day, credit_limit, issuer_name, subtype,
+             default_cash_account_id, default_category_id,
              version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
         VALUES
             ($id, $name, $type, $grp, $cur, $dt, $ia, $ua,
              $lar, $ltm, $lsd, $lhf,
              $lst, $bill, $due, $limit, $issuer, $sub,
+             $default_cash_account_id, $default_category_id,
              1, $now, $device, 0, 1);
         """;
 
@@ -784,6 +793,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         decimal? creditLimit = r.IsDBNull(15) ? null : (decimal)r.GetDouble(15);
         string? issuerName = r.IsDBNull(16) ? null : r.GetString(16);
         string? subtype = r.IsDBNull(17) ? null : r.GetString(17);
+        Guid? defaultCashAccountId = r.IsDBNull(18) ? null : Guid.Parse(r.GetString(18));
+        Guid? defaultCategoryId = r.IsDBNull(19) ? null : Guid.Parse(r.GetString(19));
         return new AssetItem(
             Guid.Parse(r.GetString(0)),
             r.GetString(1),
@@ -802,6 +813,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
             dueDay,
             creditLimit,
             issuerName,
+            defaultCashAccountId,
+            defaultCategoryId,
             subtype);
     }
 
@@ -825,6 +838,8 @@ public sealed class AssetSqliteRepository : IAssetRepository, IAssetSyncStore, I
         cmd.Parameters.AddWithValue("$limit", i.CreditLimit.HasValue ? (object)(double)i.CreditLimit.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$issuer", i.IssuerName is not null ? (object)i.IssuerName : DBNull.Value);
         cmd.Parameters.AddWithValue("$sub", i.Subtype is not null ? (object)i.Subtype : DBNull.Value);
+        cmd.Parameters.AddWithValue("$default_cash_account_id", i.DefaultCashAccountId?.ToString() ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("$default_category_id", i.DefaultCategoryId?.ToString() ?? (object)DBNull.Value);
     }
 
     private static AssetEvent MapEvent(SqliteDataReader r) => new(

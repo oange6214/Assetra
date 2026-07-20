@@ -24,6 +24,8 @@ public sealed record AssetItem(
     int? DueDay = null,
     decimal? CreditLimit = null,
     string? IssuerName = null,
+    Guid? DefaultCashAccountId = null,
+    Guid? DefaultCategoryId = null,
     // Free-form user-facing label for preset categorization (e.g., 房貸/車貸/數位活存)
     string? Subtype = null)
 {

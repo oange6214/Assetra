@@ -21,7 +21,7 @@ internal static class AssetSchemaMigrator
         "is_active", "updated_at",
         "loan_annual_rate", "loan_term_months", "loan_start_date", "loan_handling_fee",
         "liability_subtype", "billing_day", "due_day", "credit_limit", "issuer_name",
-        "subtype",
+        "subtype", "default_cash_account_id", "default_category_id",
         "version", "last_modified_at", "last_modified_by_device", "is_deleted", "is_pending_push",
         // Portfolio-Groups-Refactor P1 — cash account 可選屬於某 group
         "portfolio_group_id",
@@ -219,6 +219,10 @@ internal static class AssetSchemaMigrator
             "issuer_name", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
             "subtype", "TEXT", AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset", "default_cash_account_id", "TEXT",
+            AssetAllowedColumns, AssetAllowedTypeDefs);
+        SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset", "default_category_id", "TEXT",
+            AssetAllowedColumns, AssetAllowedTypeDefs);
 
         // Sync metadata (v0.20.8) — stamp version/last_modified, soft delete, pending push.
         SqliteSchemaHelper.MigrateAddColumn(conn, tx, "asset",
