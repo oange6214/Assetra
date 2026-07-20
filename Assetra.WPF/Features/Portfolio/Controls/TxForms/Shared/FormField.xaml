@@ -36,18 +36,21 @@
                 ToolTipService.ShowDuration="20000"
                 Visibility="{Binding InfoTooltip, ElementName=Root, Converter={StaticResource StringToVisibilityConverter}}">
                 <ds:AppIcon.ToolTip>
-                    <ToolTip>
-                        <!--
-                            ToolTip 由 Popup 承載，活在獨立 namescope，看不到外層的 x:Name="Root"，
-                            所以此處不能用 ElementName=Root（會噴 Cannot find source）。改走
-                            ToolTip.PlacementTarget（＝上面那顆 AppIcon）→ 它的 AutomationProperties.Name
-                            已綁同一個 InfoTooltip 字串，直接借來當顯示文字。
-                        -->
+                    <!--
+                        ToolTip 由 Popup 承載，活在獨立 namescope，看不到外層的 x:Name="Root"，
+                        故不能用 ElementName=Root（會噴 Cannot find source）。統一走本專案慣例：
+                        把 DataContext 設在 ToolTip 上、透過 PlacementTarget 過橋，內層 binding 寫短
+                        （對照 AddRecordDialog 類型 ⓘ 綁 PlacementTarget.DataContext 取 VM 屬性）。
+                        差別：InfoTooltip 是控制項 DP、不在 VM 上，已透過 AppIcon 的
+                        AutomationProperties.Name 曝出，故此處 DataContext 綁 PlacementTarget 本身
+                        （＝那顆 AppIcon），內層直接讀 (AutomationProperties.Name)。
+                    -->
+                    <ToolTip DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
                         <TextBlock
                             MaxWidth="280"
                             FontSize="{StaticResource Font.Size.Xs}"
                             Foreground="{DynamicResource AppTextSecondary}"
-                            Text="{Binding PlacementTarget.(AutomationProperties.Name), RelativeSource={RelativeSource AncestorType=ToolTip}}"
+                            Text="{Binding (AutomationProperties.Name)}"
                             TextWrapping="Wrap" />
                     </ToolTip>
                 </ds:AppIcon.ToolTip>
