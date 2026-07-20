@@ -447,31 +447,23 @@ public class TransactionDialogViewModelTests
         Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
     }
 
-    // 類型 chips 版面：AddRecordDialog 把 AvailableTradeTypes 拆成「買入/賣出」主 chip
-    // (PrimaryTradeTypes) 與「更多」popup (MoreTradeTypes)。此測試鎖定拆分規則 —— 換 UI
-    // 時若把 buy/sell 以外的類型誤放進主 chip、或把 buy/sell 漏掉，都會讓這裡失敗。
+    // 類型 chips 版面：AddRecordDialog 把 AvailableTradeTypes 全部平鋪成 chip（不再拆主/次、
+    // 不再有「更多」popup）。此測試鎖定「清單完整且順序不變」—— 換 UI 時若漏掉任一類型或
+    // 打亂 buy/sell 在前的順序，都會讓這裡失敗。（原本的「看不出選中」bug 源於把後兩項藏進
+    // 只在 popup 開啟時才亮的『更多』鈕；平鋪後每個 chip 各自以 TxType == Key 呈現選中態。）
     [Fact]
-    public void TradeTypeChips_SplitsPrimaryAndMore()
+    public void TradeTypeChips_ExposesAllAvailableTypesFlat()
     {
-        // 股票部位 → AvailableTradeTypes = buy, sell, cashDiv, stockDiv（同時具備主/次類型）。
+        // 股票部位 → AvailableTradeTypes = buy, sell, cashDiv, stockDiv（此資產的最大集合）。
         var position = MakePosition();
         var vm = CreateVm(positions: new ObservableCollection<PortfolioRowViewModel> { position });
 
         vm.OpenTxDialogForPosition(position, "buy");
 
-        // 前置：這個資產情境確實同時有 buy/sell 與其他類型，拆分才有意義。
-        Assert.Equal(4, vm.AvailableTradeTypes.Count);
-
-        // Primary = buy/sell 子集，保持 buy 在 sell 前。
-        Assert.Equal(2, vm.PrimaryTradeTypes.Count);
-        Assert.Equal("buy", vm.PrimaryTradeTypes[0].Key);
-        Assert.Equal("sell", vm.PrimaryTradeTypes[1].Key);
-
-        // More = 其餘類型（保持原順序），且不含 buy/sell。
-        Assert.Equal(2, vm.MoreTradeTypes.Count);
-        Assert.Equal("cashDiv", vm.MoreTradeTypes[0].Key);
-        Assert.Equal("stockDiv", vm.MoreTradeTypes[1].Key);
-        Assert.True(vm.HasMoreTradeTypes);
+        // 四種類型全部平鋪、保持 source 順序（buy/sell 在前），一個都不藏。
+        Assert.Equal(
+            new[] { "buy", "sell", "cashDiv", "stockDiv" },
+            vm.AvailableTradeTypes.Select(t => t.Key).ToArray());
     }
 
     // ── Q02: editing a trade whose asset is no longer in the live view ───────────

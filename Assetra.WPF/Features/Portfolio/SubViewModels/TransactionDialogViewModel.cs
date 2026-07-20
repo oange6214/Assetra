@@ -323,28 +323,8 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     }
 
     /// <summary>
-    /// 類型 chips 的主選項 — <see cref="AvailableTradeTypes"/> 的前兩項（依 source 順序）。
-    /// 投資標的前兩項即 buy/sell，故股票/ETF 行為不變；現金/負債等情境則各自取自己的前兩項
-    /// （如 income/deposit），避免主 chip 列為空只剩「更多」。AddRecordDialog 用它渲染主 chip 列。
-    /// </summary>
-    public IReadOnlyList<TradeTypeOption> PrimaryTradeTypes =>
-        AvailableTradeTypes.Take(2).ToList();
-
-    /// <summary>
-    /// 類型 chips 的「更多」選項 — <see cref="AvailableTradeTypes"/> 前兩項以外其餘項
-    /// （保持原順序），走「更多 ▾」popup。
-    /// </summary>
-    public IReadOnlyList<TradeTypeOption> MoreTradeTypes =>
-        AvailableTradeTypes.Skip(2).ToList();
-
-    /// <summary>True 時顯示「更多 ▾」按鈕（<see cref="MoreTradeTypes"/> 非空）。</summary>
-    public bool HasMoreTradeTypes => MoreTradeTypes.Count > 0;
-
-    /// <summary>「更多 ▾」popup 開闔狀態；選定任一類型後由 <see cref="SelectTxType"/> 關閉。</summary>
-    [ObservableProperty] private bool _isMoreTypesPopupOpen;
-
-    /// <summary>
-    /// 由類型 chip / 「更多」popup 列點擊呼叫 — 設定 <see cref="TxType"/> 並關閉「更多」popup。
+    /// 由類型 chip 點擊呼叫 — 設定 <see cref="TxType"/>。所有可用類型一律平鋪成 chip
+    /// （AvailableTradeTypes，最多 4 個），不再拆主/次或收進「更多」popup。
     /// 對齊原 type ComboBox SelectedValue TwoWay 的行為（設 TxType 即觸發 OnTxTypeChanged）。
     /// </summary>
     [RelayCommand]
@@ -353,18 +333,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         if (!CanSelectTxType || string.IsNullOrEmpty(key))
             return;
         TxType = key;
-        IsMoreTypesPopupOpen = false;
     }
 
     /// <summary>
     /// True 才允許使用者開「交易類型」下拉。SelectedAsset = null 時 disabled。
     /// </summary>
     public bool CanSelectTxType => SelectedAsset is not null;
-
-    /// <summary>給 type ComboBox 用的 tooltip key — disabled 時提示「請先選擇資產」。</summary>
-    public string TxTypePickerHintKey => CanSelectTxType
-        ? "Portfolio.Tx.TypePicker.Hint"
-        : "Portfolio.Tx.TypePicker.NeedAsset";
 
     /// <summary>
     /// Asset-Kind → 可用 trade type key 對應表。改 mapping 時記得同步
@@ -556,11 +530,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         // P2.3 — 不管 value 是否 null，都要通知 AvailableTradeTypes / CanSelectTxType 重新計算。
         OnPropertyChanged(nameof(AvailableTradeTypes));
-        OnPropertyChanged(nameof(PrimaryTradeTypes));
-        OnPropertyChanged(nameof(MoreTradeTypes));
-        OnPropertyChanged(nameof(HasMoreTradeTypes));
         OnPropertyChanged(nameof(CanSelectTxType));
-        OnPropertyChanged(nameof(TxTypePickerHintKey));
         OnPropertyChanged(nameof(IsTxCurrencyEditable));
         OnPropertyChanged(nameof(ShowTxCurrencyRow));
 
