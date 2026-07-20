@@ -171,7 +171,12 @@ public sealed record Trade(
     /// <c>= buy_cost_native × (sell_fx_rate - buy_fx_rate)</c>。
     /// 同幣別交易為 0。null = 無法計算（同 <see cref="RealizedMarketPnl"/>）。
     /// </summary>
-    decimal? RealizedFxPnl = null)
+    decimal? RealizedFxPnl = null,
+    /// <summary>
+    /// 支付該筆交易的信用卡（負債資產）Id。用於「每月帳單式」信用卡重構：
+    /// 標記每筆月結帳單支出實際刷的是哪張卡。null = 尚未指派（現有資料 / 非信用卡消費）。
+    /// </summary>
+    Guid? PaymentMethodId = null)
 {
     /// <summary>
     /// 防呆正規化:同幣別交易(<see cref="InstrumentCurrency"/> == <see cref="SettlementCurrency"/>)

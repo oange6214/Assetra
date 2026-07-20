@@ -19,6 +19,8 @@ internal static class TradeSchemaMigrator
         "portfolio_group_id",
         // MultiCurrency-Reporting P4.5b — realized PnL split into market vs FX
         "realized_market_pnl", "realized_fx_pnl",
+        // Credit-Card-Monthly-Bill P1
+        "payment_method_id",
     };
 
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -98,6 +100,10 @@ internal static class TradeSchemaMigrator
             // Existing rows stay NULL → UI shows "—".
             MigrateAddColumn(conn, tx, "realized_market_pnl", "REAL");
             MigrateAddColumn(conn, tx, "realized_fx_pnl", "REAL");
+
+            // Credit-Card-Monthly-Bill P1 — 標記月結帳單交易對應的信用卡（負債資產）Id。
+            // nullable，populated 在後續 phase（目前只加欄位，不 backfill）。
+            MigrateAddColumn(conn, tx, "payment_method_id", "TEXT");
 
             // Sync columns (v0.20.7) — mirror Category schema
             MigrateAddColumn(conn, tx, "version", "INTEGER NOT NULL DEFAULT 0");

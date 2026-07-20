@@ -181,4 +181,24 @@ public class TradeSqliteRepositoryTests : IDisposable
         Assert.Equal(new DateOnly(2026, 5, 8), saved.FxRateDate);
         Assert.Equal("bot", saved.FxSource);
     }
+
+    [Fact]
+    public async Task Trade_PaymentMethodId_RoundTrips()
+    {
+        var repo = new TradeSqliteRepository(_dbPath);
+        var card = Guid.NewGuid();
+        var bank = Guid.NewGuid();
+        var trade = new Trade(
+            Guid.NewGuid(), "", "", "台新卡 7月帳單",
+            TradeType.Withdrawal, DateTime.Today, 0m, 1, null, null,
+            CashAmount: 28_450m,
+            CashAccountId: bank,
+            CategoryId: Guid.NewGuid(),
+            PaymentMethodId: card);
+
+        await repo.AddAsync(trade);
+        var found = (await repo.GetAllAsync()).Single(t => t.Id == trade.Id);
+
+        Assert.Equal(card, found.PaymentMethodId);
+    }
 }

@@ -60,6 +60,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
     //                           21  parent_trade_id
     //                           22  category_id
     //                           23  recurring_source_id
+    //                           33  payment_method_id
 
     private const string SelectClause =
         "id, symbol, exchange, name, trade_type, trade_date, " +
@@ -74,7 +75,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         // Portfolio-Groups-Refactor P1
         "portfolio_group_id, " +
         // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
-        "realized_market_pnl, realized_fx_pnl";
+        "realized_market_pnl, realized_fx_pnl, " +
+        // Credit-Card-Monthly-Bill P1
+        "payment_method_id";
 
     private const string SyncSelectClause = SelectClause +
         ", version, last_modified_at, last_modified_by_device, is_deleted";
@@ -126,7 +129,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         // Populated by SellWorkflowService at sell time when FX history is available.
         // Existing rows / same-currency / pre-FX-history trades → NULL → UI "—".
         RealizedMarketPnl: r.IsDBNull(31) ? null : (decimal)r.GetDouble(31),
-        RealizedFxPnl: r.IsDBNull(32) ? null : (decimal)r.GetDouble(32));
+        RealizedFxPnl: r.IsDBNull(32) ? null : (decimal)r.GetDouble(32),
+        // Credit-Card-Monthly-Bill P1
+        PaymentMethodId: r.IsDBNull(33) ? null : Guid.Parse(r.GetString(33)));
 
     private static void BindTradeParams(SqliteCommand cmd, Trade t)
     {
@@ -180,6 +185,9 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
             t.RealizedMarketPnl.HasValue ? (object)(double)t.RealizedMarketPnl.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$rfx_pnl",
             t.RealizedFxPnl.HasValue ? (object)(double)t.RealizedFxPnl.Value : DBNull.Value);
+        // Credit-Card-Monthly-Bill P1 — nullable; populated in a later phase.
+        cmd.Parameters.AddWithValue("$payment_method_id",
+            t.PaymentMethodId.HasValue ? (object)t.PaymentMethodId.Value.ToString() : DBNull.Value);
     }
 
     // ─── Queries (filter is_deleted = 0) ─────────────────────────────────
@@ -344,6 +352,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                 portfolio_group_id = $portfolio_group_id,
                 realized_market_pnl = $rm_pnl,
                 realized_fx_pnl = $rfx_pnl,
+                payment_method_id = $payment_method_id,
                 updated_at = $now,
                 version = version + 1,
                 last_modified_at = $now,
@@ -578,6 +587,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              settlement_currency, fx_rate_date, fx_source,
              portfolio_group_id,
              realized_market_pnl, realized_fx_pnl,
+             payment_method_id,
              created_at, updated_at,
              version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
         VALUES
@@ -591,6 +601,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
              $settlement_ccy, $fx_rate_date, $fx_source,
              $portfolio_group_id,
              $rm_pnl, $rfx_pnl,
+             $payment_method_id,
              $now, $now,
              1, $now, $device, 0, 1);
         """;
@@ -609,13 +620,14 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
         {
             var trade = MapTrade(reader);
             // ⚠ Ordinals here track the tail of SyncSelectClause = SelectClause + sync cols.
-            // SelectClause now has 33 cols (24 base + 6 MultiCurrency + 1 PortfolioGroup + 2 P4.5b breakdown).
+            // SelectClause now has 34 cols (24 base + 6 MultiCurrency + 1 PortfolioGroup +
+            // 2 P4.5b breakdown + 1 payment_method_id).
             // Keep these ordinals in lock-step with SelectClause column count.
             var version = new EntityVersion(
-                Version: reader.GetInt64(33),
-                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(34)),
-                LastModifiedByDevice: reader.GetString(35));
-            var isDeleted = reader.GetInt32(36) != 0;
+                Version: reader.GetInt64(34),
+                LastModifiedAt: DateTimeOffset.Parse(reader.GetString(35)),
+                LastModifiedByDevice: reader.GetString(36));
+            var isDeleted = reader.GetInt32(37) != 0;
             results.Add(TradeSyncMapper.ToEnvelope(trade, version, isDeleted));
         }
         return results;
@@ -711,6 +723,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      settlement_currency, fx_rate_date, fx_source,
                      portfolio_group_id,
                      realized_market_pnl, realized_fx_pnl,
+                     payment_method_id,
                      created_at, updated_at,
                      version, last_modified_at, last_modified_by_device, is_deleted, is_pending_push)
                 VALUES
@@ -724,6 +737,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                      $settlement_ccy, $fx_rate_date, $fx_source,
                      $portfolio_group_id,
                      $rm_pnl, $rfx_pnl,
+                     $payment_method_id,
                      $now, $now,
                      $ver, $modAt, $modBy, 0, 0)
                 ON CONFLICT(id) DO UPDATE SET
@@ -759,6 +773,7 @@ public sealed class TradeSqliteRepository : ITradeRepository, ITradeSyncStore, A
                     portfolio_group_id = excluded.portfolio_group_id,
                     realized_market_pnl = excluded.realized_market_pnl,
                     realized_fx_pnl = excluded.realized_fx_pnl,
+                    payment_method_id = excluded.payment_method_id,
                     updated_at = excluded.updated_at,
                     version = excluded.version,
                     last_modified_at = excluded.last_modified_at,
