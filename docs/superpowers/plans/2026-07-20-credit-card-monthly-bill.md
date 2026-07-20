@@ -8,7 +8,13 @@
 
 **Tech Stack:** .NET 10、C#、WPF、Microsoft.Data.Sqlite、xUnit。
 
-**Scope（本計畫＝Phase 1 only）:** 資料模型 + schema + 既有卡片搬遷 + 卡片退出負債/淨值。**Phase 2（每月帳單流程 + 結帳日提醒）與 Phase 3（付款方式管理 UI + 分卡篩選）在 Phase 1 驗證後各自成計畫**——它們的實際程式碼依賴本 Phase 落地後的欄位形狀,現在寫會是臆測。Roadmap 見文末。
+**Scope（執行時修正）:** **Phase 1 ＝ 純疊加的資料模型（Task 1–3，已完成）**：`FinancialType.PaymentMethod` + `AssetItem` 兩欄 + `Trade.PaymentMethodId`。無任何行為變更、無破壞。
+
+> ⚠ **執行發現的分階段修正（2026-07-20）：** 原計畫把 Task 4「卡片退出負債/淨值」放 Phase 1、把「退役刷卡/繳卡費舊流程」放 Phase 2。執行 Task 4 時證實這是**不可分割的原子變更**：單獨做 Task 4 會讓舊繳卡費守衛（`ConfirmCreditCardPaymentAsync` 的 `Balance <= 0`）擋死每筆新繳卡費,且**新建卡片仍是 `Liability`**（`CreditCardMutationWorkflowService.CreateAsync` 未改）→ 一建新卡即回歸;單獨做搬遷（Task 5）不做 Task 4,投影仍以卡名生出卡片快照,卡片以「無資產列」殘留負債。查證（Explore）確認：搬遷完成後舊流程**不可達**（卡片退出 `Liabilities` → 退出 picker 與 `CreditCardOptions` → `CreditCard.Card` 無法填）。故 Task 4/5 + 退役舊流程 + 新流程必須整包一次落地。
+>
+> **修正後：原 Task 4–8 全數移入 Phase 2**（下方原 Task 4–8 段落保留為 Phase 2 的技術參考,但 Phase 2 會重新以「原子變更」重寫成完整計畫）。**Phase 1 到 Task 3 為止即完成。**
+
+**下方 Task 1–3 ＝ Phase 1（已執行完畢）。Task 4–8 ＝ Phase 2 技術參考（待重寫為原子計畫）。** Roadmap 見文末。
 
 **Spec:** `docs/superpowers/specs/2026-07-20-credit-card-monthly-bill-design.md`
 
@@ -590,7 +596,14 @@ git commit -m "test(信用卡): 負債頁不再顯示付款方式卡片"
 - 後果：新欄位跨裝置同步會掉成 null。因這些欄位要到 Phase 2（PaymentMethodId）/Phase 3（AssetItem 兩 default）才被填值，Phase 1 期間無實害。
 - 需在**填值的那個 Phase 之前**補上，且需先弄懂 sync 協定的版本相容性（新欄位對舊版 peer 的影響）——非機械改動,不可盲補。Trade mapper（Phase 2 用）優先。
 
-**Phase 2 — 每月帳單流程 + 結帳日提醒**
+**Phase 2 — 卡片變付款方式（原子變更）+ 每月帳單流程 + 結帳日提醒**
+
+_「卡片變付款方式」以下五項必須同一批落地,缺一即留下不一致（見上方執行修正）：_
+- **投影端**：`BalanceQueryService.GetLiabilityLabel` 對 `CreditCardCharge/Payment` 回 `null`（原 Task 4）。並移除 `ProjectLiabilitySnapshots` / `ComputeLiabilitySnapshot` 內死掉的卡片 case。
+- **資產端搬遷**：`AssetSchemaMigrator` 冪等 backfill `Liability→PaymentMethod`（原 Task 5）。
+- **創建端**：`CreditCardMutationWorkflowService.CreateAsync` 改為建立 `PaymentMethod` 卡（否則新建卡回歸為 Liability）。
+- **退役舊流程**：移除刷卡/繳卡費 tx 類型 chip、`ConfirmCreditCard*Async` 派工與 `CreditCard*WorkflowService`、`CreditCardOptions`；連同其測試（`ConfirmTx_CreditCardPayment_*`、`GetAllLiabilitySnapshots_*` 等守舊行為者）一併更新/移除。
+- **正式 DB 驗證**（原 Task 8）：備份 + 副本對數字（淨值 +61,187、負債頁無卡片、餘額不變）。
 - 每月帳單記為 `Trade{ Type=Withdrawal, CashAccountId=銀行, CategoryId, PaymentMethodId=卡, CashAmount }`；沿用既有支出/現金流機制（`PrimaryCashDelta` 已處理 Withdrawal）。
 - 結帳日 cycle 查詢 service：`[最近結帳日, 下次結帳日)`，短月 clamp 月底；「本期未記」＝無 `Withdrawal(PaymentMethodId=卡, TradeDate>=最近結帳日)`。
 - Dashboard 提醒 nudge（in-app，非推播）+ 一鍵開預填交易對話框（卡/銀行/分類預填、金額空白）。
