@@ -678,8 +678,6 @@
     <sys:String x:Key="Portfolio.Record.Destination.Transfer">Funds Account (both sides) · Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Record.Destination.LoanBorrow">Liability · Funds Account (credit) · Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Record.Destination.LoanRepay">Liability · Funds Account (debit) · Transaction Log</sys:String>
-    <sys:String x:Key="Portfolio.Record.Destination.CreditCardCharge">Liability (Credit Card) · Transaction Log</sys:String>
-    <sys:String x:Key="Portfolio.Record.Destination.CreditCardPayment">Liability (Credit Card) · Funds Account (debit) · Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreatedSnackbar">{0} added — view it in the Transaction Log</sys:String>
     <sys:String x:Key="Portfolio.Tx.BackdatedRebuildHint">Back-dated trade saved — rebuild snapshots to update trends/calendar</sys:String>
     <sys:String x:Key="Portfolio.Tx.GoRebuild">Rebuild</sys:String>
@@ -799,12 +797,6 @@
     <sys:String x:Key="Portfolio.Tx.UseLoanCashAccount">Deduct from / deposit to account</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseDeductCashAccount">Deduct from account</sys:String>
     <sys:String x:Key="Portfolio.Tx.UseDepositCashAccount">Deposit to account</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCard">Credit card</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentAccount">Payment account</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardChargeHint">A card charge increases credit-card liability; the expense and net-worth impact are recorded on the charge date.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">A card payment deducts from cash and reduces credit-card liability. If the charge was already recorded, net worth usually does not change on payment.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
-    <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardTrade.NotEditable">Historical credit-card transactions can no longer be edited. Delete the entry to remove it.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.Preview.BalanceLabel">Balance</sys:String>

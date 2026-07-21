@@ -1371,8 +1371,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         "transfer" => "Portfolio.Record.Destination.Transfer",
         "loanBorrow" => "Portfolio.Record.Destination.LoanBorrow",
         "loanRepay" => "Portfolio.Record.Destination.LoanRepay",
-        "creditCardCharge" => "Portfolio.Record.Destination.CreditCardCharge",
-        "creditCardPayment" => "Portfolio.Record.Destination.CreditCardPayment",
         _ => null,
     };
 
@@ -1392,7 +1390,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         "sell" => L("Portfolio.Tx.ProceedsAccount", "入帳帳戶"),
         "loanBorrow" => L("Portfolio.Tx.LoanDisbursementAccount", "撥款帳戶"),
         "loanRepay" => L("Portfolio.Tx.PaymentAccount", "扣款帳戶"),
-        "creditCardPayment" => L("Portfolio.Tx.CreditCardPaymentAccount", "扣款帳戶"),
         _ => L("Portfolio.Tx.CashAccount", "帳戶")
     };
 
@@ -1412,13 +1409,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
 
     public string TxTransferHint =>
         L("Portfolio.Tx.TransferHint", "自己的帳戶間移轉；來源扣款、目標入帳，總資產不變。轉給別人請用「提款」。");
-
-    public string TxCreditCardHint => TxType switch
-    {
-        "creditCardCharge" => L("Portfolio.Tx.CreditCardChargeHint", "信用卡消費會增加信用卡負債，支出與淨資產影響會記在消費日。"),
-        "creditCardPayment" => L("Portfolio.Tx.CreditCardPaymentHint", "信用卡繳款會扣現金帳戶並降低信用卡負債；若消費已先記錄，繳款當下淨資產通常不變。"),
-        _ => string.Empty
-    };
 
     // Buy sub-type predicates moved next to the AssetType facade in the Buy block.
 
@@ -1683,7 +1673,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxUseCashAccountLabel));
         OnPropertyChanged(nameof(TxCashFlowHint));
         OnPropertyChanged(nameof(TxTransferHint));
-        OnPropertyChanged(nameof(TxCreditCardHint));
         OnPropertyChanged(nameof(CashFlowCategories));
         // Dialog 動態標題與「顯示位置」提示 — 依當前 TxType 切換 i18n key。
         OnPropertyChanged(nameof(TxDynamicTitleKey));
