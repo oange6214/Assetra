@@ -56,7 +56,9 @@ public static class AssetSyncMapper
             item.DueDay,
             item.CreditLimit?.ToString(inv),
             item.IssuerName,
-            item.Subtype);
+            item.Subtype,
+            item.DefaultCashAccountId,
+            item.DefaultCategoryId);
 
         return new SyncEnvelope(
             EntityId: item.Id,
@@ -96,7 +98,9 @@ public static class AssetSyncMapper
             DueDay: dto.DueDay,
             CreditLimit: dto.CreditLimit is null ? null : decimal.Parse(dto.CreditLimit, inv),
             IssuerName: dto.IssuerName,
-            Subtype: dto.Subtype);
+            Subtype: dto.Subtype,
+            DefaultCashAccountId: dto.DefaultCashAccountId,
+            DefaultCategoryId: dto.DefaultCategoryId);
     }
 
     private sealed record AssetPayloadDto(
@@ -117,5 +121,7 @@ public static class AssetSyncMapper
         [property: JsonPropertyName("due_day")] int? DueDay,
         [property: JsonPropertyName("credit_limit")] string? CreditLimit,
         [property: JsonPropertyName("issuer_name")] string? IssuerName,
-        [property: JsonPropertyName("subtype")] string? Subtype);
+        [property: JsonPropertyName("subtype")] string? Subtype,
+        [property: JsonPropertyName("default_cash_account_id")] Guid? DefaultCashAccountId = null,
+        [property: JsonPropertyName("default_category_id")] Guid? DefaultCategoryId = null);
 }

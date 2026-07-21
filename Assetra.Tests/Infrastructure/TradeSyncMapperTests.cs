@@ -23,7 +23,8 @@ public class TradeSyncMapperTests
         Note: "備註",
         Commission: 50.25m,
         LoanLabel: null,
-        ToCashAccountId: null);
+        ToCashAccountId: null,
+        PaymentMethodId: Guid.NewGuid());
 
     [Fact]
     public void RoundTrip_PreservesAllFields()
@@ -46,6 +47,7 @@ public class TradeSyncMapperTests
         Assert.Equal(t.Note, back.Note);
         Assert.Equal(t.Commission, back.Commission);
         Assert.Equal(t.RealizedPnl, back.RealizedPnl);
+        Assert.Equal(t.PaymentMethodId, back.PaymentMethodId);
     }
 
     [Fact]
@@ -184,6 +186,7 @@ public class TradeSyncMapperTests
         Assert.Null(back.FxRateDate);
         Assert.Null(back.FxSource);
         Assert.Equal(800.5m, back.Price);
+        Assert.Null(back.PaymentMethodId);
     }
 
     [Fact]

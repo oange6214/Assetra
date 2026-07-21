@@ -25,7 +25,9 @@ public class AssetSyncMapperTests
         DueDay: 20,
         CreditLimit: 100000m,
         IssuerName: "Issuer",
-        Subtype: "房貸");
+        Subtype: "房貸",
+        DefaultCashAccountId: Guid.NewGuid(),
+        DefaultCategoryId: Guid.NewGuid());
 
     [Fact]
     public void RoundTrip_PreservesAllFields()
@@ -54,6 +56,8 @@ public class AssetSyncMapperTests
         Assert.Equal(i.CreditLimit, back.CreditLimit);
         Assert.Equal(i.IssuerName, back.IssuerName);
         Assert.Equal(i.Subtype, back.Subtype);
+        Assert.Equal(i.DefaultCashAccountId, back.DefaultCashAccountId);
+        Assert.Equal(i.DefaultCategoryId, back.DefaultCategoryId);
     }
 
     [Fact]
@@ -87,6 +91,46 @@ public class AssetSyncMapperTests
             new EntityVersion(1, DateTimeOffset.UtcNow, "dev"),
             Deleted: false);
         Assert.Throws<ArgumentException>(() => AssetSyncMapper.FromPayload(env));
+    }
+
+    [Fact]
+    public void FromPayload_BackCompat_OldPayloadWithoutPaymentDefaults()
+    {
+        // 舊 cloud payload（未含 default_cash_account_id / default_category_id）
+        // 應該 decode 成 null，向下相容。
+        var legacyJson = """
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "name": "玉山銀行",
+              "financial_type": "Asset",
+              "group_id": null,
+              "currency": "TWD",
+              "created_date": "2026-01-01",
+              "is_active": true,
+              "updated_at": null,
+              "loan_annual_rate": null,
+              "loan_term_months": null,
+              "loan_start_date": null,
+              "loan_handling_fee": null,
+              "liability_subtype": null,
+              "billing_day": null,
+              "due_day": null,
+              "credit_limit": null,
+              "issuer_name": null,
+              "subtype": null
+            }
+            """;
+        var env = new SyncEnvelope(
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            "Asset", legacyJson,
+            new EntityVersion(1, DateTimeOffset.UtcNow, "dev"),
+            Deleted: false);
+
+        var back = AssetSyncMapper.FromPayload(env);
+
+        Assert.Null(back.DefaultCashAccountId);
+        Assert.Null(back.DefaultCategoryId);
+        Assert.Equal("玉山銀行", back.Name);
     }
 
     [Fact]

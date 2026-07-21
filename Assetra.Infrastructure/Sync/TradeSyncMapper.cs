@@ -73,7 +73,8 @@ public static class TradeSyncMapper
             trade.PortfolioGroupId,
             // MultiCurrency-Reporting P4.5b — realized PnL market/FX split
             trade.RealizedMarketPnl?.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            trade.RealizedFxPnl?.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            trade.RealizedFxPnl?.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            trade.PaymentMethodId);
 
         return new SyncEnvelope(
             EntityId: trade.Id,
@@ -132,7 +133,8 @@ public static class TradeSyncMapper
             PortfolioGroupId: dto.PortfolioGroupId,
             // MultiCurrency-Reporting P4.5b — 舊 payload 缺欄位走 null
             RealizedMarketPnl: dto.RealizedMarketPnl is null ? null : decimal.Parse(dto.RealizedMarketPnl, inv),
-            RealizedFxPnl: dto.RealizedFxPnl is null ? null : decimal.Parse(dto.RealizedFxPnl, inv));
+            RealizedFxPnl: dto.RealizedFxPnl is null ? null : decimal.Parse(dto.RealizedFxPnl, inv),
+            PaymentMethodId: dto.PaymentMethodId);
     }
 
     private sealed record TradePayloadDto(
@@ -171,5 +173,7 @@ public static class TradeSyncMapper
         [property: JsonPropertyName("portfolio_group_id")] Guid? PortfolioGroupId = null,
         // MultiCurrency-Reporting P4.5b — realized PnL market/FX split (decimals as strings to avoid drift)
         [property: JsonPropertyName("realized_market_pnl")] string? RealizedMarketPnl = null,
-        [property: JsonPropertyName("realized_fx_pnl")] string? RealizedFxPnl = null);
+        [property: JsonPropertyName("realized_fx_pnl")] string? RealizedFxPnl = null,
+        // 信用卡 Phase 2a — payment_method_id 附在尾端，舊 payload 缺欄位走 null
+        [property: JsonPropertyName("payment_method_id")] Guid? PaymentMethodId = null);
 }
