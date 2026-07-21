@@ -20,7 +20,6 @@ public partial class AddAssetDialogViewModel : ObservableObject
     private readonly IAccountUpsertWorkflowService _accountUpsertWorkflow;
     private readonly ITransactionWorkflowService? _transactionWorkflow;
     private readonly ICreditCardMutationWorkflowService _creditCardMutationWorkflow;
-    private readonly ICreditCardTransactionWorkflowService? _creditCardTransactionWorkflow;
     private readonly ILoanMutationWorkflowService? _loanMutationWorkflow;
     private readonly ILocalizationService? _localization;
 
@@ -56,7 +55,6 @@ public partial class AddAssetDialogViewModel : ObservableObject
         IAccountUpsertWorkflowService accountUpsertWorkflow,
         ITransactionWorkflowService? transactionWorkflow,
         ICreditCardMutationWorkflowService creditCardMutationWorkflow,
-        ICreditCardTransactionWorkflowService? creditCardTransactionWorkflow = null,
         ILoanMutationWorkflowService? loanMutationWorkflow = null,
         ILocalizationService? localization = null)
     {
@@ -64,7 +62,6 @@ public partial class AddAssetDialogViewModel : ObservableObject
         _accountUpsertWorkflow = accountUpsertWorkflow;
         _transactionWorkflow = transactionWorkflow;
         _creditCardMutationWorkflow = creditCardMutationWorkflow;
-        _creditCardTransactionWorkflow = creditCardTransactionWorkflow;
         _loanMutationWorkflow = loanMutationWorkflow;
         _localization = localization;
     }
@@ -941,7 +938,7 @@ public partial class AddAssetDialogViewModel : ObservableObject
             creditLimit = parsedLimit;
         }
 
-        var created = await _creditCardMutationWorkflow.CreateAsync(new CreateCreditCardRequest(
+        await _creditCardMutationWorkflow.CreateAsync(new CreateCreditCardRequest(
             AddCreditCardName.Trim(),
             "TWD",
             DateOnly.FromDateTime(DateTime.Today),
@@ -950,21 +947,6 @@ public partial class AddAssetDialogViewModel : ObservableObject
             creditLimit,
             string.IsNullOrWhiteSpace(AddCreditCardIssuer) ? null : AddCreditCardIssuer.Trim(),
             string.IsNullOrWhiteSpace(AddSubtype) ? null : AddSubtype.Trim()));
-
-        if (AddInitialCreditCardBalanceEnabled)
-        {
-            if (_creditCardTransactionWorkflow is null)
-            { AddError = "初始未繳金額功能尚未就緒"; return; }
-            if (!ParseHelpers.TryParseDecimal(AddInitialCreditCardBalanceAmount, out var initialAmount) || initialAmount <= 0)
-            { AddError = "目前未繳金額無效"; return; }
-
-            await _creditCardTransactionWorkflow.ChargeAsync(new CreditCardChargeRequest(
-                created.CreditCard.Id,
-                created.CreditCard.Name,
-                (AddInitialCreditCardBalanceDate ?? DateTime.Today).Date,
-                initialAmount,
-                string.IsNullOrWhiteSpace(AddInitialCreditCardBalanceNote) ? null : AddInitialCreditCardBalanceNote.Trim()));
-        }
 
         AddSubtype = string.Empty;
         AddCreditCardName = string.Empty;

@@ -253,24 +253,6 @@ public partial class TransactionDialogViewModel
                 delta = -principalPaid;
                 return true;
 
-            case "creditCardCharge":
-                if (!ParseHelpers.TryParseDecimal(TxAmount, out var charged) || charged <= 0)
-                    return false;
-                if (CreditCard.Card is null)
-                    return false;
-                liability = CreditCard.Card;
-                delta = charged;
-                return true;
-
-            case "creditCardPayment":
-                if (!ParseHelpers.TryParseDecimal(TxAmount, out var paid) || paid <= 0)
-                    return false;
-                if (CreditCard.Card is null)
-                    return false;
-                liability = CreditCard.Card;
-                delta = -paid;
-                return true;
-
             default:
                 return false;
         }

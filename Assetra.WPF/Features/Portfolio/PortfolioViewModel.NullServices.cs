@@ -166,44 +166,6 @@ public partial class PortfolioViewModel
                     IssuerName: request.IssuerName)));
     }
 
-    private sealed class NullCreditCardTransactionWorkflowService : ICreditCardTransactionWorkflowService
-    {
-        public Task<CreditCardTransactionResult> ChargeAsync(CreditCardChargeRequest request, CancellationToken ct = default) =>
-            Task.FromResult(new CreditCardTransactionResult(
-                new Trade(
-                    Guid.NewGuid(),
-                    string.Empty,
-                    string.Empty,
-                    request.CardName,
-                    TradeType.CreditCardCharge,
-                    request.TradeDate,
-                    request.Amount,
-                    1,
-                    0m,
-                    0m,
-                    request.Amount,
-                    LiabilityAssetId: request.CreditCardAssetId,
-                    Note: request.Note)));
-
-        public Task<CreditCardTransactionResult> PayAsync(CreditCardPaymentRequest request, CancellationToken ct = default) =>
-            Task.FromResult(new CreditCardTransactionResult(
-                new Trade(
-                    Guid.NewGuid(),
-                    string.Empty,
-                    string.Empty,
-                    request.CardName,
-                    TradeType.CreditCardPayment,
-                    request.TradeDate,
-                    request.Amount,
-                    1,
-                    0m,
-                    0m,
-                    request.Amount,
-                    request.CashAccountId,
-                    LiabilityAssetId: request.CreditCardAssetId,
-                    Note: request.Note)));
-    }
-
     private sealed class NullPortfolioLoadService : IPortfolioLoadService
     {
         public Task<PortfolioLoadResult> LoadAsync(CancellationToken ct = default) =>

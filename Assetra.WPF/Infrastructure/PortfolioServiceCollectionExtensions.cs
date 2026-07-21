@@ -157,10 +157,6 @@ internal static class PortfolioServiceCollectionExtensions
         services.AddSingleton<ICreditCardMutationWorkflowService>(sp =>
             new CreditCardMutationWorkflowService(
                 sp.GetRequiredService<IAssetRepository>()));
-        services.AddSingleton<ICreditCardTransactionWorkflowService>(sp =>
-            new CreditCardTransactionWorkflowService(
-                sp.GetRequiredService<IAssetRepository>(),
-                sp.GetRequiredService<ITransactionService>()));
         services.AddSingleton<IAddAssetWorkflowService>(sp => new AddAssetWorkflowService(
             sp.GetRequiredService<IStockSearchService>(),
             sp.GetService<IStockHistoryProvider>(),

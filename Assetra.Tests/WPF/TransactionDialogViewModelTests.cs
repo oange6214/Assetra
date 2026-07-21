@@ -54,7 +54,6 @@ public class TransactionDialogViewModelTests
             TradeDeletion: Mock.Of<ITradeDeletionWorkflowService>(),
             TradeMetadata: Mock.Of<ITradeMetadataWorkflowService>(),
             LoanMutation: Mock.Of<ILoanMutationWorkflowService>(),
-            CreditCardTransaction: Mock.Of<ICreditCardTransactionWorkflowService>(),
             Search: Mock.Of<IStockSearchService>(),
             TradeDialogController: new PortfolioTradeDialogController(),
             AccountUpsert: null,
@@ -341,25 +340,6 @@ public class TransactionDialogViewModelTests
     }
 
     [Fact]
-    public void OpenTxDialogForLiability_CreditCardPaymentPreselectsCardAndLocksAssetSelector()
-    {
-        var liability = MakeCreditCardLiability();
-        var vm = CreateVm(liabilities: new ObservableCollection<LiabilityRowViewModel> { liability });
-
-        vm.OpenTxDialogForLiability(liability, "creditCardPayment");
-
-        Assert.True(vm.IsTxDialogOpen);
-        Assert.True(vm.IsAssetContextLocked);
-        Assert.False(vm.ShowAssetSelector);
-        Assert.Equal("creditCardPayment", vm.TxType);
-        Assert.NotNull(vm.SelectedAsset);
-        Assert.Equal(TxAssetKind.Liability, vm.SelectedAsset.Kind);
-        Assert.Equal(liability.AssetId, vm.SelectedAsset.Id);
-        Assert.Equal(liability.Label, vm.SelectedAsset.PrimaryName);
-        Assert.Same(liability, vm.CreditCard.Card);
-    }
-
-    [Fact]
     public void OpenTxDialog_GlobalEntryClearsPositionContext()
     {
         var position = MakePosition();
@@ -592,8 +572,6 @@ public class TransactionDialogViewModelTests
     [Theory]
     [InlineData(TradeType.LoanBorrow, "loanBorrow")]
     [InlineData(TradeType.LoanRepay, "loanRepay")]
-    [InlineData(TradeType.CreditCardCharge, "creditCardCharge")]
-    [InlineData(TradeType.CreditCardPayment, "creditCardPayment")]
     public void EditTrade_LiabilityRowsPreselectLiabilityAndHydrateTypePicker(
         TradeType tradeType,
         string expectedTxType)
@@ -964,21 +942,6 @@ public class TransactionDialogViewModelTests
         Assert.False(vm.TxTypeIsWithdrawal);
         vm.TxType = "income";
         Assert.False(vm.TxTypeIsWithdrawal);
-    }
-
-    [Fact]
-    public void TxType_CreditCardChargeAndPayment_BothMapToTxTypeIsCreditCard()
-    {
-        var vm = CreateVm();
-        vm.TxType = "creditCardCharge";
-        Assert.True(vm.TxTypeIsCreditCard);
-        Assert.True(vm.TxTypeIsCreditCardCharge);
-        Assert.False(vm.TxTypeIsCreditCardPayment);
-
-        vm.TxType = "creditCardPayment";
-        Assert.True(vm.TxTypeIsCreditCard);
-        Assert.False(vm.TxTypeIsCreditCardCharge);
-        Assert.True(vm.TxTypeIsCreditCardPayment);
     }
 
     // ── Validation ───────────────────────────────────────────────────────────

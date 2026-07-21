@@ -69,7 +69,6 @@ internal sealed class PortfolioViewModelFactory
             TradeMetadata: sp.GetRequiredService<ITradeMetadataWorkflowService>(),
             LiabilityMutation: sp.GetRequiredService<ILiabilityMutationWorkflowService>(),
             CreditCardMutation: sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-            CreditCardTransaction: sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
             LoanPayment: sp.GetRequiredService<ILoanPaymentWorkflowService>(),
             LoanMutation: sp.GetRequiredService<ILoanMutationWorkflowService>(),
             AddAsset: sp.GetRequiredService<IAddAssetWorkflowService>(),
@@ -80,7 +79,6 @@ internal sealed class PortfolioViewModelFactory
                 sp.GetRequiredService<IAccountUpsertWorkflowService>(),
                 sp.GetRequiredService<ITransactionWorkflowService>(),
                 sp.GetRequiredService<ICreditCardMutationWorkflowService>(),
-                sp.GetRequiredService<ICreditCardTransactionWorkflowService>(),
                 sp.GetRequiredService<ILoanMutationWorkflowService>()),
             SellPanel: new SellPanelViewModel(
                 sp.GetRequiredService<ISellWorkflowService>(),

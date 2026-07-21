@@ -28,8 +28,6 @@ public partial class TransactionDialogViewModel
             ["withdrawal"] = vm => vm.ConfirmCashFlowAsync(TradeType.Withdrawal),
             ["loanBorrow"] = vm => vm.ConfirmLoanAsync(TradeType.LoanBorrow),
             ["loanRepay"] = vm => vm.ConfirmLoanAsync(TradeType.LoanRepay),
-            ["creditCardCharge"] = vm => vm.ConfirmCreditCardChargeAsync(),
-            ["creditCardPayment"] = vm => vm.ConfirmCreditCardPaymentAsync(),
             ["transfer"] = vm => vm.ConfirmTransferAsync(),
             ["buy"] = vm => vm.ConfirmBuyAsync(),
             ["sell"] = vm => vm.ConfirmSellTxAsync(),
@@ -251,8 +249,6 @@ public partial class TransactionDialogViewModel
             "transfer" => L("Portfolio.Tx.TransferAction", "轉帳"),
             "loanBorrow" => L("Portfolio.TradeType.LoanBorrow", "借款"),
             "loanRepay" => L("Portfolio.TradeType.LoanRepay", "還款"),
-            "creditCardCharge" => L("Portfolio.TradeType.CreditCardCharge", "信用卡消費"),
-            "creditCardPayment" => L("Portfolio.TradeType.CreditCardPayment", "信用卡繳款"),
             _ => L("Portfolio.Tx.Generic", "交易"),
         };
         // A — 回溯投資交易：過去的每日快照（走勢圖/報酬日曆來源）會變舊，改提示去「設定 → 重建快照」

@@ -504,9 +504,6 @@
                                         <!--  ======== 借款/還款欄位 ========  -->
                                         <txforms:LoanTxForm />
 
-                                        <!--  ======== 信用卡欄位 ========  -->
-                                        <txforms:CreditCardTxForm />
-
                                         <!--  ======== 轉帳欄位 ========  -->
                                         <txforms:TransferTxForm />
                                     </StackPanel>

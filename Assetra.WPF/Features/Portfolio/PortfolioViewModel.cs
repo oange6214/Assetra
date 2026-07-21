@@ -483,7 +483,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
         var accountUpsertWorkflow = services.AccountUpsert ?? new NullAccountUpsertWorkflowService();
         var accountMutationWorkflow = services.AccountMutation ?? new NullAccountMutationWorkflowService();
         var creditCardMutationWorkflow = services.CreditCardMutation ?? new NullCreditCardMutationWorkflowService();
-        var creditCardTransactionWorkflow = services.CreditCardTransaction ?? new NullCreditCardTransactionWorkflowService();
         var sellWorkflow = services.Sell ?? new NullSellWorkflowService();
         var tradeMetadataWorkflow = services.TradeMetadata ?? new NullTradeMetadataWorkflowService();
         var loanScheduleService = services.LoanSchedule;
@@ -495,7 +494,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
             accountUpsertWorkflow,
             _transactionWorkflowService,
             creditCardMutationWorkflow,
-            creditCardTransactionWorkflow,
             loanMutationWorkflowService);
         AddAssetDialog.AssetAdded += OnAssetAdded;
 
@@ -537,7 +535,6 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
                 TradeDeletion: _tradeDeletionWorkflowService,
                 TradeMetadata: tradeMetadataWorkflow,
                 LoanMutation: loanMutationWorkflowService,
-                CreditCardTransaction: creditCardTransactionWorkflow,
                 Search: _search,
                 TradeDialogController: _tradeDialogController,
                 AccountUpsert: accountUpsertWorkflow,
@@ -1336,9 +1333,7 @@ public partial class PortfolioViewModel : ObservableObject, IDisposable,
 
     /// <summary>
     /// P4.9e — Liability detail panel「+ 新增交易」ContextMenu item 用。
-    /// Loan 走 `loanBorrow` / `loanRepay`（預填 Loan.Label），CreditCard 走
-    /// `creditCardCharge` / `creditCardPayment`（無 Loan.Label，由 dialog 內部
-    /// 帶 LiabilityAssetId）。
+    /// Loan 走 `loanBorrow` / `loanRepay`（預填 Loan.Label）。
     /// </summary>
     [RelayCommand]
     private void BeginTxForSelectedLiability(string txType)

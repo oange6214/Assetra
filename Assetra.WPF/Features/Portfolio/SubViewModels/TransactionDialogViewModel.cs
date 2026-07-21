@@ -28,7 +28,6 @@ internal sealed record TransactionDialogDependencies(
     ITradeDeletionWorkflowService TradeDeletion,
     ITradeMetadataWorkflowService TradeMetadata,
     ILoanMutationWorkflowService LoanMutation,
-    ICreditCardTransactionWorkflowService CreditCardTransaction,
     IStockSearchService Search,
     PortfolioTradeDialogController TradeDialogController,
     IAccountUpsertWorkflowService? AccountUpsert,
@@ -97,7 +96,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     private readonly ITradeDeletionWorkflowService _tradeDeletionWorkflowService;
     private readonly ITradeMetadataWorkflowService _tradeMetadataWorkflowService;
     private readonly ILoanMutationWorkflowService _loanMutationWorkflowService;
-    private readonly ICreditCardTransactionWorkflowService _creditCardTransactionWorkflowService;
     private readonly IStockSearchService _search;
     private readonly PortfolioTradeDialogController _tradeDialogController;
     private readonly IAccountUpsertWorkflowService? _accountUpsert;
@@ -179,17 +177,12 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         ArgumentNullException.ThrowIfNull(deps);
 
-        // H1 — react to Buy/Sell/Div/Loan/Transfer/CreditCard.X changes.
+        // H1 — react to Buy/Sell/Div/Loan/Transfer.X changes.
         Buy.PropertyChanged += OnBuyPriceModeChanged;
         Sell.PropertyChanged += OnSellTxChanged;
         Div.PropertyChanged += OnDividendTxChanged;
         Loan.PropertyChanged += OnLoanTxChanged;
         Transfer.PropertyChanged += OnTransferTxChanged;
-        CreditCard.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(CreditCardTxViewModel.Card))
-                NotifyImpactPreviewChanged();
-        };
 
         // M6-B — read-only views of the internally-mutated suggestion collections.
         CashAccountSuggestions = new ReadOnlyObservableCollection<string>(_cashAccountSuggestions);
@@ -199,7 +192,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _tradeDeletionWorkflowService = deps.TradeDeletion;
         _tradeMetadataWorkflowService = deps.TradeMetadata;
         _loanMutationWorkflowService = deps.LoanMutation;
-        _creditCardTransactionWorkflowService = deps.CreditCardTransaction;
         _search = deps.Search;
         _tradeDialogController = deps.TradeDialogController;
         _accountUpsert = deps.AccountUpsert;
@@ -302,8 +294,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         new("transfer",           "Portfolio.Tx.TransferAction",       "Portfolio.Record.Group.Cash"),
         new("loanBorrow",         "Portfolio.TradeType.LoanBorrow",    "Portfolio.Record.Group.Liability"),
         new("loanRepay",          "Portfolio.TradeType.LoanRepay",     "Portfolio.Record.Group.Liability"),
-        new("creditCardCharge",   "Portfolio.TradeType.CreditCardCharge",  "Portfolio.Record.Group.Liability"),
-        new("creditCardPayment",  "Portfolio.TradeType.CreditCardPayment", "Portfolio.Record.Group.Liability"),
     };
 
     /// <summary>
@@ -363,7 +353,7 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             TxAssetKind.CashAccount => new HashSet<string>(StringComparer.Ordinal)
                 { "income", "deposit", "withdrawal", "transfer" },
             TxAssetKind.Liability => new HashSet<string>(StringComparer.Ordinal)
-                { "loanBorrow", "loanRepay", "creditCardCharge", "creditCardPayment" },
+                { "loanBorrow", "loanRepay" },
             _ => new HashSet<string>(StringComparer.Ordinal),
         };
     }
@@ -647,14 +637,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     {
         if (asset is null || asset.Kind != TxAssetKind.Liability)
             return;
-        // 信用卡：CreditCardOptions 只含信用卡負債；subject.Id 對應負債的 AssetId（見 1.3 subject building）。
-        // legacy 信用卡 (AssetId=null → subject Id=Guid.Empty) 不自動對應，屬罕見舊資料。
-        var card = CreditCardOptions.FirstOrDefault(c => c.AssetId == asset.Id);
-        if (card is not null)
-        {
-            CreditCard.Card = card;
-            return;
-        }
         // 貸款：把所選貸款負債的名稱帶進 Loan.Label，讓「貸款名稱」反映上方「選擇資產」並觸發
         // 還款自動帶入。ConfirmLoanAsync 以名稱識別貸款（可建新），故仍保留可編輯、不隱藏。
         var loan = Liabilities.FirstOrDefault(l => l.AssetId == asset.Id && l.IsLoan);
@@ -1344,9 +1326,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     public bool TxTypeIsLoan => TxType is "loanBorrow" or "loanRepay";
     public bool TxTypeIsLoanBorrow => TxType == "loanBorrow";
     public bool TxTypeIsLoanRepay => TxType == "loanRepay";
-    public bool TxTypeIsCreditCard => TxType is "creditCardCharge" or "creditCardPayment";
-    public bool TxTypeIsCreditCardCharge => TxType == "creditCardCharge";
-    public bool TxTypeIsCreditCardPayment => TxType == "creditCardPayment";
     /// <summary>True for 轉帳 — money moves between two cash accounts.</summary>
     public bool TxTypeIsTransfer => TxType == "transfer";
     public bool TxTypeIsBuy => TxType == "buy";
@@ -1455,14 +1434,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     /// </summary>
     public IReadOnlyList<string> LoanLabelSuggestions =>
         Liabilities.Select(l => l.Label).OrderBy(l => l).ToList();
-
-    /// <summary>
-    /// H1-P9 — credit-card transaction state extracted into <see cref="Tx.CreditCardTxViewModel"/>.
-    /// </summary>
-    public Tx.CreditCardTxViewModel CreditCard { get; } = new();
-
-    public IReadOnlyList<LiabilityRowViewModel> CreditCardOptions =>
-        Liabilities.Where(l => !l.IsLoan).OrderBy(l => l.Label).ToList();
 
     /// <summary>
     /// H1 — transfer transaction state cluster extracted into <see cref="Tx.TransferTxViewModel"/>.
@@ -1700,9 +1671,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         OnPropertyChanged(nameof(TxTypeIsLoan));
         OnPropertyChanged(nameof(TxTypeIsLoanBorrow));
         OnPropertyChanged(nameof(TxTypeIsLoanRepay));
-        OnPropertyChanged(nameof(TxTypeIsCreditCard));
-        OnPropertyChanged(nameof(TxTypeIsCreditCardCharge));
-        OnPropertyChanged(nameof(TxTypeIsCreditCardPayment));
         OnPropertyChanged(nameof(TxTypeIsTransfer));
         OnPropertyChanged(nameof(TxTypeIsBuy));
         OnPropertyChanged(nameof(TxTypeIsSell));
@@ -2199,7 +2167,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Transfer.Target = null;
         Transfer.TargetName = string.Empty;
         Transfer.TargetAmount = string.Empty;
-        CreditCard.Card = null;
         Buy.AssetType = state.TxBuyAssetType;
         Buy.PriceMode = state.TxBuyPriceMode;
         Buy.TotalCost = string.Empty;
@@ -2310,14 +2277,10 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
             IsAssetContextLocked = true;
         }
 
-        if (row.IsCreditCard)
-            CreditCard.Card = row;
-        else
+        if (!row.IsCreditCard)
             Loan.Label = row.Label;
 
-        TxType = string.IsNullOrWhiteSpace(txType)
-            ? row.IsCreditCard ? "creditCardPayment" : "loanRepay"
-            : txType;
+        TxType = string.IsNullOrWhiteSpace(txType) ? "loanRepay" : txType;
     }
 
     /// <summary>
@@ -2426,7 +2389,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         Transfer.Target = null;
         Transfer.TargetName = string.Empty;
         Transfer.TargetAmount = string.Empty;
-        CreditCard.Card = null;
         Loan.Principal = string.Empty;
         Loan.InterestPaid = string.Empty;
         Div.Position = null;
@@ -2469,7 +2431,6 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
         _userTouchedCurrency = true;
         SelectedAsset = ResolveAssetSubjectForTrade(row);
         TxType = editState.TxType;
-        CreditCard.Card = editState.TxCreditCard;
 
         switch (row.Type)
         {

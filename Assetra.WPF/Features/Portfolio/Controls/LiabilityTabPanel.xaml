@@ -851,17 +851,6 @@
                                             CommandParameter="loanRepay"
                                             Header="{DynamicResource Portfolio.Detail.Liability.Action.LoanRepay}"
                                             Visibility="{Binding SelectedLiabilityRow.IsLoan, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                        <!--  CreditCard：消費 / 繳款  -->
-                                        <MenuItem
-                                            Command="{Binding BeginTxForSelectedLiabilityCommand}"
-                                            CommandParameter="creditCardCharge"
-                                            Header="{DynamicResource Portfolio.Detail.Liability.Action.CreditCardCharge}"
-                                            Visibility="{Binding SelectedLiabilityRow.IsCreditCard, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                        <MenuItem
-                                            Command="{Binding BeginTxForSelectedLiabilityCommand}"
-                                            CommandParameter="creditCardPayment"
-                                            Header="{DynamicResource Portfolio.Detail.Liability.Action.CreditCardPayment}"
-                                            Visibility="{Binding SelectedLiabilityRow.IsCreditCard, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
