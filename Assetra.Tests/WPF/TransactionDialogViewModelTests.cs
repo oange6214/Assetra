@@ -7,6 +7,7 @@ using Assetra.Core.Models;
 using Assetra.WPF.Features.Portfolio;
 using Assetra.WPF.Features.Portfolio.SubViewModels;
 using Assetra.WPF.Features.PortfolioGroups;
+using Assetra.WPF.Infrastructure;
 using Moq;
 using Xunit;
 
@@ -34,7 +35,8 @@ public class TransactionDialogViewModelTests
         TransactionFxRateResolver? fxResolver = null,
         Func<CashAccountRowViewModel?>? getDefaultCashAccount = null,
         ISellWorkflowService? sellWorkflow = null,
-        ITransactionWorkflowService? txWorkflow = null)
+        ITransactionWorkflowService? txWorkflow = null,
+        ISnackbarService? snackbar = null)
     {
         var addWorkflow = new Mock<IAddAssetWorkflowService>();
         addWorkflow.Setup(w => w.BuildBuyPreview(It.IsAny<BuyPreviewRequest>()))
@@ -57,7 +59,7 @@ public class TransactionDialogViewModelTests
             Search: Mock.Of<IStockSearchService>(),
             TradeDialogController: new PortfolioTradeDialogController(),
             AccountUpsert: null,
-            Snackbar: null,
+            Snackbar: snackbar,
             Trades: new ReadOnlyObservableCollection<TradeRowViewModel>(trades ?? new()),
             Positions: new ReadOnlyObservableCollection<PortfolioRowViewModel>(positions ?? new()),
             CashAccounts: new ReadOnlyObservableCollection<CashAccountRowViewModel>(cashAccounts ?? new()),
@@ -607,6 +609,42 @@ public class TransactionDialogViewModelTests
         Assert.Equal(TxAssetKind.Liability, vm.SelectedAsset.Kind);
         Assert.Equal(liability.AssetId, vm.SelectedAsset.Id);
         Assert.Contains(vm.AvailableTradeTypes, t => t.Key == expectedTxType);
+    }
+
+    [Theory]
+    [InlineData(TradeType.CreditCardCharge)]
+    [InlineData(TradeType.CreditCardPayment)]
+    public void EditTrade_HistoricalCreditCardTrade_DoesNotOpenDialog(TradeType tradeType)
+    {
+        // 歷史刷卡/繳卡費舊流程已退役、沒有對應編輯表單：點編輯不開對話框，改跳 snackbar
+        // 提示使用者改用刪除（可刪除，另途徑）。
+        var liability = MakeCreditCardLiability("富邦 J 卡");
+        var cash = MakeCashAccount("富邦", "TWD");
+        var row = new TradeRowViewModel(new Trade(
+            Id: Guid.NewGuid(),
+            Symbol: string.Empty,
+            Exchange: string.Empty,
+            Name: liability.Label,
+            Type: tradeType,
+            TradeDate: new DateTime(2026, 5, 27),
+            Price: 0m,
+            Quantity: 0,
+            RealizedPnl: null,
+            RealizedPnlPct: null,
+            CashAmount: 1_000m,
+            CashAccountId: cash.Id,
+            LiabilityAssetId: liability.AssetId));
+        var snackbar = new Mock<ISnackbarService>();
+        var vm = CreateVm(
+            trades: new ObservableCollection<TradeRowViewModel> { row },
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { cash },
+            liabilities: new ObservableCollection<LiabilityRowViewModel> { liability },
+            snackbar: snackbar.Object);
+
+        vm.EditTradeCommand.Execute(row);
+
+        Assert.False(vm.IsTxDialogOpen);
+        snackbar.Verify(s => s.Show(It.IsAny<string>(), SnackbarKind.Info), Times.Once);
     }
 
     // ── Mode flags (TxType change) ───────────────────────────────────────────

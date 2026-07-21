@@ -2349,6 +2349,15 @@ public partial class TransactionDialogViewModel : ObservableObject  // public so
     [RelayCommand]
     private void EditTrade(TradeRowViewModel row)
     {
+        // 信用卡改為付款方式後，刷卡/繳卡費舊流程已退役、沒有對應編輯表單。
+        // 歷史卡片交易在交易記錄仍可檢視/刪除，但不再可編輯（避免開出空白對話框）。
+        if (row.Type is TradeType.CreditCardCharge or TradeType.CreditCardPayment)
+        {
+            _snackbar?.Show(L("Portfolio.Tx.CreditCardTrade.NotEditable",
+                "歷史信用卡交易已不可編輯。如需移除請直接刪除該筆。"));
+            return;
+        }
+
         IsRevisionMode = false;
         IsAssetContextLocked = false;
         TxLoanScheduleEntryId = null;

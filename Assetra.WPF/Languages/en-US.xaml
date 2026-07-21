@@ -805,6 +805,7 @@
     <sys:String x:Key="Portfolio.Tx.CreditCardPaymentHint">A card payment deducts from cash and reduces credit-card liability. If the charge was already recorded, net worth usually does not change on payment.</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.NoBalance">This card has no outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
     <sys:String x:Key="Portfolio.Tx.CreditCardPayment.ExceedsBalance">Payment cannot exceed the current outstanding balance. To backfill an old bill, record a “Card Charge” first, or use “Withdraw”.</sys:String>
+    <sys:String x:Key="Portfolio.Tx.CreditCardTrade.NotEditable">Historical credit-card transactions can no longer be edited. Delete the entry to remove it.</sys:String>
     <sys:String x:Key="Portfolio.Tx.EditTitle">Edit Record</sys:String>
     <sys:String x:Key="Portfolio.Tx.Preview.BalanceLabel">Balance</sys:String>
     <sys:String x:Key="Portfolio.Tx.Preview.LiabilityLabel">Balance</sys:String>
