@@ -528,6 +528,30 @@ public class AssetSqliteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task Migration_ExistingCreditCard_BecomesPaymentMethod()
+    {
+        var repo1 = new AssetSqliteRepository(_dbPath);
+        var legacyCard = new AssetItem(
+            Guid.NewGuid(), "台新", FinancialType.Liability, null, "TWD",
+            DateOnly.FromDateTime(DateTime.Today),
+            LiabilitySubtype: LiabilitySubtype.CreditCard,
+            IssuerName: "台新銀行");
+        await repo1.AddItemAsync(legacyCard);
+        Assert.Equal(FinancialType.Liability, (await repo1.GetByIdAsync(legacyCard.Id))!.Type);
+
+        // 觸發搬遷（重新初始化代表升級後開 app）
+        _ = new AssetSqliteRepository(_dbPath);
+
+        var after = await new AssetSqliteRepository(_dbPath).GetByIdAsync(legacyCard.Id);
+        Assert.Equal(FinancialType.PaymentMethod, after!.Type);
+        Assert.Equal(LiabilitySubtype.CreditCard, after.LiabilitySubtype);
+
+        _ = new AssetSqliteRepository(_dbPath); // 冪等
+        Assert.Equal(FinancialType.PaymentMethod,
+            (await new AssetSqliteRepository(_dbPath).GetByIdAsync(legacyCard.Id))!.Type);
+    }
+
+    [Fact]
     public async Task Wave7_IsIdempotent_WhenRunTwice()
     {
         // First init

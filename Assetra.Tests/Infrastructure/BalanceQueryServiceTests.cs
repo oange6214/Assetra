@@ -279,22 +279,23 @@ public class BalanceQueryServiceTests
     }
 
     [Fact]
-    public async Task Liability_CreditCardChargeAndPayment_ProjectOutstandingBalance()
+    public async Task Liability_CreditCardTrades_NoLongerProjectedAsLiability()
     {
-        var cash = Guid.NewGuid();
         var card = Guid.NewGuid();
+        var cash = Guid.NewGuid();
         var svc = Create(
             CreditCardCharge(card, "玉山 Pi 卡", 8_000m),
             CreditCardCharge(card, "玉山 Pi 卡", 2_000m),
             CreditCardPayment(card, "玉山 Pi 卡", cash, 3_500m));
 
         var snap = await svc.GetLiabilitySnapshotAsync("玉山 Pi 卡");
-        Assert.Equal(TWD(6_500m), snap.Balance);
-        Assert.Equal(TWD(10_000m), snap.OriginalAmount);
+
+        Assert.Equal(0m, snap.Balance.Amount);
+        Assert.Equal(0m, snap.OriginalAmount.Amount);
     }
 
     [Fact]
-    public async Task GetAllLiabilitySnapshots_IncludesCreditCards()
+    public async Task GetAllLiabilitySnapshots_ExcludesCreditCards()
     {
         var cash = Guid.NewGuid();
         var card = Guid.NewGuid();
@@ -305,7 +306,7 @@ public class BalanceQueryServiceTests
 
         var all = await svc.GetAllLiabilitySnapshotsAsync();
         Assert.Equal(new LiabilitySnapshot(TWD(500_000m), TWD(500_000m)), all["台新信貸"]);
-        Assert.Equal(new LiabilitySnapshot(TWD(16_000m), TWD(20_000m)), all["富邦 J 卡"]);
+        Assert.False(all.ContainsKey("富邦 J 卡"));
     }
 
     // ─── As-of-D projection (Step 1 — historical snapshot rebuild support) ──

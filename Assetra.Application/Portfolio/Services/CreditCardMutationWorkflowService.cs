@@ -21,7 +21,7 @@ public sealed class CreditCardMutationWorkflowService : ICreditCardMutationWorkf
         var creditCard = new AssetItem(
             Guid.NewGuid(),
             request.Name.Trim(),
-            FinancialType.Liability,
+            FinancialType.PaymentMethod,
             null,
             request.Currency,
             request.CreatedDate,
@@ -43,7 +43,7 @@ public sealed class CreditCardMutationWorkflowService : ICreditCardMutationWorkf
         var creditCard = new AssetItem(
             request.CardId,
             request.Name.Trim(),
-            FinancialType.Liability,
+            FinancialType.PaymentMethod,
             null,
             request.Currency,
             request.CreatedDate,

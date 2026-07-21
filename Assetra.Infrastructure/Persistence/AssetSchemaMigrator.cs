@@ -92,6 +92,7 @@ internal static class AssetSchemaMigrator
             MigrateLegacyCashAccounts(cmd, conn, tx);
             MigrateLegacyLiabilityAccounts(cmd, conn, tx);
             BackfillLiabilitySubtype(cmd);
+            BackfillCreditCardsToPaymentMethod(cmd);
             // 必須在 subtype 欄位存在之後才能跑（依 subtype 重新分配 group_id）。
             ReclassifyCashAccountsBySubtype(cmd);
             // Portfolio-Groups-Refactor P1 — 既有 cash account / 投資資產 row backfill 到
@@ -358,6 +359,17 @@ internal static class AssetSchemaMigrator
         cmd.Parameters.AddWithValue("$credit_card_group", GrpCreditCard.ToString());
         cmd.ExecuteNonQuery();
         cmd.Parameters.Clear();
+    }
+
+    // 信用卡改為「付款方式」：把既有 Liability + CreditCard subtype 的資產搬成 PaymentMethod。
+    // 冪等——搬完即無列符合。歷史 trade 不動。
+    private static void BackfillCreditCardsToPaymentMethod(SqliteCommand cmd)
+    {
+        cmd.CommandText = """
+            UPDATE asset SET asset_type = 'PaymentMethod'
+             WHERE asset_type = 'Liability' AND liability_subtype = 'CreditCard';
+            """;
+        cmd.ExecuteNonQuery();
     }
 
     private static bool TableExists(SqliteConnection conn, SqliteTransaction tx, string table)

@@ -131,12 +131,6 @@ public sealed class BalanceQueryService : IBalanceQueryService
                 TradeType.LoanRepay => (
                     current.Balance - (t.Principal ?? t.CashAmount ?? 0m),
                     current.Original),
-                TradeType.CreditCardCharge => (
-                    current.Balance + (t.CashAmount ?? 0m),
-                    current.Original + (t.CashAmount ?? 0m)),
-                TradeType.CreditCardPayment => (
-                    current.Balance - (t.CashAmount ?? 0m),
-                    current.Original),
                 _ => current,
             };
         }
@@ -235,16 +229,6 @@ public sealed class BalanceQueryService : IBalanceQueryService
                 case TradeType.LoanRepay:
                     balance -= t.Principal ?? t.CashAmount ?? 0m;
                     break;
-                case TradeType.CreditCardCharge:
-                {
-                    var amt = t.CashAmount ?? 0m;
-                    balance += amt;
-                    original += amt;
-                    break;
-                }
-                case TradeType.CreditCardPayment:
-                    balance -= t.CashAmount ?? 0m;
-                    break;
             }
         }
         return (balance, original);
@@ -278,7 +262,7 @@ public sealed class BalanceQueryService : IBalanceQueryService
     private static string? GetLiabilityLabel(Trade t) => t.Type switch
     {
         TradeType.LoanBorrow or TradeType.LoanRepay => t.LoanLabel,
-        TradeType.CreditCardCharge or TradeType.CreditCardPayment => t.Name,
+        // 信用卡改為「付款方式」——刷卡/繳卡費不再視為負債（歷史交易保留為紀錄）。
         _ => null,
     };
 

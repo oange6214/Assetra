@@ -29,7 +29,7 @@ public sealed class CreditCardMutationWorkflowServiceTests
             " 國泰世華 "));
 
         Assert.NotNull(saved);
-        Assert.Equal(FinancialType.Liability, saved!.Type);
+        Assert.Equal(FinancialType.PaymentMethod, saved!.Type);
         Assert.Equal(LiabilitySubtype.CreditCard, saved.LiabilitySubtype);
         Assert.Equal(8, saved.BillingDay);
         Assert.Equal(23, saved.DueDay);

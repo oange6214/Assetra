@@ -1289,7 +1289,7 @@ public class PortfolioViewModelTests
     }
 
     [Fact]
-    public async Task AddCreditCard_ValidInput_AddsLiabilityRow()
+    public async Task AddCreditCard_ValidInput_DoesNotAddLiabilityRow()
     {
         var portfolioRepo = new Mock<IPortfolioRepository>();
         portfolioRepo.Setup(r => r.GetEntriesAsync()).ReturnsAsync([]);
@@ -1322,10 +1322,10 @@ public class PortfolioViewModelTests
 
         await vm.AddAssetDialog.ConfirmAddCommand.ExecuteAsync(null);
 
-        Assert.Single(vm.Liabilities);
-        Assert.Equal("富邦 J 卡", vm.Liabilities[0].Label);
-        Assert.True(vm.Liabilities[0].IsCreditCard);
-        Assert.Equal(0m, vm.Liabilities[0].Balance);
+        // 信用卡改為「付款方式」，不再是負債——新增後不應出現在 vm.Liabilities。
+        var saved = await assetRepo.GetItemsByTypeAsync(FinancialType.PaymentMethod);
+        Assert.Contains(saved, a => a.Name == "富邦 J 卡");
+        Assert.Empty(vm.Liabilities);
     }
 
     [Fact]
