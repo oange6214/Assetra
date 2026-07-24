@@ -747,8 +747,11 @@ public class TransactionDialogViewModelTests
             .Setup(h => h.GetEntryAsync(It.IsAny<DateOnly>(), "USD", "TWD", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FxRateHistoryEntry(tradeDate, "USD", "TWD", 31.59m, "bot", DateTimeOffset.UtcNow));
 
-        var vm = CreateVm(fxResolver: new TransactionFxRateResolver(history.Object));
+        var vm = CreateVm(
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { MakeCashAccount("台新", "TWD") },
+            fxResolver: new TransactionFxRateResolver(history.Object));
         vm.TxType = "buy";
+        vm.TxCashAccount = vm.CashAccounts[0];   // 帳戶必填守衛：跨幣別買入仍需指定扣款帳戶（TWD 帳戶 vs USD 標的維持跨幣別）
         vm.Buy.InstrumentCurrency = "USD";
         vm.Buy.SettlementCurrency = "TWD";
         vm.TxDate = tradeDate.ToDateTime(TimeOnly.MinValue);
@@ -1636,6 +1639,7 @@ public class TransactionDialogViewModelTests
             sellWorkflow: workflow.Object);
 
         vm.TxType = "sell";
+        vm.TxCashAccount = MakeCashAccount("台新", "TWD");   // 帳戶必填守衛：賣出入帳帳戶（與此測試的反推無關，僅滿足守衛）
         vm.Sell.Position = position;
         vm.Sell.Quantity = "10";
         vm.Sell.PriceMode = "total";
@@ -1711,6 +1715,7 @@ public class TransactionDialogViewModelTests
             txWorkflow: txWorkflow.Object);
 
         vm.TxType = "cashDiv";
+        vm.TxCashAccount = MakeCashAccount("台新", "TWD");   // 帳戶必填守衛：股利入帳帳戶（與此測試的反推無關，僅滿足守衛）
         vm.Div.Position = position;
         vm.Div.InputMode = "total";
         vm.Div.TotalInput = "3000";   // 直接填總股息金額，不填每股
@@ -1722,6 +1727,73 @@ public class TransactionDialogViewModelTests
         Assert.Equal(3_000m, captured!.TotalAmount);
         Assert.Equal(15_000, captured.Quantity);
         Assert.Equal(0.2m, captured.PerShare);   // 3000 / 15000 反推
+    }
+
+    // ── 帳戶必填守衛（勾了「從帳戶扣款 / 存入帳戶」就一定要選帳戶）─────────────────
+    //   破洞：勾選框預設 true，對話框開啟時不觸發自動選帳戶（OnTxUseCashAccountChanged
+    //   只在切換時才帶入預設），故會出現「勾了卻空白」→ 舊行為靜默記一筆不連動現金的交易，
+    //   讓現金餘額/淨值悄悄失真。守衛只在「勾選卻沒帳戶」時擋下，取消勾選的逃生口不受影響。
+    //   範圍：現金流四型別 buy/sell/income/cashDiv（loan 另有「只調負債」語義，暫不納入）。
+    [Fact]
+    public async Task ConfirmTx_Income_CashLinkOn_ButNoAccount_BlocksAndDoesNotRecord()
+    {
+        var txWorkflow = new Mock<ITransactionWorkflowService>();
+        txWorkflow.Setup(s => s.RecordIncomeAsync(
+                It.IsAny<IncomeTransactionRequest>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var vm = CreateVm(
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { MakeCashAccount("台新", "TWD") },
+            txWorkflow: txWorkflow.Object);
+        vm.TxType = "income";
+        vm.TxAmount = "1000";
+        // 勾選框預設 true（連動現金），刻意不選帳戶 → 重現「勾了卻空白」。
+        Assert.True(vm.TxUseCashAccount);
+        Assert.Null(vm.TxCashAccount);
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Equal("請選擇帳戶", vm.TxError);
+        txWorkflow.Verify(s => s.RecordIncomeAsync(
+            It.IsAny<IncomeTransactionRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmTx_Income_CashLinkOff_NoAccount_StillRecords()
+    {
+        // 逃生口：取消勾選＝不連動現金（只記錄、不影響餘額），此時允許無帳戶儲存。
+        var txWorkflow = new Mock<ITransactionWorkflowService>();
+        txWorkflow.Setup(s => s.RecordIncomeAsync(
+                It.IsAny<IncomeTransactionRequest>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var vm = CreateVm(
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { MakeCashAccount("台新", "TWD") },
+            txWorkflow: txWorkflow.Object);
+        vm.TxType = "income";
+        vm.TxAmount = "1000";
+        vm.TxUseCashAccount = false;   // 不連動現金
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.TxError);
+        txWorkflow.Verify(s => s.RecordIncomeAsync(
+            It.IsAny<IncomeTransactionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmTx_Buy_DeductOn_ButNoAccount_BlocksBeforeDelegating()
+    {
+        // 使用者截圖情境：買進「從帳戶扣款」勾著、下拉空白。守衛應在委派買進流程前就擋下。
+        var vm = CreateVm(
+            cashAccounts: new ObservableCollection<CashAccountRowViewModel> { MakeCashAccount("台新", "TWD") });
+        vm.TxType = "buy";
+        Assert.True(vm.TxUseCashAccount);
+        Assert.Null(vm.TxCashAccount);
+
+        await vm.ConfirmTxCommand.ExecuteAsync(null);
+
+        Assert.Equal("請選擇帳戶", vm.TxError);
     }
 
     private static PortfolioRowViewModel CreatePositionRow() => new()

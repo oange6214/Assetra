@@ -982,6 +982,8 @@ public class PortfolioViewModelTests
         Assert.True(vm.Transaction.IsTxDialogOpen);
         Assert.Equal("sell", vm.Transaction.TxType);
 
+        // 本測試聚焦「賣出後持倉自集合移除」，與入帳帳戶無關；關閉現金連動以避開帳戶必填守衛。
+        vm.Transaction.TxUseCashAccount = false;
         // Set sell price via TxAmount (the Sell form binds to TxAmount)
         vm.Transaction.TxAmount = "1000";
         await vm.Transaction.ConfirmTxCommand.ExecuteAsync(null);
@@ -3255,6 +3257,7 @@ public class PortfolioViewModelTests
         // For this test simplicity, just verify the validation path: total mode with valid
         // total should not produce "每股股利無效" error.
         vm.Transaction.TxType = "cashDiv";
+        vm.Transaction.TxUseCashAccount = false;   // 聚焦驗證順序（未選股票 → 請選擇股票），與入帳帳戶無關，避開帳戶必填守衛
         vm.Transaction.Div.InputMode = "total";
         vm.Transaction.Div.TotalInput = "1000";
         // No Div.Position set → expect "請選擇股票" not "每股股利無效"
@@ -3268,6 +3271,7 @@ public class PortfolioViewModelTests
     {
         var (vm, _, _) = await CreateVmWithCashAsync(0m);
         vm.Transaction.TxType = "cashDiv";
+        vm.Transaction.TxUseCashAccount = false;   // 聚焦「總股息金額無效」驗證，與入帳帳戶無關，避開帳戶必填守衛
         vm.Transaction.Div.InputMode = "total";
         vm.Transaction.Div.TotalInput = "abc";
 

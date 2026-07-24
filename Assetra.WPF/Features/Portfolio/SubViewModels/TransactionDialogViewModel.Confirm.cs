@@ -33,6 +33,14 @@ public partial class TransactionDialogViewModel
             ["sell"] = vm => vm.ConfirmSellTxAsync(),
         };
 
+    /// <summary>
+    /// 帶「從帳戶扣款 / 存入帳戶」勾選框的現金流型別。勾選＝此筆要連動現金帳戶，
+    /// 故必須指定帳戶，否則交易會憑空產生/消失現金卻不動任何餘額（過去「勾了卻空白」
+    /// 可靜默存檔，讓現金餘額與淨值悄悄失真）。loan 另有「只調負債、不連動現金」語義，暫不納入。
+    /// </summary>
+    private static readonly IReadOnlySet<string> _cashAccountToggleTypes =
+        new HashSet<string>(StringComparer.Ordinal) { "buy", "sell", "income", "cashDiv" };
+
     [RelayCommand]
     private async Task ConfirmTx()
     {
@@ -97,6 +105,21 @@ public partial class TransactionDialogViewModel
 
         var revisionSourceTradeId = _revisionSourceTradeId;
         _preserveRevisionSourceOnClose = revisionSourceTradeId.HasValue;
+
+        // 帳戶必填守衛：勾了「從帳戶扣款 / 存入帳戶」就必須指定帳戶。放在 meta-only 早退之後，
+        // 只改日期/備註的安全編輯不受影響；只擋真正要寫入現金流的新增/修訂。取消勾選＝刻意不連動
+        // 現金，仍允許無帳戶儲存。失敗時比照下方驗證失敗還原編輯情境。
+        if (_cashAccountToggleTypes.Contains(TxType)
+            && TxUseCashAccount
+            && TxCashAccount is null
+            && string.IsNullOrWhiteSpace(TxCashAccountName))
+        {
+            TxError = CashAccounts.Count == 0
+                ? "尚無帳戶，請先建立帳戶"
+                : "請選擇帳戶";
+            EditingTradeId = pendingEditId;
+            return;
+        }
 
         try
         {
